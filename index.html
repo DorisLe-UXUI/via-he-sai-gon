@@ -3,40 +3,557 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vỉa Hè Sài Gòn — Game bán hàng rong, phát hành bởi SentryXP</title>
-<meta name="description" content="Vỉa Hè Sài Gòn: game bán hàng rong chạy ngay trên trình duyệt. Nhập hàng ở chợ, đẩy xe ra phố, giữ khách quen, bay đi Hà Nội, Đà Lạt, Phú Quốc buôn đặc sản.">
-<meta name="theme-color" content="#1b1230">
-<link rel="icon" href="ico/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="ico/favicon-32.png"><link rel="apple-touch-icon" href="ico/apple-touch-icon.png">
-<meta property="og:title" content="Vỉa Hè Sài Gòn"><meta property="og:description" content="Đẩy xe ra phố, bán tới khi đèn lồng sáng."><meta property="og:image" content="p/01.webp">
-<script>if(innerWidth<860&&!/[?&]desktop/.test(location.search))location.replace('m.html'+location.hash)</script>
+<title>Vỉa Hè Sài Gòn — Game bán hàng rong · SentryXP</title>
+<meta name="description" content="Vỉa Hè Sài Gòn — game sống ở vỉa hè Sài Gòn chạy ngay trên trình duyệt. Đẩy xe, bán hàng, nâng cấp, buôn đặc sản. Phát hành bởi SentryXP.">
+<meta name="theme-color" content="#171c3a">
+<link rel="icon" href="ico/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="ico/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="ico/icon-192.png">
+<link rel="apple-touch-icon" href="ico/apple-touch-icon.png">
+<meta property="og:title" content="Vỉa Hè Sài Gòn">
+<meta property="og:description" content="Đẩy xe ra phố, bán tới khi đèn lồng sáng. Phát hành bởi SentryXP.">
+<meta property="og:image" content="ico/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Caveat:wght@600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#1b1230;font-family:system-ui,'Be Vietnam Pro',sans-serif;color:#f5e9d0}
-.ps{position:relative;line-height:0}.ps img{width:100%;height:auto;display:block}.ps+.ps{margin-top:-1px}
-.hs{position:absolute;display:block;border-radius:14px;outline-offset:2px;cursor:pointer}.hs:hover{background:rgba(255,255,255,.08)}.hs:focus-visible{outline:3px solid #ffd27a}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.foot{background:#0b0a1e;padding:44px 20px 28px;line-height:1.5}.foot .in{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px}
-.foot img{height:64px;width:auto}.foot h4{margin:0 0 10px;font:800 15px system-ui;color:#ffd27a}.foot a{color:#d9cfe8;text-decoration:none;display:block;margin:6px 0;font-size:14px}.foot a:hover{color:#fff}
-.foot p{color:#a69cbd;font-size:14px;max-width:34ch}.pub{display:inline-flex!important;align-items:center;gap:10px;margin-top:12px;padding:10px 14px;border-radius:12px;background:rgba(255,243,214,.06);box-shadow:inset 0 0 0 1px rgba(255,243,214,.16)}
-.pub span{font-size:13px;color:#a9a5c8}.pub img{height:22px}.foot .bar{max-width:1120px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);font-size:13px;color:#8f86a8;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.foot a.go{display:inline-block;margin-top:6px;padding:12px 22px;border-radius:14px;background:linear-gradient(#ffcf6a,#f2a21d);color:#2a1a08;font-weight:800;box-shadow:0 4px 0 #a86a0c}
+:root{
+  --gold:#ffc548;--gold-d:#e08a12;--gold-dd:#8e4d06;
+  --cream:#fff6e0;--paper:#f6e8c8;--ink:#3a2210;--wood:#6b4020;--wood-d:#3e2410;
+  --red:#d2432f;--night:#141a3a;--leaf:#2f7a43;
+  --h:'Baloo 2','Be Vietnam Pro',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --script:'Caveat','Segoe Script',cursive;
+  --body:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--night);color:var(--cream);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+p{margin:0;text-wrap:pretty}
+h1,h2,h3{margin:0;text-wrap:balance}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:8px}
+.wrap{width:min(1180px,100% - 40px);margin-inline:auto}
+
+/* ---------- shared pieces ---------- */
+.bgfill{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center}
+.scrim{position:absolute;inset:0;z-index:-1}
+section{position:relative;isolation:isolate}
+.sec{padding-block:clamp(72px,9vw,120px)}
+.h2{font:800 clamp(34px,4.8vw,60px)/1.02 var(--h);letter-spacing:-.01em;color:var(--ink)}
+.h2.l{color:var(--cream);text-shadow:0 3px 0 rgba(0,0,0,.28),0 10px 30px rgba(0,0,0,.4)}
+.lead{margin-top:14px;max-width:34em;font-size:18px;color:#5b3d22}
+.lead.l{color:#fbeccb;text-shadow:0 2px 12px rgba(0,0,0,.55)}
+.script{font:700 clamp(24px,2.6vw,34px)/1 var(--script);color:var(--gold-d)}
+.script.l{color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 30px;border-radius:18px;font:800 20px/1 var(--h);text-decoration:none;border:0;cursor:pointer;color:#4a2606;background:linear-gradient(#ffd877,#f4a21f);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 5px 0 var(--gold-dd),0 16px 26px rgba(0,0,0,.35);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(3px);box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 2px 0 var(--gold-dd)}
+.btn.out{color:var(--cream);background:rgba(255,246,224,.14);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 2px rgba(255,246,224,.55)}
+.btn.sm{padding:11px 20px;font-size:17px;border-radius:14px}
+.card{background:linear-gradient(#fffaf0,#f8ebcd);border-radius:22px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.7),0 3px 0 #c9aa72,0 26px 40px -22px rgba(40,20,5,.65);color:var(--ink)}
+.wood{border-radius:20px;padding:10px;background:linear-gradient(#85582c,#573416);box-shadow:inset 0 2px 0 rgba(255,220,160,.35),0 3px 0 var(--wood-d),0 28px 44px -20px rgba(30,15,5,.7)}
+.wood img{border-radius:12px;width:100%;aspect-ratio:16/9;object-fit:cover;box-shadow:0 0 0 2px #2e1a0a}
+.num{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font:800 28px/1 var(--h);color:#4a2606;background:radial-gradient(circle at 35% 30%,#ffe7a0,#f2a11d);box-shadow:inset 0 -3px 0 rgba(142,77,6,.45),0 4px 0 var(--gold-dd),0 8px 14px rgba(0,0,0,.3)}
+
+/* ---------- nav ---------- */
+.bar{position:fixed;z-index:30;left:0;right:0;top:0;padding:calc(12px + env(safe-area-inset-top,0px)) 0 0;pointer-events:none}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.bar a,.bar nav{pointer-events:auto}
+.bar .logo{height:58px;width:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.bar nav{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:rgba(40,24,22,.42);backdrop-filter:blur(14px) saturate(1.3);box-shadow:inset 0 0 0 1px rgba(255,246,224,.28),0 10px 30px rgba(0,0,0,.3)}
+.bar nav a{padding:9px 16px;border-radius:999px;font:700 15px/1 var(--h);text-decoration:none;color:var(--cream);transition:background .2s}
+.bar nav a:hover{background:rgba(255,246,224,.16)}
+.bar nav a.cta{background:linear-gradient(#ffd877,#f4a21f);color:#4a2606;padding:10px 20px;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 3px 0 var(--gold-dd)}
+@media(max-width:820px){.bar nav a:not(.cta){display:none}.bar .logo{height:46px}}
+
+/* ---------- hero ---------- */
+.hero{min-height:max(680px,100svh);display:flex;align-items:center;overflow:hidden;padding-top:90px}
+.hero .bgfill{background-image:url(bg/lantern.webp);transform:scaleX(-1);transform-origin:center;will-change:transform}
+.hero .scrim{background:linear-gradient(90deg,rgba(12,14,38,.88) 0%,rgba(12,14,38,.55) 36%,rgba(12,14,38,0) 62%),linear-gradient(0deg,rgba(20,26,58,.95) 0%,rgba(20,26,58,0) 22%)}
+.hero .in{position:relative}
+.hero .script{font-size:clamp(30px,3.6vw,48px);transform:rotate(-2deg);display:inline-block}
+.hero h1{margin-top:6px;font:700 clamp(46px,6.6vw,98px)/.98 var(--serif);letter-spacing:-.03em;color:var(--cream);text-shadow:0 4px 0 rgba(0,0,0,.25),0 14px 40px rgba(0,0,0,.55);max-width:8.2em}
+.hero h1 em{display:block;font-style:normal;color:var(--gold);background:linear-gradient(#ffe38f,#ffb12b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 4px 0 rgba(120,60,0,.55))}
+.hero .sub{margin-top:20px;max-width:28em;font-size:clamp(16px,1.4vw,19px);color:#fbeccb;text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.hero .btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.chips span{display:inline-flex;align-items:center;gap:8px;padding:8px 15px 8px 10px;border-radius:999px;font:700 15px/1 var(--h);background:rgba(34,22,34,.5);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,246,224,.3)}
+.chips img{width:24px;height:24px;object-fit:contain}
+.hero .girl{position:absolute;right:max(3vw,10px);bottom:0;height:min(64vh,520px);z-index:1;filter:drop-shadow(0 18px 18px rgba(0,0,0,.5));pointer-events:none}
+.hero .girl.g2{right:auto;left:0;display:none}
+@media(max-width:820px){.hero{align-items:flex-start;padding-top:110px}.hero .scrim{background:linear-gradient(180deg,rgba(12,14,38,.85) 0%,rgba(12,14,38,.5) 55%,rgba(12,14,38,.1) 78%),linear-gradient(0deg,rgba(20,26,58,.95) 0%,rgba(20,26,58,0) 16%)}.hero .girl{display:none}}
+/* awning: ties hero to the paper section */
+.awning{position:relative;z-index:6;height:56px;margin:-1px 0 -56px;pointer-events:none;filter:drop-shadow(0 12px 14px rgba(40,22,10,.32))}
+.awning::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,#d2432f 0 64px,#fff3d4 64px 128px);
+  -webkit-mask:linear-gradient(#000,#000) 0 0/100% 24px no-repeat,radial-gradient(circle 32px at 32px 24px,#000 97%,transparent 100%) 0 0/64px 100% repeat-x;
+  mask:linear-gradient(#000,#000) 0 0/100% 24px no-repeat,radial-gradient(circle 32px at 32px 24px,#000 97%,transparent 100%) 0 0/64px 100% repeat-x}
+
+/* ---------- 1. a day ---------- */
+.day .bgfill{background-image:url(bg/paper.webp)}
+.day{padding-top:calc(clamp(72px,9vw,120px) + 30px)}
+.day .head{text-align:center;margin-inline:auto}
+.day .head .lead{margin-inline:auto}
+.steps{margin-top:54px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;counter-reset:s}
+.step{padding:22px 22px 26px;display:flex;flex-direction:column;gap:14px;position:relative}
+.step .num{position:absolute;top:-22px;left:22px;z-index:2}
+.step .wood{margin-top:12px}
+.step h3{font:800 26px/1.1 var(--h);margin-top:6px}
+.step p{font-size:15.5px;color:#5b3d22;line-height:1.55}
+@media(max-width:900px){.steps{grid-template-columns:1fr;gap:42px}}
+
+/* ---------- 2. day & night ---------- */
+.dn{padding:0}
+.band{position:relative;isolation:isolate;overflow:hidden;padding-block:clamp(64px,8vw,104px)}
+.band .grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,5vw,72px);align-items:center}
+.band.rev .grid{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.band.rev .txt{order:2}
+.band.d .bgfill{background-image:url(bg/market.webp)}
+.band.d .scrim{background:linear-gradient(90deg,rgba(50,24,8,.78),rgba(50,24,8,.25) 60%,rgba(50,24,8,.1))}
+.band.n .bgfill{background-image:url(bg/night.webp)}
+.band.n .scrim{background:linear-gradient(90deg,rgba(14,16,44,.2),rgba(14,16,44,.72))}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:24px}
+.tile{padding:12px 8px 10px;border-radius:16px;text-align:center;background:rgba(255,246,224,.9);color:var(--ink);box-shadow:0 3px 0 #b99555,0 12px 20px -10px rgba(0,0,0,.5)}
+.tile b{display:block;font:800 22px/1 var(--h)}
+.tile span{display:block;margin-top:4px;font-size:13px;line-height:1.3;color:#6b4a2a}
+.kh{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.kh span{padding:7px 14px;border-radius:999px;font:700 14px/1 var(--h);background:rgba(34,22,34,.55);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,246,224,.3)}
+.stats{display:grid;gap:12px;margin-top:24px}
+.stat{display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:center;padding:12px 16px;border-radius:18px;background:rgba(20,22,58,.62);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,220,150,.28)}
+.stat img{width:56px;height:56px;object-fit:contain}
+.stat b{display:block;font:800 19px/1.1 var(--h);color:var(--gold)}
+.stat span{font-size:14.5px;color:#ece3ff}
+.band .wood{transform:rotate(1.2deg)}
+.band.rev .wood{transform:rotate(-1.2deg)}
+@media(max-width:900px){.band .grid,.band.rev .grid{grid-template-columns:1fr}.band.rev .txt{order:0}}
+
+/* ---------- 3. carts ---------- */
+.xe .bgfill{background-image:url(bg/sunset.webp)}
+.xe .scrim{background:linear-gradient(180deg,rgba(40,16,50,.55),rgba(60,20,40,.35) 40%,rgba(30,14,40,.7))}
+.xe .top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.arrows{display:flex;gap:10px}
+.arrows button{width:54px;height:54px;border-radius:50%;border:0;cursor:pointer;font:800 26px/1 var(--h);color:#4a2606;background:linear-gradient(#ffd877,#f4a21f);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 var(--gold-dd),0 10px 18px rgba(0,0,0,.3)}
+.arrows button:active{transform:translateY(3px)}
+.carts{margin-top:40px;display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:20px 6px 34px;scrollbar-width:none}
+.carts::-webkit-scrollbar{display:none}
+.cart{flex:0 0 min(290px,76vw);scroll-snap-align:start;padding:16px 18px 20px;display:flex;flex-direction:column;position:relative;transition:transform .3s}
+.cart:hover{transform:translateY(-8px)}
+.cart .lv{position:absolute;top:12px;left:12px;z-index:2;font:800 13px/1 var(--h);padding:6px 10px;border-radius:999px;background:var(--leaf);color:#fff}
+.cart .pic{height:200px;overflow:hidden;display:block;border-radius:16px;background:radial-gradient(ellipse at 50% 90%,rgba(255,180,70,.55),transparent 65%),linear-gradient(#ffeec2,#fbe0a0);margin-bottom:12px;padding-bottom:6px}
+.cart .pic img{height:100%;width:100%;object-fit:contain;object-position:bottom;filter:drop-shadow(0 12px 10px rgba(60,30,10,.4))}
+.cart h3{font:800 24px/1.1 var(--h)}
+.cart p{margin-top:6px;font-size:14.5px;line-height:1.45;color:#5b3d22;min-height:3em}
+.cart .meta{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font:700 15px/1 var(--h)}
+.cart .meta .pr{color:var(--red);font-size:18px}
+.cart .meta .rp{display:inline-flex;align-items:center;gap:4px;color:#8a5f20}
+.cart .meta img{width:20px;height:20px}
+
+/* ---------- 4. regions ---------- */
+.bp .bgfill{background-image:url(bg/canal.webp)}
+.bp .scrim{background:linear-gradient(180deg,rgba(255,243,210,.55),rgba(255,243,210,.1) 40%,rgba(50,28,10,.55))}
+.bp .head{text-align:center}.bp .head .lead{margin-inline:auto;color:#4a2f18;text-shadow:0 1px 8px rgba(255,246,224,.7)}
+.regions{margin-top:48px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.reg{overflow:hidden;position:relative;padding:0;transition:transform .3s}
+.reg:hover{transform:translateY(-8px) rotate(-.8deg)}
+.reg .ph{aspect-ratio:4/3;position:relative;overflow:hidden;background:#d9c08b}
+.reg .ph img.b{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.reg:hover .ph img.b{transform:scale(1.08)}
+.reg .ph img.st{position:absolute;right:8px;top:8px;width:58px;height:58px;object-fit:contain;transform:rotate(8deg);filter:drop-shadow(0 4px 5px rgba(0,0,0,.45))}
+.reg .cp{padding:14px 18px 18px}
+.reg h3{font:800 24px/1 var(--h)}
+.reg small{display:block;margin-top:5px;font-size:14px;color:#6b4a2a}
+.soon{margin-top:26px;text-align:center}
+.soon span{display:inline-block;padding:10px 20px;border-radius:999px;font:700 16px/1 var(--h);background:rgba(34,22,34,.62);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,246,224,.35)}
+@media(max-width:1000px){.regions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.regions{gap:12px}.reg h3{font-size:20px}.reg .cp{padding:10px 12px 14px}}
+
+/* trade strip */
+.trade{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center;margin-top:70px;padding:clamp(22px,3vw,40px)}
+.trade h3{font:800 clamp(26px,3vw,38px)/1.05 var(--h)}
+.trade ul{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:14px}
+.trade li{display:grid;grid-template-columns:54px minmax(0,1fr);gap:14px;align-items:center}
+.trade li img{width:54px;height:54px;object-fit:contain;border-radius:14px;background:#f1dcaa;padding:6px}
+.trade li b{display:block;font:800 18px/1.2 var(--h)}
+.trade li span{font-size:14.5px;color:#5b3d22;line-height:1.45}
+@media(max-width:860px){.trade{grid-template-columns:1fr}}
+
+/* ---------- 5. customers ---------- */
+.kc .bgfill{background-image:url(bg/paper.webp);background-position:center top}
+.kc .head{text-align:center}.kc .head .lead{margin-inline:auto}
+.people{margin-top:54px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
+.person{padding:0 12px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .3s}
+.person:hover{transform:translateY(-8px)}
+.person .pl{height:200px;width:100%;margin-top:-34px;display:flex;align-items:flex-end;justify-content:center}
+.person img{height:100%;width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 10px 8px rgba(60,30,10,.35))}
+.person b{font:800 20px/1.1 var(--h);margin-top:8px}
+.person .tm{font:700 12.5px/1 var(--h);padding:5px 10px;border-radius:999px;background:var(--leaf);color:#fff}
+.person span.d{font-size:13.5px;line-height:1.4;color:#5b3d22}
+@media(max-width:1000px){.people{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:48px}}
+@media(max-width:560px){.people{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;row-gap:44px}}
+
+/* ---------- 6. new life ---------- */
+.life .bgfill{background-image:url(bg/kitchen.webp)}
+.life .scrim{background:linear-gradient(180deg,rgba(30,14,8,.75),rgba(30,14,8,.55) 50%,rgba(20,10,10,.82))}
+.lg{margin-top:48px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.lc{padding:20px 20px 22px;position:relative}
+.lc .ic{font-size:34px;line-height:1;margin-bottom:10px}
+.lc h3{font:800 21px/1.1 var(--h)}
+.lc p{margin-top:8px;font-size:14.5px;line-height:1.5;color:#5b3d22}
+.lc .st{position:absolute;top:14px;right:14px;font:800 12px/1 var(--h);padding:5px 9px;border-radius:999px}
+.st.ok{background:var(--leaf);color:#fff}.st.wip{background:#f4a21f;color:#4a2606}
+@media(max-width:1000px){.lg{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.lg{grid-template-columns:1fr}}
+
+/* ---------- 7. browser ---------- */
+.may .bgfill{background-image:url(bg/aerial.webp)}
+.may .scrim{background:linear-gradient(90deg,rgba(12,22,50,.82),rgba(12,22,50,.35) 70%,rgba(12,22,50,.1))}
+.dev{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(28px,5vw,72px);align-items:center}
+.dev ul{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:12px}
+.dev li{display:flex;gap:14px;align-items:center;padding:12px 16px;border-radius:16px;background:rgba(255,246,224,.12);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,246,224,.25);font-size:16.5px}
+.dev li i{font-style:normal;font-size:24px}
+.phones{position:relative;display:flex;justify-content:center;gap:0;padding-bottom:20px}
+.phone{width:min(250px,44vw);border-radius:40px;padding:10px;background:linear-gradient(#34365a,#14172e);box-shadow:0 0 0 2px #5a5f94,0 40px 60px -16px rgba(0,0,0,.7);transform:rotate(-5deg)}
+.phone img{border-radius:30px;width:100%;aspect-ratio:390/800;object-fit:cover}
+.phone+.phone{margin-left:-36px;margin-top:46px;transform:rotate(5deg)}
+@media(max-width:860px){.dev{grid-template-columns:1fr}}
+
+/* ---------- final ---------- */
+.final{text-align:center;padding-block:clamp(90px,12vw,160px) clamp(70px,8vw,100px);overflow:hidden}
+.final .bgfill{background-image:url(bg/dusk.webp)}
+.final .scrim{background:linear-gradient(180deg,rgba(60,20,50,.55),rgba(20,16,50,.45) 60%,#141a3a)}
+.final h2{font:700 clamp(40px,6.4vw,86px)/1 var(--serif);letter-spacing:-.03em;color:var(--cream);text-shadow:0 4px 0 rgba(0,0,0,.25),0 14px 40px rgba(0,0,0,.5);max-width:10em;margin-inline:auto}
+.final h2 em{font-style:normal;color:var(--gold)}
+.final .script{display:block;margin-bottom:10px}
+.final .lead{margin:18px auto 0}
+.final .btns{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:30px}
+.fstats{margin:60px auto 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);max-width:900px;gap:14px}
+.fstats div{padding:18px 10px;border-radius:20px;background:rgba(255,246,224,.12);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,246,224,.3)}
+.fstats dt{font:800 clamp(34px,4.4vw,54px)/1 var(--h);color:var(--gold);text-shadow:0 3px 0 rgba(0,0,0,.3)}
+.fstats dd{margin:6px 0 0;font-size:14px;color:#fbeccb}
+@media(max-width:640px){.fstats{grid-template-columns:repeat(2,1fr)}}
+.cat{position:absolute;right:max(20px,calc(50% - 570px));bottom:0;width:clamp(80px,11vw,140px)}
+@media(max-width:760px){.cat{display:none}}
+
+/* ---------- footer ---------- */
+.foot{background:#0a0d1f;color:#a9a5c8;padding:60px 0 28px;font-size:14.5px;line-height:1.6}
+.fgrid{display:grid;grid-template-columns:1.35fr .9fr 1.25fr 1fr;gap:40px 36px}
+.fbrand img{margin-bottom:14px}.fbrand p{max-width:26em;color:#b9b5d6}
+.pub{margin-top:18px;display:inline-flex;align-items:baseline;gap:10px;padding:10px 16px;border-radius:12px;background:rgba(255,243,214,.06);box-shadow:inset 0 0 0 1px rgba(255,243,214,.16);text-decoration:none;transition:background .2s}
+.pub:hover{background:rgba(255,243,214,.12)}
+.pub img{height:22px;width:auto}.pub span{font-size:13px}
+.fcol h3{font:800 17px var(--h);color:var(--cream);margin:0 0 14px}
+.fcol>a:not(.btn){display:block;color:#b9b5d6;text-decoration:none;padding:4px 0}.fcol>a:not(.btn):hover{color:var(--gold)}
+.spec{margin:0}.spec div{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,243,214,.08)}
+.spec dt{color:#8e8aaf}.spec dd{margin:0;color:#d9d5ee}
+.fnote{margin:0 0 16px;color:#b9b5d6}
+.fbar{margin-top:44px;padding-top:20px;border-top:1px solid rgba(255,243,214,.12);display:flex;flex-wrap:wrap;gap:8px 28px;justify-content:space-between;font-size:13px;color:#8e8aaf}
+@media(max-width:900px){.fgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr}}
+
+/* ---------- reveal ---------- */
+html.rv [data-r]{opacity:0;transform:translateY(40px) scale(.97);transition:opacity .7s ease,transform .9s cubic-bezier(.16,.84,.24,1);transition-delay:var(--d,0s)}
+html.rv [data-r].in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}html.rv [data-r]{opacity:1;transform:none;transition:none}.cart,.reg,.person{transition:none}}
 </style>
 </head>
 <body>
-<h1 class="sr">Vỉa Hè Sài Gòn: game bán hàng rong chạy trên trình duyệt</h1>
-<section class="ps" id="top"><img src="p/01.webp" width="1672" height="941" alt="Vỉa Hè Sài Gòn: đẩy xe ra phố, bán tới khi đèn lồng sáng" fetchpriority="high"><a class="hs" href="#cachchoi" aria-label="Cách chơi" style="left:44.56%;top:5.53%;width:5.20%;height:5.31%"></a><a class="hs" href="#xe" aria-label="Các loại xe" style="left:50.72%;top:5.53%;width:6.10%;height:5.31%"></a><a class="hs" href="#map" aria-label="Bản đồ thành phố" style="left:57.72%;top:5.53%;width:8.79%;height:5.31%"></a><a class="hs" href="#khach" aria-label="Nhân vật" style="left:67.46%;top:5.53%;width:5.38%;height:5.31%"></a><a class="hs" href="#web" aria-label="Tính năng" style="left:73.68%;top:5.53%;width:5.86%;height:5.31%"></a><a class="hs" href="play/" aria-label="Chơi ngay" style="left:81.10%;top:5.10%;width:13.76%;height:6.38%"></a><a class="hs" href="play/" aria-label="Chơi ngay" style="left:5.32%;top:70.67%;width:20.10%;height:8.18%"></a><a class="hs" href="#cachchoi" aria-label="Xem cách chơi" style="left:26.73%;top:70.99%;width:15.13%;height:7.65%"></a><a class="hs" href="#top" aria-label="Vỉa Hè Sài Gòn" style="left:4.19%;top:2.13%;width:12.26%;height:18.07%"></a></section>
-<section class="ps" id="cachchoi"><img src="p/02.webp" width="1616" height="973" alt="Một ngày bán hàng dài hai phút rưỡi: sáng nhập hàng ở chợ Đầu Mối" loading="lazy"></section>
-<section class="ps" id="ngay"><img src="p/03.webp" width="1617" height="973" alt="Ban ngày đẩy xe tới điểm có bảng tên, gặp khách và bán hàng" loading="lazy"></section>
-<section class="ps" id="nangcap"><img src="p/04.webp" width="2065" height="761" alt="Buổi tối tính số và nâng cấp xe" loading="lazy"></section>
-<section class="ps" id="xe"><img src="p/05.webp" width="1747" height="900" alt="Mười hai chiếc xe, mười hai cách bán" loading="lazy"></section>
-<section class="ps" id="map"><img src="p/06.webp" width="1747" height="900" alt="Du lịch tám thành phố: Sài Gòn, Cần Thơ, Đà Nẵng, Huế, Hội An, Hà Nội, Đà Lạt, Phú Quốc" loading="lazy"></section>
-<section class="ps" id="khach"><img src="p/07.webp" width="1746" height="901" alt="Khách trên phố đều có giờ và có gu" loading="lazy"></section>
-<section class="ps" id="web"><img src="p/08.webp" width="1746" height="901" alt="Mở trình duyệt là chơi, không cần tải app" loading="lazy"></section>
-<section class="ps" id="choi"><img src="p/09.webp" width="1746" height="901" alt="Xe đã đầy hàng, ra phố thôi" loading="lazy"><a class="hs" href="play/" aria-label="Chơi ngay" style="left:31.90%;top:55.49%;width:18.67%;height:8.88%"></a><a class="hs" href="#cachchoi" aria-label="Xem cách chơi" style="left:51.32%;top:55.72%;width:16.72%;height:8.66%"></a></section>
 
-<footer class="foot"><div class="in">
- <div><img src="a/logo.webp" alt="Vỉa Hè Sài Gòn"><p>Game bán hàng rong chạy trên trình duyệt. Nhân vật và cảnh phố vẽ riêng cho game.</p><a class="pub" href="https://www.sentryxp.com/" target="_blank" rel="noopener"><span>Phát hành bởi</span><img src="s/sentryx.png" alt="SentryXP"></a></div>
- <div><h4>Khám phá</h4><a href="#cachchoi">Cách chơi</a><a href="#xe">Các loại xe</a><a href="#map">Bản đồ thành phố</a><a href="#khach">Khách trên phố</a></div>
- <div><h4>Thông tin game</h4><a>Mô phỏng đời sống và kinh doanh</a><a>Trình duyệt, điện thoại, máy tính</a><a>Tiếng Việt</a><a>Miễn phí, không cần cài đặt</a></div>
- <div><h4>Chơi ngay</h4><a class="go" href="play/">Vào game</a><a href="https://www.sentryxp.com/" target="_blank" rel="noopener">Về SentryXP</a></div>
-</div><div class="bar"><span>© 2026 <a style="display:inline" href="https://www.sentryxp.com/" target="_blank" rel="noopener">SentryXP</a>. Vỉa Hè Sài Gòn là game do SentryXP phát hành.</span><span>Chơi nhẹ nhàng, nghỉ mắt thường xuyên.</span></div></footer>
-</body></html>
+<header class="bar">
+  <div class="wrap">
+    <a href="#top"><img class="logo" src="a/logo.webp" alt="Vỉa Hè Sài Gòn"></a>
+    <nav aria-label="Điều hướng">
+      <a href="#ngay">Cách chơi</a>
+      <a href="#xe">Xe đẩy</a>
+      <a href="#bonphuong">Bốn phương</a>
+      <a href="#khach">Khách phố</a>
+      <a href="#moi">Phố sống</a>
+      <a class="cta" href="play/">Chơi ngay</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero" aria-label="Vỉa Hè Sài Gòn">
+  <div class="bgfill" id="heroBg"></div><div class="scrim"></div>
+  <div class="wrap in">
+    <span class="script l">Sài Gòn ơi, hôm nay bán gì?</span>
+    <h1>Đẩy xe ra phố,<em>bán tới khi đèn lồng sáng.</em></h1>
+    <p class="sub">Game sống ở vỉa hè Sài Gòn chạy ngay trên trình duyệt. Nhập hàng ở chợ, đẩy xe qua từng quận, né mưa, giữ khách quen, rồi bay đi buôn đặc sản khắp ba miền.</p>
+    <div class="btns">
+      <a class="btn" href="play/">Chơi ngay</a>
+      <a class="btn out" href="#ngay">Xem cách chơi</a>
+    </div>
+    <div class="chips">
+      <span><img src="a/n/i_basket.webp" alt="">12 loại xe đẩy</span>
+      <span><img src="a/n/i_pack.webp" alt="">8 điểm đến</span>
+      <span><img src="a/n/i_cal.webp" alt="">Một ngày khoảng 2 phút rưỡi</span>
+    </div>
+  </div>
+  <img class="girl" src="a/311.webp" alt="" width="177" height="420">
+</section>
+<div class="awning" aria-hidden="true"></div>
+
+<section class="day sec" id="ngay">
+  <div class="bgfill"></div>
+  <div class="wrap">
+    <div class="head" data-r>
+      <span class="script">từ 6 giờ sáng đến 8 giờ tối</span>
+      <h2 class="h2">Một ngày bán hàng dài hai phút rưỡi</h2>
+      <p class="lead">Mỗi ngày là một vòng ngắn: chuẩn bị, bán, rồi tính sổ để mai bán khá hơn.</p>
+    </div>
+    <div class="steps">
+      <article class="step card" data-r>
+        <div class="num">1</div>
+        <div class="wood"><img src="s/market.webp" alt="Chợ đầu mối trong game" width="1280" height="720" loading="lazy"></div>
+        <h3>Sáng: nhập hàng ở chợ</h3>
+        <p>Giá chợ đổi mỗi ngày, có món đang hot, có món đang rẻ. Mua vừa đủ vốn rồi xem xe chở được bao nhiêu.</p>
+      </article>
+      <article class="step card" data-r>
+        <div class="num">2</div>
+        <div class="wood"><img src="s/street.webp" alt="Phố Sài Gòn trong game, xe bánh mì đang bán" width="1280" height="720" loading="lazy"></div>
+        <h3>Ngày: đẩy xe ra phố</h3>
+        <p>Mỗi điểm bán có giờ cao điểm và món khách ưa riêng. Chạm vào khách để bán, đừng để họ đứng chờ sốt ruột.</p>
+      </article>
+      <article class="step card" data-r>
+        <div class="num">3</div>
+        <div class="wood"><img src="s/cart.webp" alt="Màn nâng cấp xe" width="1280" height="720" loading="lazy"></div>
+        <h3>Tối: tính sổ, nâng xe</h3>
+        <p>Tiền lời đổ vào xe: chứa nhiều hơn, bán nhanh hơn, hút khách hơn. Đủ uy tín thì mở chiếc xe kế tiếp.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="dn" aria-label="Ban ngày và ban đêm">
+  <div class="band d">
+    <div class="bgfill"></div><div class="scrim"></div>
+    <div class="wrap grid">
+      <div class="txt" data-r>
+        <span class="script l">ban ngày</span>
+        <h2 class="h2 l">Phố có giờ cao điểm</h2>
+        <p class="lead l">Sáng bán đồ ăn, trưa bán nước mát, chiều tan trường là đông nhất. Đứng đúng chỗ, đúng giờ thì khách tự tới.</p>
+        <div class="tiles">
+          <div class="tile"><b>6–9h</b><span>Khách đi làm, mê đồ ăn sáng</span></div>
+          <div class="tile"><b>11–13h</b><span>Dân văn phòng nghỉ trưa</span></div>
+          <div class="tile"><b>16–18h</b><span>Tan trường, tan ca</span></div>
+        </div>
+        <div class="kh"><span>Học sinh</span><span>Dân văn phòng</span><span>Shipper</span><span>Cặp đôi</span></div>
+      </div>
+      <div data-r><div class="wood"><img src="s/street.webp" alt="Phố ban ngày trong game" width="1280" height="720" loading="lazy"></div></div>
+    </div>
+  </div>
+  <div class="band n rev">
+    <div class="bgfill"></div><div class="scrim"></div>
+    <div class="wrap grid">
+      <div class="txt" data-r>
+        <span class="script l">ban đêm</span>
+        <h2 class="h2 l">Tối về, nâng cấp xe</h2>
+        <p class="lead l">Hết ngày, tiền lời đổ vào xe. Mỗi chiếc nâng được năm cấp, càng lên cao khách càng đông.</p>
+        <div class="stats">
+          <div class="stat"><img src="a/n/i_pack.webp" alt=""><div><b>Sức chứa</b><span>Chở nhiều hàng hơn mỗi chuyến</span></div></div>
+          <div class="stat"><img src="a/n/i_bolt.webp" alt=""><div><b>Tốc độ</b><span>Phục vụ nhanh, khách không sốt ruột</span></div></div>
+          <div class="stat"><img src="a/n/i_star.webp" alt=""><div><b>Thu hút</b><span>Hút khách quen và khách ghé ngang</span></div></div>
+        </div>
+      </div>
+      <div data-r><div class="wood"><img src="s/cart.webp" alt="Màn nâng cấp xe trong game" width="1280" height="720" loading="lazy"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="xe sec" id="xe">
+  <div class="bgfill"></div><div class="scrim"></div>
+  <div class="wrap">
+    <div class="top" data-r>
+      <div>
+        <span class="script l">mở khoá dần theo uy tín</span>
+        <h2 class="h2 l">Mười hai chiếc xe</h2>
+        <p class="lead l">Bắt đầu với xe bánh mì. Càng có uy tín, càng mở được xe to hơn, lời hơn và kén khách hơn.</p>
+      </div>
+      <div class="arrows"><button type="button" id="cl" aria-label="Xe trước">‹</button><button type="button" id="cr" aria-label="Xe sau">›</button></div>
+    </div>
+    <div class="carts" id="cartList" tabindex="0" aria-label="Danh sách xe đẩy"></div>
+  </div>
+</section>
+
+<section class="bp sec" id="bonphuong">
+  <div class="bgfill"></div><div class="scrim"></div>
+  <div class="wrap">
+    <div class="head" data-r>
+      <span class="script">đặc sản rẻ ở nơi làm ra, đắt ở nơi đang thèm</span>
+      <h2 class="h2">Phiên chợ bốn phương</h2>
+      <p class="lead">Ra sân bay, chọn hạng vé, mang hàng đi bán lời hơn bán quanh quận.</p>
+    </div>
+    <div class="regions" id="regList"></div>
+    <div class="soon" data-r><span>Sắp mở thêm: Nha Trang và những thành phố mới</span></div>
+
+    <div class="trade card" data-r>
+      <div>
+        <h3>Mỗi chuyến bay là một quyết định buôn bán</h3>
+        <ul>
+          <li><img src="a/n/rp_xoai.webp" alt=""><div><b>Nhập ở nơi làm ra</b><span>Xoài Cần Thơ, mì Quảng Đà Nẵng, phở Hà Nội, dâu Đà Lạt. 32 đặc sản chia theo vùng.</span></div></li>
+          <li><img src="a/n/air_plane.webp" alt=""><div><b>Chọn hạng vé, tính hành lý</b><span>Ba hạng vé với 15, 25 hoặc 40 ký hành lý.</span></div></li>
+          <li><img src="a/n/st_hanoi.webp" alt=""><div><b>Đóng dấu hộ chiếu</b><span>Đủ bộ đặc sản một miền thì nhận thưởng và danh hiệu.</span></div></li>
+        </ul>
+      </div>
+      <div class="wood"><img src="s/trade.webp" alt="Chợ nổi Cần Thơ với đặc sản và giá nhập" width="1280" height="720" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+<section class="kc sec" id="khach">
+  <div class="bgfill"></div>
+  <div class="wrap">
+    <div class="head" data-r>
+      <span class="script">nhớ vài ngày là nhớ luôn</span>
+      <h2 class="h2">Khách trên phố đều có giờ và có gu</h2>
+      <p class="lead">Nhóm nào ghé lúc nào, mê món nào, bạn sẽ nhớ dần sau vài ngày bán.</p>
+    </div>
+    <div class="people" id="people"></div>
+  </div>
+</section>
+
+<section class="life sec" id="moi">
+  <div class="bgfill"></div><div class="scrim"></div>
+  <div class="wrap">
+    <div data-r>
+      <span class="script l">không chỉ là bán hàng</span>
+      <h2 class="h2 l">Sống trọn một ngày ở Sài Gòn</h2>
+      <p class="lead l">Vỉa Hè Sài Gòn đang lớn thành game sống ở phố: có điện thoại, bạn bè, nghề tay trái và một căn nhà để nâng cấp.</p>
+    </div>
+    <div class="lg" id="lifeGrid"></div>
+  </div>
+</section>
+
+<section class="may sec" id="may">
+  <div class="bgfill"></div><div class="scrim"></div>
+  <div class="wrap dev">
+    <div data-r>
+      <span class="script l">không cần cài</span>
+      <h2 class="h2 l">Mở trình duyệt là chơi</h2>
+      <ul>
+        <li><i>📱</i>Chạy trên điện thoại và máy tính.</li>
+        <li><i>💾</i>Tiến trình tự lưu, mở lại là chơi tiếp.</li>
+        <li><i>👆</i>Cần điều khiển và nút bán lớn, bấm một tay được.</li>
+        <li><i>🌧️</i>Nhạc nền, tiếng phố, tiếng mưa. Chỉnh trong cài đặt.</li>
+      </ul>
+    </div>
+    <div class="phones" data-r>
+      <div class="phone"><img src="s/phone.webp" alt="Màn chơi trên điện thoại" width="585" height="1200" loading="lazy"></div>
+      <div class="phone"><img src="s/cart.webp" alt="Màn nâng cấp xe" loading="lazy" style="object-position:30% 50%"></div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="bgfill"></div><div class="scrim"></div>
+  <div class="wrap">
+    <h2 data-r><span class="script l">chiều xuống rồi</span>Xe đã đầy hàng. <em>Ra phố thôi.</em></h2>
+    <p class="lead l" data-r>Ván đầu chỉ vài phút để biết bạn có mê nghề bán hàng rong không. Không cần cài, không cần đăng nhập.</p>
+    <div class="btns" data-r>
+      <a class="btn" href="play/">Chơi ngay</a>
+      <a class="btn out" href="#ngay">Xem cách chơi</a>
+    </div>
+    <dl class="fstats" data-r>
+      <div><dt>12</dt><dd>loại xe đẩy</dd></div>
+      <div><dt>8</dt><dd>thành phố để buôn</dd></div>
+      <div><dt>32</dt><dd>đặc sản</dd></div>
+      <div><dt>6</dt><dd>khách quen có chuyện riêng</dd></div>
+    </dl>
+  </div>
+  <img class="cat" src="a/n/cat_walk.webp" alt="">
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="fgrid">
+      <div class="fbrand">
+        <img src="a/logo.webp" alt="Vỉa Hè Sài Gòn" width="150">
+        <p>Game sống ở vỉa hè Sài Gòn. Đẩy xe, giữ khách quen, bay đi buôn đặc sản khắp ba miền.</p>
+        <a class="pub" href="https://www.sentryxp.com/" target="_blank" rel="noopener"><span>Phát hành bởi</span><img src="s/sentryx.png" alt="SentryXP" height="22"></a>
+      </div>
+      <nav class="fcol" aria-label="Khám phá">
+        <h3>Khám phá</h3>
+        <a href="#ngay">Một ngày bán hàng</a>
+        <a href="#xe">12 loại xe đẩy</a>
+        <a href="#bonphuong">Phiên chợ bốn phương</a>
+        <a href="#khach">Khách trên phố</a>
+        <a href="#moi">Sống ở phố</a>
+        <a href="#may">Chơi trên điện thoại</a>
+      </nav>
+      <div class="fcol">
+        <h3>Thông tin game</h3>
+        <dl class="spec">
+          <div><dt>Thể loại</dt><dd>Mô phỏng bán hàng rong</dd></div>
+          <div><dt>Nền tảng</dt><dd>Trình duyệt điện thoại và máy tính</dd></div>
+          <div><dt>Ngôn ngữ</dt><dd>Tiếng Việt</dd></div>
+          <div><dt>Điều khiển</dt><dd>Chạm, hoặc bàn phím ◀ ▶ và phím số</dd></div>
+          <div><dt>Lưu tiến trình</dt><dd>Tự động trên trình duyệt</dd></div>
+          <div><dt>Một ván</dt><dd>Một ngày game khoảng 2 phút rưỡi</dd></div>
+        </dl>
+      </div>
+      <div class="fcol">
+        <h3>Chơi ngay</h3>
+        <p class="fnote">Mở trên điện thoại hay máy tính đều được.</p>
+        <a class="btn sm" href="play/">Chơi Vỉa Hè Sài Gòn</a>
+      </div>
+    </div>
+    <div class="fbar">
+      <span>© 2026 <a href="https://www.sentryxp.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">SentryXP</a>. Vỉa Hè Sài Gòn do SentryXP phát hành.</span>
+      <span>Nhân vật và cảnh phố được vẽ riêng cho game.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const CARTS=[
+ ['Xe bánh mì','z/vietnamese_banh_mi_street_cart','Xe khởi nghiệp, gọn và dễ bán.',0,0],
+ ['Xe cà phê','z/vietnamese_sidewalk_coffee_cart','Có ghế nhựa, khách ngồi lâu và quý bạn.',150,0],
+ ['Xe nước mía','z/vietnamese_sugarcane_juice_cart_2','Có thùng đá, đồ uống giữ lạnh qua đêm.',200,0],
+ ['Xe trà tắc','z/vietnamese_kumquat_tea_cart_game','Xe đạp nhẹ, đi nhanh, bán đồ uống mát.',300,1],
+ ['Xe chè','z/vietnamese_che_dessert_street_cart','Chè ba màu, tủ lạnh nhỏ giữ đồ ngọt.',320,1],
+ ['Xe bắp xào','z/vietnamese_stir_fried_corn_stree_2','Nồi bắp bốc khói thơm cả con hẻm.',350,1],
+ ['Xe trái cây','z/vietnamese_fruit_cart_isolated','Xe to chở nhiều, hàng tươi lâu.',380,2],
+ ['Xe đồ ăn sáng','z/vietnamese_breakfast_street_cart','Khách sáng sớm rất mê, bán mạnh 6 đến 9 giờ.',450,2],
+ ['Xe đồ ăn vặt','z/vietnamese_snack_street_cart','Học sinh và dân văn phòng ghé hoài.',520,2],
+ ['Xe cá viên','z/vietnamese_fishball_street_cart','Bếp than nướng, mùi thơm hút khách.',650,3],
+ ['Xe sinh tố','z/vietnamese_smoothie_street_cart','Máy xay và tủ đá, lời cao nhưng khách kén.',800,3],
+ ['Xe hủ tiếu','z/vietnamese_noodle_street_cart_re','Nồi nước lèo cả ngày. Cần uy tín cực cao.',1100,4]
+];
+const vnd=k=>(k*1000).toLocaleString('vi-VN')+'₫';
+const $=id=>document.getElementById(id);
+$('cartList').innerHTML=CARTS.map((c,i)=>`<article class="cart card"><span class="lv">Xe ${i+1}</span><div class="pic"><img src="a/${c[1]}.webp" alt="${c[0]}" loading="lazy"></div><h3>${c[0]}</h3><p>${c[2]}</p><div class="meta"><span class="pr">${c[3]?vnd(c[3]):'Có sẵn'}</span><span class="rp">${c[4]?`<img src="a/n/i_star.webp" alt="">Uy tín ${c[4]}`:'Không cần uy tín'}</span></div></article>`).join('');
+$('cl').onclick=()=>$('cartList').scrollBy({left:-320,behavior:'smooth'});
+$('cr').onclick=()=>$('cartList').scrollBy({left:320,behavior:'smooth'});
+const REG=[['Sài Gòn','Miền Nam · nơi xuất phát','s_ngatu','st_saigon'],['Cần Thơ','Miền Tây · chợ nổi','reg_canTho','st_canTho'],['Đà Nẵng','Miền Trung · biển','reg_daNang','st_daNang'],['Huế','Miền Trung · cố đô','reg_hue','st_hue'],['Hội An','Miền Trung · phố cổ','reg_hoiAn','st_hoiAn'],['Hà Nội','Miền Bắc · thủ đô','reg_hanoi','st_hanoi'],['Đà Lạt','Cao nguyên · mát lạnh','reg_daLat','st_daLat'],['Phú Quốc','Biển đảo · hải sản','reg_phuQuoc','st_phuQuoc']];
+$('regList').innerHTML=REG.map(r=>`<article class="reg card" data-r><div class="ph"><img class="b" src="a/n/${r[2]}.webp" alt="" loading="lazy"><img class="st" src="a/n/${r[3]}.webp" alt="Con dấu ${r[0]}"></div><div class="cp"><h3>${r[0]}</h3><small>${r[1]}</small></div></article>`).join('');
+const PPL=[['Học sinh','n/npc_student','Tan trường là đông nhất, mê đồ mát và đồ vặt.','15–17h'],['Dân văn phòng','n/npc_office','Xuống phố giờ nghỉ trưa và tan ca.','11–13h'],['Shipper','n/npc_ship','Ghé nhanh, mua nhanh, không thích đợi.','Cả ngày'],['Cặp đôi','n/npc_couple','Dạo tối, hay mua hai phần.','Sau 18h'],['Chàng guitar','n/npc_guitar','Ngồi ven đường, kéo khách đứng lại nghe.','Chiều tối'],['Người chụp ảnh','n/npc_photo','Đi tìm góc phố đẹp, tiện tay mua nước.','Sáng sớm']];
+$('people').innerHTML=PPL.map(p=>`<div class="person card" data-r><div class="pl"><img src="a/${p[1]}.webp" alt="${p[0]}" loading="lazy"></div><span class="tm">${p[3]}</span><b>${p[0]}</b><span class="d">${p[2]}</span></div>`).join('');
+const LIFE=[
+ ['📱','Điện thoại & Townly','Nhắn tin với khách quen, lướt mạng xã hội của phố, nhận quà và lời nhắn.',1],
+ ['⚡','Năng lượng & tâm trạng','Mệt thì bán chậm, vui thì khách trả hậu. Uống nước mía cho tỉnh.',1],
+ ['👥','Bạn bè & bảng xếp hạng','Đăng nhập Google, lưu game trên mây, xem phố của bạn bè.',0],
+ ['🚶','Người phố có lịch riêng','Mỗi người đi làm, đi học, đi chợ theo giờ và nhớ bạn đã làm gì.',0],
+ ['🎣','Nghề tay trái','Giao hàng, câu cá, trồng trọt, pha cà phê, mỗi nghề một mini-game.',0],
+ ['🏠','Nhà sáu bậc','Từ phòng trọ lên nhà phố, thêm nội thất và đồ trang trí.',0],
+ ['🎭','Chọn nhân vật','Chọn dáng, tóc, áo, màu da trước khi ra phố.',0],
+ ['🏆','Sự kiện & bộ sưu tập','Lễ hội, mưa bão, gặp người lạ, gom đủ bộ huy hiệu.',0]];
+$('lifeGrid').innerHTML=LIFE.map(l=>`<article class="lc card" data-r><span class="st ${l[3]?'ok':'wip'}">${l[3]?'Đã có':'Đang làm'}</span><div class="ic">${l[0]}</div><h3>${l[1]}</h3><p>${l[2]}</p></article>`).join('');
+
+/* parallax + reveal */
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+if(!RM){
+  const hb=$('heroBg');let tk=0;
+  addEventListener('scroll',()=>{if(tk)return;tk=requestAnimationFrame(()=>{tk=0;const y=Math.min(scrollY,900);hb.style.transform=`scaleX(-1) translateY(${y*.18}px) scale(${1+y*.0001})`})},{passive:true});
+}
+if(!RM&&'IntersectionObserver' in window){
+  const els=[...document.querySelectorAll('[data-r]')];
+  els.forEach(el=>{const sib=[...el.parentElement.children].indexOf(el);el.style.setProperty('--d',Math.min(sib,6)*.07+'s')});
+  document.documentElement.classList.add('rv');
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('in');io.unobserve(e.target);setTimeout(()=>{e.target.removeAttribute('data-r');e.target.style.removeProperty('--d')},1800)}),{threshold:.1,rootMargin:'0px 0px -5% 0px'});
+  els.forEach(el=>io.observe(el));
+}
+</script>
+</body>
+</html>
