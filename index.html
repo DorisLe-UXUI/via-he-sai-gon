@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Vỉa Hè Sài Gòn — game bán hàng rong chạy trên trình duyệt. Phát hành bởi SentryXP.">
+<meta name="theme-color" content="#171c3a">
+<link rel="icon" href="ico/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="ico/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="ico/icon-192.png">
+<link rel="apple-touch-icon" href="ico/apple-touch-icon.png">
+<meta property="og:title" content="Vỉa Hè Sài Gòn">
+<meta property="og:description" content="Đẩy xe ra phố, bán tới khi đèn lồng sáng. Phát hành bởi SentryXP.">
+<meta property="og:image" content="ico/icon-512.png">
 <title>Vỉa Hè Sài Gòn</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,7 +62,7 @@ p{margin:0;text-wrap:pretty}
 .hero .nogl{position:absolute;inset:0;background:url(s/street.webp) center/cover;display:none}
 .hero.fallback .nogl{display:block}
 .hero::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.16;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
-.hero::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 120%,rgba(0,0,0,.4),transparent 55%),linear-gradient(90deg,rgba(14,17,40,.86) 0%,rgba(14,17,40,.5) 34%,rgba(14,17,40,0) 58%),linear-gradient(0deg,rgba(23,28,58,1) 0%,rgba(23,28,58,0) 16%)}
+.hero::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 120%,rgba(0,0,0,.4),transparent 55%),linear-gradient(90deg,rgba(14,17,40,.86) 0%,rgba(14,17,40,.62) 34%,rgba(14,17,40,.12) 52%,rgba(14,17,40,0) 62%),linear-gradient(0deg,rgba(23,28,58,1) 0%,rgba(23,28,58,0) 16%)}
 .hero .copy{position:absolute;z-index:3;left:0;right:0;top:clamp(110px,17vh,170px)}
 .hero .copy .in{width:min(1160px,100% - 40px);margin-inline:auto}
 .hero h1{font-size:clamp(40px,6.2vw,84px);max-width:11.5em;text-shadow:0 4px 0 rgba(0,0,0,.3),0 12px 36px rgba(0,0,0,.45);color:var(--cream)}
@@ -461,6 +469,8 @@ if(!RM&&matchMedia('(hover:hover)').matches){
         scene.add(me);sprites.push(me);
       });
     }
+    const shT=(function(){const c=document.createElement('canvas');c.width=128;c.height=64;const g=c.getContext('2d'),r=g.createRadialGradient(64,32,0,64,32,60);r.addColorStop(0,'rgba(12,10,30,.62)');r.addColorStop(.6,'rgba(12,10,30,.28)');r.addColorStop(1,'rgba(12,10,30,0)');g.save();g.scale(1,.5);g.translate(0,32);g.fillStyle=r;g.fillRect(0,-32,128,128);g.restore();return new T.CanvasTexture(c)})();
+    function shadow(x,z,w,a){const m=new T.Mesh(new T.PlaneGeometry(w,w*.34),new T.MeshBasicMaterial({map:shT,transparent:true,depthWrite:false,opacity:a||1,fog:false}));m.rotation.x=-Math.PI/2;m.position.set(x,.03,z+.25);m.renderOrder=-8500+Math.round(z);scene.add(m)}
     /* sky */
     loader.load('a/43.webp',t=>{t.encoding=T.sRGBEncoding;const m=new T.MeshBasicMaterial({map:t,fog:false});const me=new T.Mesh(new T.PlaneGeometry(380,106),m);me.position.set(0,34,-70);me.renderOrder=-9999;scene.add(me)});
     /* ground: sidewalk tiles, curb, asphalt with lane dashes, drawn once on a canvas */
@@ -491,24 +501,20 @@ if(!RM&&matchMedia('(hover:hover)').matches){
     sprite('a/67.webp',-13,-8.5,7.2);
     sprite('a/133.webp',-2.5,-8,5.4);
     sprite('a/60.webp',8,-8.5,4.6);
-    sprite('a/235.webp',-8,-5,4.4);
     sprite('a/235.webp',3.6,-4.6,3.8,{flip:true});
     [[-9,-2.4],[2.4,-2.6],[11,-2.2],[-17,-2]].forEach(p=>sprite('a/225.webp',p[0],p[1],4.4));
-    sprite('a/16.webp',-10.6,-0.6,1.5);
     /* lantern string across the street */
     sprite('a/52.webp',-7,-1.5,2.0,{y:5.4,sway:.02});
     sprite('a/52.webp',4,-1.5,2.0,{y:5.4,sway:.02,flip:true});
     sprite('a/52.webp',10,-1.5,1.8,{y:5.7,sway:.02});
-    sprite('a/61.webp',8,-1.2,2.4,{bob:.05});
-    /* hero cart on the right third, big and lit */
-    sprite('a/z/vietnamese_banh_mi_street_cart.webp',3.4,2.2,4.3,{bob:.015});
-    /* mid crowd */
-    const crowd=[['a/313.webp',-1.4,.6,2.0],['a/287.webp',0.4,1.0,1.95],['a/227.webp',8.6,.6,2.0],['a/318.webp',10.6,.2,1.95],['a/77.webp',-5,.2,2.1],['a/211.webp',-8.5,.6,1.9],['a/24.webp',13,.2,1.9],['a/25.webp',-11.5,.4,1.9],['a/303.webp',-14.5,.8,2.0]];
-    crowd.forEach((c,i)=>sprite(c[0],c[1],c[2],c[3],{bob:.04,flip:i%2===1}));
-    /* key-art heroes in front of the cart, bigger than everyone: the cast */
-    sprite('a/311.webp',2.6,4.6,3.0,{bob:.05});
-    sprite('a/327.webp',8.4,4.8,2.9,{bob:.05,flip:true});
-    sprite('a/304.webp',6.0,5.4,2.8,{bob:.04});
+    /* hero cart on the right third; one clean hero group, everything else recedes into dusk */
+    const warm=0xffe6cf;
+    shadow(3.4,2.2,6.2,.95);
+    sprite('a/z/cart_clean.webp',3.4,2.2,4.3,{bob:.012,tint:warm});
+    shadow(2.5,4.6,2.0,.9);
+    sprite('a/311.webp',2.5,4.6,3.0,{bob:.05,tint:warm});
+    const crowd=[['a/313.webp',-0.6,.2,1.9],['a/227.webp',9.2,.4,2.0],['a/318.webp',11.2,.1,1.95]];
+    crowd.forEach((c,i)=>{shadow(c[1],c[2],1.4,.7);sprite(c[0],c[1],c[2],c[3],{bob:.04,flip:i%2===1,tint:0xf0dcd0})});
     /* lantern glow and floating embers */
     function glowTex(){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),r=g.createRadialGradient(64,64,0,64,64,64);r.addColorStop(0,'rgba(255,196,110,1)');r.addColorStop(.35,'rgba(255,160,60,.45)');r.addColorStop(1,'rgba(255,140,40,0)');g.fillStyle=r;g.fillRect(0,0,128,128);return new T.CanvasTexture(c)}
     const gt=glowTex();
