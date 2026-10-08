@@ -541,6 +541,11 @@ body #act.open,body.dev-desktop #act.open,body.dev-tablet #act.open{width:56px;h
 .lb{position:relative;width:100%;min-height:46px;border-radius:14px;border:1.5px solid #e5c58a;background:#fff;color:#3a2412;font:600 14px var(--body);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:9px;box-shadow:none;cursor:pointer}
 .lb b{position:absolute;left:14px;font:800 18px var(--display)}.lb .gl{background:conic-gradient(#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lb.fb{background:#2f66d8;color:#fff;border-color:#2f66d8}.lb.em{background:#fbf0d6}.lb em{position:absolute;right:10px;font:600 9px var(--body);font-style:normal;letter-spacing:.06em;background:rgba(42,22,10,.12);padding:1px 6px;border-radius:999px}.lb.fb em{background:rgba(255,255,255,.25)}
+.lb.gslot{padding:0;border:0;background:transparent;min-height:44px;overflow:hidden}.lb.gslot>div{margin:0 auto}
+.lb.lnk{background:transparent;border:0;min-height:34px;margin:4px 0 0;font:600 13px var(--body);color:#8a5a2a;text-decoration:underline}
+.lgf{display:grid;gap:9px;margin-bottom:6px}.lgf input{width:100%;box-sizing:border-box;min-height:46px;border-radius:14px;border:1.5px solid #e5c58a;background:#fff;padding:0 14px;font:500 15px var(--body);color:#3a2412}
+.lgf input:focus{outline:none;border-color:#f2a81c;box-shadow:0 0 0 3px rgba(242,168,28,.25)}
+.lgerr{margin:2px 0 8px;padding:8px 10px;border-radius:10px;background:#fde3d9;color:#9a2e14;font:600 12.5px var(--body)}
 .lb.guest{background:linear-gradient(#ffe27a,#f2a81c);border-color:#d78c10;color:#5a2e08;font-weight:700;margin:0}.lb.guest small{font:500 11px var(--body);opacity:.8}
 .or{font:500 12px var(--body);color:#8a6a4a;margin:2px 0 8px}.terms{font:500 11px var(--body);color:#fff3da;opacity:.85;margin:8px 0 0;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 /* chars */
@@ -2697,6 +2702,65 @@ function onlineBody(){
     if(ON.friends===null){onFr();h+='<div class="phcard"><small>Đang tải...</small></div>'}else h+=(ON.friends.length?ON.friends.map(f=>`<div class="phcard" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span><b>${esc(f.name)}</b><br><small>Cấp ${f.level} · ngày ${f.day}</small></span><button class="phbtn" onclick="onVisit('${esc(f.uid)}')">Ghé phố (+5k)</button></div>`).join(''):'<div class="phcard"><small>Chưa có bạn nào. Gửi mã bạn bè của mày cho người chơi khác.</small></div>')}
   return h}
 onBoot();
+// ===================== ĐĂNG NHẬP: Google / Facebook / Email ở màn mở game =====================
+let LG={mode:null,err:'',busy:false,open:false};
+function lgRender(){if(LG.open)showLogin()}
+(async()=>{while(!ON.ready)await new Promise(r=>setTimeout(r,150));if(ON.on){try{const c=await oapi('config');ON.fb=c.fbAppId||'';ON.email=!!c.email}catch(e){}}lgRender()})();
+function showLogin(){
+  LG.open=true;
+  const ready=ON.ready,on=ON.on;
+  let body;
+  if(ON.user){
+    body=`<h2>Chào ${esc(ON.user.name)}!</h2><p>Mày đang đăng nhập${ON.user.via==='email'?' bằng email':ON.user.via==='facebook'?' bằng Facebook':' bằng Google'}. Tiến trình tự lưu lên tài khoản.</p>
+    <button class="lb guest" id="lgGo">Vào game</button><button class="lb lnk" id="lgOut">Đổi tài khoản</button>`;
+  }else if(LG.mode){
+    const reg=LG.mode==='register';
+    body=`<h2>${reg?'Tạo tài khoản':'Đăng nhập bằng email'}</h2><p>${reg?'Dùng email và mật khẩu để lưu tiến trình trên mọi máy.':'Nhập email và mật khẩu mày đã đăng ký.'}</p>
+    <form id="lgForm" class="lgf" novalidate>
+      ${reg?'<input id="lgName" maxlength="20" placeholder="Tên hiển thị" autocomplete="nickname">':''}
+      <input id="lgMail" type="email" placeholder="Email" autocomplete="email" inputmode="email" value="${esc(LG.mail||'')}">
+      <input id="lgPw" type="password" placeholder="Mật khẩu (từ 6 ký tự)" autocomplete="${reg?'new-password':'current-password'}">
+      ${LG.err?`<div class="lgerr">${esc(LG.err)}</div>`:''}
+      <button class="lb guest" type="submit" ${LG.busy?'disabled':''}>${LG.busy?'Đang xử lý...':reg?'Tạo tài khoản':'Đăng nhập'}</button>
+    </form>
+    <button class="lb lnk" id="lgSw">${reg?'Đã có tài khoản? Đăng nhập':'Chưa có tài khoản? Tạo mới'}</button>
+    <button class="lb lnk" id="lgBack">← Cách đăng nhập khác</button>`;
+  }else{
+    const soon=t=>`<em>${t}</em>`;
+    body=`<h2>Chào mừng!</h2><p>Đăng nhập để lưu tiến trình và chơi mọi thiết bị</p>
+    <div class="lb gslot" id="gSlot"><button class="lb" id="gFall" style="margin:0"><b class="gl">G</b>Đăng nhập với Google${on?'':soon(ready?'Chưa bật':'...')}</button></div>
+    <button class="lb fb" id="lgFb"><b>f</b>Đăng nhập với Facebook${ON.fb?'':soon('Sắp có')}</button>
+    <button class="lb em" id="lgEm"><b>✉</b>Đăng nhập với Email${on?'':soon(ready?'Chưa bật':'...')}</button>
+    ${LG.err?`<div class="lgerr">${esc(LG.err)}</div>`:''}
+    <div class="or">Hoặc</div><button class="lb guest" id="guest">Chơi ngay <small>(Không cần đăng nhập)</small></button>`;
+  }
+  scrShow(`<img class="logo sm" src="logo.png" alt=""><div class="lcard">${body}</div><p class="terms">${ON.user?'Đổi máy chỉ cần đăng nhập lại là chơi tiếp.':'Không đăng nhập thì tiến trình chỉ lưu trên trình duyệt này.'}</p>`,'login');
+  const q=id=>document.getElementById(id);
+  if(ON.user){q('lgGo').onclick=()=>{sfx.tap();lgDone()};q('lgOut').onclick=async()=>{sfx.tap();await oapi('auth',{method:'DELETE'});ON.user=null;showLogin()};return}
+  if(LG.mode){
+    q('lgForm').onsubmit=e=>{e.preventDefault();lgEmail()};q('lgSw').onclick=()=>{sfx.tap();LG.mode=LG.mode==='register'?'login':'register';LG.err='';showLogin()};
+    q('lgBack').onclick=()=>{sfx.tap();LG.mode=null;LG.err='';showLogin()};setTimeout(()=>{const f=q(LG.mode==='register'?'lgName':'lgMail');if(f)f.focus()},50);return}
+  q('gFall').onclick=()=>{sfx.tap();toast(ON.on?'Nút Google chưa tải xong. Kiểm tra mạng hoặc tắt chặn quảng cáo.':'Đăng nhập cần mở game ở sidewalkgamee.fun')};
+  q('guest').onclick=()=>{sfx.tap();LG.open=false;showChars()};
+  q('lgEm').onclick=()=>{sfx.tap();if(!ON.on){toast('Đăng nhập cần mở game ở sidewalkgamee.fun');return}LG.mode='login';LG.err='';showLogin()};
+  q('lgFb').onclick=()=>{sfx.tap();if(!ON.fb){toast('Đăng nhập Facebook đang chờ duyệt, dùng Google hoặc Email nhé');return}lgFacebook()};
+  if(on){const slot=q('gSlot');gisLoad(()=>{try{google.accounts.id.initialize({client_id:ON.cid,callback:r=>lgPost({credential:r.credential})});
+    google.accounts.id.renderButton(slot,{theme:'outline',size:'large',shape:'pill',text:'signin_with',locale:'vi',logo_alignment:'left',width:Math.min(400,Math.max(220,slot.clientWidth||300))})}catch(e){LG.err='Không tải được nút Google.';}})}
+}
+async function lgPost(body){LG.busy=true;LG.err='';const a=await oapi('auth',{method:'POST',body});LG.busy=false;
+  if(a.user){ON.user=a.user;sfx.sale&&sfx.sale();toast('👋 Xin chào '+a.user.name);LG.mode=null;lgDone()}else{LG.err=a.error||'Đăng nhập thất bại, thử lại nhé.';showLogin()}}
+function lgEmail(){const m=(document.getElementById('lgMail').value||'').trim();LG.mail=m;const p=document.getElementById('lgPw').value||'',n=document.getElementById('lgName');
+  if(!/^\S+@\S+\.\S+$/.test(m)){LG.err='Email chưa đúng.';showLogin();return}if(p.length<6){LG.err='Mật khẩu cần từ 6 ký tự.';showLogin();return}
+  LG.busy=true;showLogin();lgPost({email:m,password:p,mode:LG.mode,name:n?n.value:''})}
+function lgFacebook(){const go=()=>FB.login(r=>{if(r.authResponse)lgPost({fbToken:r.authResponse.accessToken});else{LG.err='Mày đã huỷ đăng nhập Facebook.';showLogin()}},{scope:'public_profile'});
+  if(window.FB)return go();window.fbAsyncInit=()=>{FB.init({appId:ON.fb,cookie:false,xfbml:false,version:'v19.0'});go()};
+  const s=document.createElement('script');s.src='https://connect.facebook.net/vi_VN/sdk.js';s.async=true;s.onerror=()=>{LG.err='Không tải được Facebook.';showLogin()};document.head.appendChild(s)}
+async function lgDone(){LG.open=false;
+  try{const r=await oapi('save');const d=r.save&&r.save.data;
+    if(d&&d.day){modal({ic:'☁️',c:'#2aa6a0',tag:'Tài khoản',title:'Có tiến trình trên tài khoản',text:'Ngày <b>'+d.day+'</b>, tiền <b>'+fmt(d.cash||0)+'</b>, cấp '+(d.level||1)+'.<br>Chơi tiếp bản này hay bắt đầu mới?',cta:'Chơi tiếp',cta2:'Chơi mới',
+      onOk:()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));localStorage.setItem('vhsg-cloudbase',r.save.updatedAt)}catch(e){}location.reload()},
+      onNo:()=>{ON.base=r.save.updatedAt;try{localStorage.setItem('vhsg-cloudbase',ON.base)}catch(e){}showChars()}});return}}catch(e){}
+  showChars()}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);

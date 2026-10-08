@@ -14,6 +14,8 @@ function cmd(a){const [c,...r]=a;const C=c.toUpperCase();
  case'ZADD':{const z=kv.get('z'+r[0])||new Map();z.set(r[2],+r[1]);kv.set('z'+r[0],z);return 1}
  case'ZREVRANGE':{const z=[...(kv.get('z'+r[0])||new Map())].sort((a,b)=>b[1]-a[1]).slice(+r[1],+r[2]+1);return r[3]?z.flatMap(([k,v])=>[k,String(v)]):z.map(x=>x[0])}
  case'ZREVRANK':{const z=[...(kv.get('z'+r[0])||new Map())].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);const i=z.indexOf(r[1]);return i<0?null:i}
+ case'INCR':{const v=(+kv.get(r[0])||0)+1;kv.set(r[0],String(v));return v}
+ case'EXPIRE':return 1;
  case'SADD':{const s=kv.get(r[0])||new Set();s.add(r[1]);kv.set(r[0],s);return 1}
  case'SMEMBERS':return[...(kv.get(r[0])||[])];
  case'SCARD':return(kv.get(r[0])||new Set()).size;
@@ -54,4 +56,12 @@ let fail=0;const ok=(c,n)=>{console.log((c?'PASS ':'FAIL ')+n);if(!c)fail++};
  const v1=await call('friends','POST',{visit:'g2'},ca);ok(v1.json.bonus===5,'first visit bonus');
  ok((await call('friends','POST',{visit:'g2'},ca)).json.bonus===0,'second visit same day no bonus');
  ok((await call('auth','DELETE',null,ca)).status===200,'logout');
+ const er=await call('auth','POST',{email:'Doris@Mail.com',password:'abc123',mode:'register',name:'Doris E'});ok(er.status===200&&er.json.user.via==='email'&&/^[A-Z0-9]{6}$/.test(er.json.user.code),'email register');
+ ok((await call('auth','POST',{email:'doris@mail.com',password:'abc123',mode:'register'})).status===409,'email duplicate blocked');
+ const el=await call('auth','POST',{email:'doris@mail.com',password:'abc123',mode:'login'});ok(el.status===200&&el.json.user.uid===er.json.user.uid,'email login (case-insensitive)');
+ ok((await call('auth','POST',{email:'doris@mail.com',password:'wrong12',mode:'login'})).status===401,'email wrong password');
+ ok((await call('auth','POST',{email:'bad',password:'abc123',mode:'login'})).status===400,'email format checked');
+ ok((await call('auth','GET',null,cookieOf(el))).json.user.name==='Doris E','email session works');
+ ok((await call('auth','POST',{fbToken:'x'})).status===503,'facebook off without app id');
+ ok((await call('config','GET')).json.fbAppId==='','config: fb hidden');
  console.log(fail?fail+' FAILED':'ALL PASSED');process.exit(fail?1:0)})();
