@@ -360,7 +360,7 @@ section{background:var(--under,transparent)}
     </div>
     <div class="chips">
       <span><img src="a/n/i_basket.webp" alt="">12 loại xe đẩy</span>
-      <span><img src="a/n/i_pack.webp" alt="">8 điểm đến</span>
+      <span><img src="a/n/i_pack.webp" alt="">13 điểm đến</span>
       <span><img src="a/n/i_cal.webp" alt="">Một ngày khoảng 2 phút rưỡi</span>
     </div>
   </div>
@@ -466,13 +466,13 @@ section{background:var(--under,transparent)}
       <p class="lead">Ra sân bay, chọn hạng vé, mang hàng đi bán lời hơn bán quanh quận.</p>
     </div>
     <div class="track" data-sp="34" aria-label="Các điểm đến"><div class="rail" id="regList"></div></div>
-    <div class="soon"><span>Sắp mở thêm: Nha Trang và những thành phố mới</span></div>
+    <div class="soon"><span>Mới mở: Vũng Tàu, Nha Trang, Quy Nhơn, Ninh Bình và Sa Pa</span></div>
 
     <div class="trade card">
       <div>
         <h3>Mỗi chuyến bay là một quyết định buôn bán</h3>
         <ul>
-          <li><img src="a/n/rp_xoai.webp" alt=""><div><b>Nhập ở nơi làm ra</b><span>Xoài Cần Thơ, mì Quảng Đà Nẵng, phở Hà Nội, dâu Đà Lạt. 32 đặc sản chia theo vùng.</span></div></li>
+          <li><img src="a/n/rp_xoai.webp" alt=""><div><b>Nhập ở nơi làm ra</b><span>Xoài Cần Thơ, mì Quảng Đà Nẵng, phở Hà Nội, dâu Đà Lạt, yến sào Nha Trang, thổ cẩm Sa Pa. 57 đặc sản chia theo vùng.</span></div></li>
           <li><img src="a/n/air_plane.webp" alt=""><div><b>Chọn hạng vé, tính hành lý</b><span>Ba hạng vé với 15, 25 hoặc 40 ký hành lý.</span></div></li>
           <li><img src="a/n/st_hanoi.webp" alt=""><div><b>Đóng dấu hộ chiếu</b><span>Đủ bộ đặc sản một miền thì nhận thưởng và danh hiệu.</span></div></li>
         </ul>
@@ -537,8 +537,8 @@ section{background:var(--under,transparent)}
     </div>
     <dl class="fstats">
       <div><dt>12</dt><dd>loại xe đẩy</dd></div>
-      <div><dt>8</dt><dd>thành phố để buôn</dd></div>
-      <div><dt>32</dt><dd>đặc sản</dd></div>
+      <div><dt>13</dt><dd>thành phố để buôn</dd></div>
+      <div><dt>57</dt><dd>đặc sản</dd></div>
       <div><dt>6</dt><dd>khách quen có chuyện riêng</dd></div>
       <img class="cat" src="a/n/cat_walk.webp" alt="">
     </dl>
@@ -605,8 +605,8 @@ const CARTS=[
 const vnd=k=>(k*1000).toLocaleString('vi-VN')+'₫';
 const $=id=>document.getElementById(id);
 $('cartList').innerHTML=CARTS.map((c,i)=>`<article class="cart card"><span class="lv">Xe ${i+1}</span><div class="pic"><img src="a/${c[1]}.webp" alt="${c[0]}" loading="lazy"></div><h3>${c[0]}</h3><p>${c[2]}</p><div class="meta"><span class="pr">${c[3]?vnd(c[3]):'Có sẵn'}</span><span class="rp">${c[4]?`<img src="a/n/i_star.webp" alt="">Uy tín ${c[4]}`:'Không cần uy tín'}</span></div></article>`).join('');
-const REG=[['Sài Gòn','Miền Nam · nơi xuất phát','s_ngatu','st_saigon'],['Cần Thơ','Miền Tây · chợ nổi','reg_canTho','st_canTho'],['Đà Nẵng','Miền Trung · biển','reg_daNang','st_daNang'],['Huế','Miền Trung · cố đô','reg_hue','st_hue'],['Hội An','Miền Trung · phố cổ','reg_hoiAn','st_hoiAn'],['Hà Nội','Miền Bắc · thủ đô','reg_hanoi','st_hanoi'],['Đà Lạt','Cao nguyên · mát lạnh','reg_daLat','st_daLat'],['Phú Quốc','Biển đảo · hải sản','reg_phuQuoc','st_phuQuoc']];
-$('regList').innerHTML=REG.map(r=>`<article class="reg card"><div class="ph"><img class="b" src="a/n/${r[2]}.webp" alt="" loading="lazy"><img class="st" src="a/n/${r[3]}.webp" alt="Con dấu ${r[0]}"></div><div class="cp"><h3>${r[0]}</h3><small>${r[1]}</small></div></article>`).join('');
+const REG=[['Sài Gòn','Miền Nam · nơi xuất phát','s_ngatu','st_saigon'],['Cần Thơ','Miền Tây · chợ nổi','reg_canTho','st_canTho'],['Đà Nẵng','Miền Trung · biển','reg_daNang','st_daNang'],['Huế','Miền Trung · cố đô','reg_hue','st_hue'],['Hội An','Miền Trung · phố cổ','reg_hoiAn','st_hoiAn'],['Hà Nội','Miền Bắc · thủ đô','reg_hanoi','st_hanoi'],['Đà Lạt','Cao nguyên · mát lạnh','reg_daLat','st_daLat'],['Phú Quốc','Biển đảo · hải sản','reg_phuQuoc','st_phuQuoc'],['Vũng Tàu','Miền Nam · biển cuối tuần','c/city_vungtau','c/stamp_vungtau'],['Nha Trang','Biển đảo · yến sào','c/city_nhatrang','c/stamp_nhatrang'],['Quy Nhơn','Miền Trung · Eo Gió','c/city_quynhon','c/stamp_quynhon'],['Ninh Bình','Miền Bắc · Tràng An','c/city_ninhbinh','c/stamp_ninhbinh'],['Sa Pa','Tây Bắc · chợ phiên','c/city_sapa','c/stamp_sapa']];
+$('regList').innerHTML=REG.map(r=>`<article class="reg card"><div class="ph"><img class="b" src="a/${r[2].includes('/')?r[2]:'n/'+r[2]}.webp" alt="" loading="lazy"><img class="st" src="a/${r[3].includes('/')?r[3]:'n/'+r[3]}.webp" alt="Con dấu ${r[0]}"></div><div class="cp"><h3>${r[0]}</h3><small>${r[1]}</small></div></article>`).join('');
 const PPL=[['Học sinh','n/npc_student','Tan trường là đông nhất, mê đồ mát và đồ vặt.','15–17h'],['Dân văn phòng','n/npc_office','Xuống phố giờ nghỉ trưa và tan ca.','11–13h'],['Shipper','n/npc_ship','Ghé nhanh, mua nhanh, không thích đợi.','Cả ngày'],['Cặp đôi','n/npc_couple','Dạo tối, hay mua hai phần.','Sau 18h'],['Chàng guitar','n/npc_guitar','Ngồi ven đường, kéo khách đứng lại nghe.','Chiều tối'],['Người chụp ảnh','n/npc_photo','Đi tìm góc phố đẹp, tiện tay mua nước.','Sáng sớm']];
 $('people').innerHTML=PPL.map(p=>`<div class="person card"><div class="pl"><img src="a/${p[1]}.webp" alt="${p[0]}" loading="lazy"></div><span class="tm">${p[3]}</span><b>${p[0]}</b><span class="d">${p[2]}</span></div>`).join('');
 const LIFE=[

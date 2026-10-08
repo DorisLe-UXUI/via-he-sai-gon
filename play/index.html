@@ -2876,9 +2876,9 @@ const MAPPOS={hanoi:[.50,.20],hue:[.355,.29],daNang:[.55,.41],hoiAn:[.60,.50],da
 #fly .fmap{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;box-shadow:0 0 0 4000px #2a8fc4}
 #fly .fmap>img.m{position:absolute;inset:0;width:100%;height:100%;display:block}
 #fly .fmap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-#fly .pin{position:absolute;width:5.2%;transform:translate(-50%,-92%);filter:drop-shadow(0 6px 6px rgba(0,0,0,.4))}
-#fly .pin.to{width:7%;animation:pinB 1s ease-in-out infinite}#fly .pin.lk{opacity:.85}
-#fly .pin b{position:absolute;left:50%;top:100%;transform:translateX(-50%);white-space:nowrap;font:800 13px var(--display,'Baloo 2');color:#fff;background:rgba(40,22,10,.75);padding:1px 8px;border-radius:8px;margin-top:2px}
+#fly .fpin{position:absolute;width:3.2%;transform:translate(-50%,-92%);filter:drop-shadow(0 6px 6px rgba(0,0,0,.4))}
+#fly .fpin.to{width:4.6%;animation:pinB 1s ease-in-out infinite}#fly .fpin.lk{opacity:.85}
+#fly .fpin b{position:absolute;left:50%;top:100%;transform:translateX(-50%);white-space:nowrap;font:800 13px var(--display,'Baloo 2');color:#fff;background:rgba(40,22,10,.75);padding:1px 8px;border-radius:8px;margin-top:2px}
 @keyframes pinB{0%,100%{transform:translate(-50%,-92%)}50%{transform:translate(-50%,-110%)}}
 #fly .pl{position:absolute;left:0;top:0;width:min(17vw,150px);transform-origin:50% 50%;will-change:transform;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
 #fly .psh{position:absolute;left:0;top:0;width:min(17vw,150px);opacity:.28;filter:blur(3px);will-change:transform}
@@ -2897,7 +2897,7 @@ function playFlight(from,dest,done){
   const P=(r,d)=>MAPPOS[r]||(CITY[r]?[CITY[r][0],CITY[r][1]]:d||[.5,.5]);
   const A=P(from),B=P(dest),R=REGIONS[dest]||{};
   const pins=REG_ORDER.map(r=>{const p=P(r),ok=S.unlockedRegions.includes(r),cls=r===dest?'to':r===from?'fr':ok?'':'lk',src=r===dest?'pin_current':r===from?'pin_home':ok?'pin_unlocked':'pin_locked';
-    return `<div class="pin ${cls}" style="left:${p[0]*100}%;top:${p[1]*100}%"><img src="a/u/i/${src}.webp" alt="" style="width:100%">${r===dest||r===from?`<b>${REGIONS[r].name}</b>`:''}</div>`}).join('');
+    return `<div class="fpin ${cls}" style="left:${p[0]*100}%;top:${p[1]*100}%"><img src="a/u/i/${src}.webp" alt="" style="width:100%">${r===dest||r===from?`<b>${REGIONS[r].name}</b>`:''}</div>`}).join('');
   const mid=[(A[0]+B[0])/2+(B[1]-A[1])*.22,(A[1]+B[1])/2-Math.abs(B[0]-A[0])*.25-.06];
   const bez=u=>[(1-u)*(1-u)*A[0]+2*(1-u)*u*mid[0]+u*u*B[0],(1-u)*(1-u)*A[1]+2*(1-u)*u*mid[1]+u*u*B[1]];
   const pathD=`M${A[0]*1280} ${A[1]*720} Q${mid[0]*1280} ${mid[1]*720} ${B[0]*1280} ${B[1]*720}`;
@@ -2952,7 +2952,62 @@ function patchAir(){const r=sheet.querySelector('.airv');if(!r)return;
 {const _a=showAirport;showAirport=function(){_a.apply(this,arguments);patchAir()}}
 {const _f=showFlight;showFlight=function(){_f.apply(this,arguments);patchAir()}}
 (function(){const st=document.createElement('style');st.textContent=`.tvcls button img.tki{display:block;width:84%;max-width:120px;margin:0 auto 4px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25));transition:transform .2s}.tvcls button.on img.tki{transform:translateY(-4px) rotate(-4deg) scale(1.06)}
-.tvchips button img.emi{width:1.5em;height:1.5em;margin-right:4px}#fly .pin.lk{width:3.6%!important;opacity:.55}`;document.head.appendChild(st)})();
+.tvchips button img.emi{width:1.5em;height:1.5em;margin-right:4px}#fly .fpin.lk{width:2.4%!important;opacity:.6}`;document.head.appendChild(st)})();
+// ===================== 5 THÀNH PHỐ MỚI: Vũng Tàu, Nha Trang, Quy Nhơn, Ninh Bình, Sa Pa =====================
+GROUPS.push('Tây Bắc');
+DEX_REW['Tây Bắc']={cash:600,rep:.2,title:'Người đi chợ phiên Tây Bắc'};
+Object.assign(REGIONS,{
+ vungTau:{id:'vungTau',name:'Vũng Tàu',e:'⛵',grp:'Miền Nam',mkt:'Chợ hải sản',ticket:18,mins:30,unlock:{rep:2,cash:1500},c:'#1f8fb8',tint:'rgba(40,160,220,.12)',rain:1,
+  art:'../u/s/city_vungtau_banner',st:'../u/i/stamp_vungtau',amb:{traffic:.4,water:0,wind:.35,wave:.9,bird:1.2},mus:[2,1.05],tip:'Cuối tuần dân Sài Gòn ra Vũng Tàu tắm biển, bánh khọt và hải sản bán đắt nhất buổi chiều.',
+  ev:[{id:'vt_wk',name:'Cuối tuần tắm biển',e:'🏖️',cat:{seafood:.4,drink:.3},traffic:.4,msg:'Khách Sài Gòn ra biển +40%'}]},
+ nhaTrang:{id:'nhaTrang',name:'Nha Trang',e:'🐚',grp:'Biển đảo',mkt:'Chợ Đầm',ticket:42,mins:55,unlock:{rep:4,cash:4000},c:'#e0663a',tint:'rgba(255,140,80,.12)',rain:.8,
+  art:'../u/s/city_nhatrang_banner',st:'../u/i/stamp_nhatrang',amb:{traffic:.45,water:0,wind:.3,wave:.8,bird:1},mus:[4,1.05],tip:'Khách du lịch Nha Trang mê đồ biển, yến sào là món quà mang về được giá nhất.',
+  ev:[{id:'nt_cruise',name:'Tàu du lịch cập cảng',e:'🚢',cat:{seafood:.5,trad:.2},traffic:.5,msg:'Khách tàu du lịch +50%'}]},
+ quyNhon:{id:'quyNhon',name:'Quy Nhơn',e:'🌊',grp:'Miền Trung',mkt:'Chợ Lớn Quy Nhơn',ticket:46,mins:60,unlock:{rep:4,cash:6000},c:'#2a9d8f',tint:'rgba(50,180,160,.12)',rain:1.1,
+  art:'../u/s/city_quynhon_banner',st:'../u/i/stamp_quynhon',amb:{traffic:.2,water:0,wind:.4,wave:.9,bird:1.3},mus:[1,1],tip:'Quy Nhơn yên bình, khách ít mà sành ăn: bún chả cá và bánh ít lá gai là phải mua.',
+  ev:[{id:'qn_eo',name:'Mùa du lịch Eo Gió',e:'🌊',cat:{trad:.4,seafood:.3},traffic:.3,msg:'Món địa phương +40%'}]},
+ ninhBinh:{id:'ninhBinh',name:'Ninh Bình',e:'⛰️',grp:'Miền Bắc',mkt:'Chợ quê Tràng An',ticket:58,mins:70,unlock:{rep:5,cash:10000},c:'#5a8f3c',tint:'rgba(110,170,90,.13)',rain:1.2,
+  art:'../u/s/city_ninhbinh_banner',st:'../u/i/stamp_ninhbinh',amb:{traffic:.12,water:.4,wind:.25,wave:0,bird:2},mus:[-1,.95],tip:'Khách đi đò Tràng An về là đói, cơm cháy và dê núi bán hết veo buổi trưa.',
+  ev:[{id:'nb_fest',name:'Lễ hội chùa Bái Đính',e:'🏯',cat:{trad:.5},traffic:.5,msg:'Khách hành hương +50%'}]},
+ sapa:{id:'sapa',name:'Sa Pa',e:'🏔️',grp:'Tây Bắc',mkt:'Chợ phiên',ticket:70,mins:85,unlock:{rep:5,cash:15000},c:'#7a5ab8',tint:'rgba(150,170,220,.2)',rain:1.8,
+  art:'../u/s/city_sapa_banner',st:'../u/i/stamp_sapa',amb:{traffic:.08,water:.1,wind:.7,wave:0,bird:1.5},mus:[6,.9],tip:'Sa Pa lạnh quanh năm. Đồ nóng, rượu táo mèo và thổ cẩm luôn có khách hỏi.',
+  ev:[{id:'sp_cold',name:'Sương mù lạnh buốt',e:'🌫️',cat:{drink:.6,trad:.3},traffic:0,rain:1,msg:'Đồ nóng và rượu +60%'}]}
+});
+REG_ORDER.push('vungTau','nhaTrang','quyNhon','ninhBinh','sapa');
+const NEWP=[
+ ['p_vt_muc','Mực nướng','🦑','../u/i/city_vungtau_item_1','seafood',1.2,44,['vungTau'],'Miền Nam',{saigon:'H',daLat:'M',hanoi:'M'}],
+ ['p_vt_khot','Bánh khọt','🥞','../u/i/city_vungtau_item_2','trad',1,24,['vungTau'],'Miền Nam',{saigon:'M',hanoi:'H'}],
+ ['p_vt_kho','Khô mực, khô cá','🐟','../u/i/city_vungtau_item_3','dry',1,52,['vungTau'],'Miền Nam',{hanoi:'H',daLat:'H',sapa:'M'}],
+ ['p_vt_keo','Kẹo dừa','🍬','../u/i/city_vungtau_item_4','snack',1,26,['vungTau'],'Miền Nam',{hanoi:'M',ninhBinh:'M'}],
+ ['p_vt_muoi','Muối Bà Rịa','🧂','../u/i/city_vungtau_item_5','cond',2,12,['vungTau'],'Miền Nam',{sapa:'H',daLat:'M'}],
+ ['p_nt_yen','Yến sào','🪺','../u/i/city_nhatrang_item_1','dry',.5,180,['nhaTrang'],'Biển đảo',{hanoi:'H',saigon:'H',sapa:'M'}],
+ ['p_nt_mam','Nước mắm Nha Trang','🧂','../u/i/city_nhatrang_item_2','cond',1.5,34,['nhaTrang'],'Biển đảo',{hanoi:'M',sapa:'H'}],
+ ['p_nt_muc','Mực khô','🦑','../u/i/city_nhatrang_item_3','dry',1,60,['nhaTrang'],'Biển đảo',{hanoi:'H',daLat:'M',ninhBinh:'H'}],
+ ['p_nt_bun','Bún chả cá Nha Trang','🍲','../u/i/city_nhatrang_item_4','trad',1.5,30,['nhaTrang'],'Biển đảo',{saigon:'M',daLat:'H'}],
+ ['p_nt_tom','Tôm hùm','🦞','../u/i/city_nhatrang_item_5','seafood',1.5,120,['nhaTrang'],'Biển đảo',{hanoi:'H',saigon:'H',daNang:'M'}],
+ ['p_qn_banhit','Bánh ít lá gai','🍙','../u/i/city_quynhon_item_1','trad',1,28,['quyNhon'],'Miền Trung',{saigon:'H',hanoi:'M'}],
+ ['p_qn_ca','Cá cơm khô','🐟','../u/i/city_quynhon_item_2','dry',1,40,['quyNhon'],'Miền Trung',{daLat:'H',sapa:'H',hanoi:'M'}],
+ ['p_qn_bun','Bún chả cá Quy Nhơn','🍲','../u/i/city_quynhon_item_3','trad',1.5,30,['quyNhon'],'Miền Trung',{saigon:'M',hanoi:'H'}],
+ ['p_qn_ruou','Rượu Bàu Đá','🍶','../u/i/city_quynhon_item_4','drink',1.5,46,['quyNhon'],'Miền Trung',{hanoi:'H',sapa:'M'}],
+ ['p_qn_rong','Rong biển','🌿','../u/i/city_quynhon_item_5','dry',.8,36,['quyNhon'],'Miền Trung',{daLat:'M',hanoi:'M'}],
+ ['p_nb_de','Dê núi','🍖','../u/i/city_ninhbinh_item_1','trad',1.5,64,['ninhBinh'],'Miền Bắc',{saigon:'H',daNang:'M'}],
+ ['p_nb_comchay','Cơm cháy','🍘','../u/i/city_ninhbinh_item_2','snack',1,32,['ninhBinh'],'Miền Bắc',{saigon:'H',vungTau:'M',nhaTrang:'M'}],
+ ['p_nb_dekho','Dê khô','🥩','../u/i/city_ninhbinh_item_3','dry',.8,70,['ninhBinh'],'Miền Bắc',{saigon:'M',daLat:'H'}],
+ ['p_nb_non','Nón lá làng nghề','👒','../u/i/city_ninhbinh_item_4','craft',1,22,['ninhBinh'],'Miền Bắc',{phuQuoc:'H',nhaTrang:'H',daNang:'M'}],
+ ['p_nb_tra','Trà Ninh Bình','🍵','../u/i/city_ninhbinh_item_5','drink',1,38,['ninhBinh'],'Miền Bắc',{saigon:'M',quyNhon:'M'}],
+ ['p_sp_thangco','Thắng cố','🍲','../u/i/city_sapa_item_1','trad',1.5,40,['sapa'],'Tây Bắc',{hanoi:'M',saigon:'M'}],
+ ['p_sp_thocam','Thổ cẩm','🧣','../u/i/city_sapa_item_2','craft',1,70,['sapa'],'Tây Bắc',{hoiAn:'H',phuQuoc:'H',nhaTrang:'H',saigon:'M'}],
+ ['p_sp_taomeo','Rượu táo mèo','🍷','../u/i/city_sapa_item_3','drink',1.5,50,['sapa'],'Tây Bắc',{saigon:'H',hanoi:'M',vungTau:'M'}],
+ ['p_sp_hatde','Hạt dẻ','🌰','../u/i/city_sapa_item_4','snack',1,44,['sapa'],'Tây Bắc',{saigon:'H',hanoi:'H'}],
+ ['p_sp_ruoungo','Rượu ngô','🏺','../u/i/city_sapa_item_5','drink',2,36,['sapa'],'Tây Bắc',{hanoi:'M',daNang:'M'}]
+].map(a=>({id:a[0],name:a[1],e:a[2],ic:a[3],cat:a[4],w:a[5],base:a[6],home:a[7],grp:a[8],d:a[9]}));
+NEWP.forEach(p=>{PRODUCTS.push(p);PRD[p.id]=p});
+// hàng cũ cũng có khách ở thành phố mới
+[['p_caphesua',{sapa:'H',ninhBinh:'M',nhaTrang:'M'}],['p_dau',{nhaTrang:'M',quyNhon:'M'}],['p_xoai',{sapa:'H',ninhBinh:'M'}],['p_pho',{vungTau:'M',nhaTrang:'M'}],['p_haisan',{sapa:'H',ninhBinh:'H'}],['p_caphe',{sapa:'M',vungTau:'M'}],['p_dua',{sapa:'H',ninhBinh:'M'}],['p_banhmi',{sapa:'M'}]].forEach(([id,d])=>{if(PRD[id])Object.assign(PRD[id].d,d)});
+// hộ chiếu: đếm theo số thành phố thật
+{const _pa=patchAir;patchAir=function(){_pa();const b=document.getElementById('tvPass');if(b)b.innerHTML=b.innerHTML.replace(/\/\s*8\b/,'/'+REG_ORDER.length)}}
+
+{const _sp=showPassport;showPassport=function(){_sp.apply(this,arguments);const r=sheet.querySelector('.tvpass');if(r)r.innerHTML=r.innerHTML.replace(/(\d+)\/8 điểm đến/,'$1/'+REG_ORDER.length+' điểm đến')}}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
