@@ -57,7 +57,7 @@ p{margin:0;text-wrap:pretty}
 @media (max-width:760px){.bar nav a:not(.cta){display:none}.bar .logo{height:44px}}
 
 /* ===== hero ===== */
-.hero{position:relative;height:clamp(600px,88vh,820px);overflow:hidden;background:linear-gradient(#10142c,#262d58 55%,#3a3350)}
+.hero{position:relative;height:clamp(600px,80vh,780px);overflow:hidden;background:linear-gradient(#10142c,#262d58 55%,#3a3350)}
 .hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hero .nogl{position:absolute;inset:0;background:url(s/street.webp) center/cover;display:none}
 .hero.fallback .nogl{display:block}
@@ -216,6 +216,15 @@ html.rv [data-r=r]{transform-origin:100% 50%;transform:perspective(1000px) trans
 html.rv [data-r=z]{transform-origin:50% 60%;transform:perspective(1000px) translate3d(0,30px,-260px) scale(.92)}
 html.rv [data-r].in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){html.rv [data-r]{opacity:1;transform:none;transition:none}}
+
+/* awning: ties the dusk street to the paper section under it */
+.awning{position:relative;z-index:6;height:52px;margin-bottom:-52px;pointer-events:none;filter:drop-shadow(0 10px 14px rgba(40,22,10,.28))}
+.awning::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,#c9433b 0 60px,#f7ecd2 60px 120px);
+  -webkit-mask:linear-gradient(#000,#000) 0 0/100% 22px no-repeat,radial-gradient(circle 30px at 30px 22px,#000 97%,transparent 100%) 0 0/60px 100% repeat-x;
+  mask:linear-gradient(#000,#000) 0 0/100% 22px no-repeat,radial-gradient(circle 30px at 30px 22px,#000 97%,transparent 100%) 0 0/60px 100% repeat-x}
+.awning::after{content:'';position:absolute;left:0;right:0;top:0;height:7px;background:linear-gradient(#2a1612,#4a2a20)}
+#ngay{padding-top:calc(clamp(64px,9vw,112px) + 30px)}
+@media (max-width:760px){.awning{height:44px;margin-bottom:-44px}.awning::before{background:repeating-linear-gradient(90deg,#c9433b 0 40px,#f7ecd2 40px 80px);-webkit-mask:linear-gradient(#000,#000) 0 0/100% 16px no-repeat,radial-gradient(circle 20px at 20px 16px,#000 97%,transparent 100%) 0 0/40px 100% repeat-x;mask:linear-gradient(#000,#000) 0 0/100% 16px no-repeat,radial-gradient(circle 20px at 20px 16px,#000 97%,transparent 100%) 0 0/40px 100% repeat-x}}
 </style>
 </head>
 <body>
@@ -229,7 +238,7 @@ html.rv [data-r].in{opacity:1;transform:none}
       <a href="#xe">Các loại xe</a>
       <a href="#bonphuong">Bốn phương</a>
       <a href="#khach">Khách phố</a>
-      <a class="cta" href="https://claude.ai/artifact/262HZowwArWTh56y2Vmx2Q" target="_blank" rel="noopener">Chơi ngay</a>
+      <a class="cta" href="play/">Chơi ngay</a>
     </nav>
   </div>
 </header>
@@ -242,7 +251,7 @@ html.rv [data-r].in{opacity:1;transform:none}
     <h1>Đẩy xe ra phố, bán tới khi đèn lồng sáng.</h1>
     <p class="sub">Game bán hàng rong chạy ngay trên trình duyệt. Nhập hàng ở chợ, đẩy xe qua từng quận, né mưa, giữ khách quen, rồi bay ra Hà Nội, Đà Lạt, Phú Quốc buôn đặc sản.</p>
     <div class="btns">
-      <a class="btn go" href="https://claude.ai/artifact/262HZowwArWTh56y2Vmx2Q" target="_blank" rel="noopener">Chơi ngay</a>
+      <a class="btn go" href="play/">Chơi ngay</a>
       <a class="btn ghost" href="#ngay">Xem cách chơi</a>
     </div>
     <div class="facts">
@@ -252,6 +261,7 @@ html.rv [data-r].in{opacity:1;transform:none}
     </div>
   </div></div>
 </section>
+<div class="awning" aria-hidden="true"></div>
 
 <section class="paper sec" id="ngay">
   <div class="wrap">
@@ -352,7 +362,7 @@ html.rv [data-r].in{opacity:1;transform:none}
     <h2>Xe đã đầy hàng. Ra phố thôi.</h2>
     <p class="lead">Ván đầu chỉ mất vài phút để biết mình có mê nghề bán hàng rong không. Không cần cài đặt, không cần đăng nhập.</p>
     <div class="btns">
-      <a class="btn go" href="https://claude.ai/artifact/262HZowwArWTh56y2Vmx2Q" target="_blank" rel="noopener">Chơi ngay</a>
+      <a class="btn go" href="play/">Chơi ngay</a>
       <a class="btn ghost" href="#ngay">Xem cách chơi</a>
     </div>
     <dl class="fstats">
@@ -397,7 +407,7 @@ html.rv [data-r].in{opacity:1;transform:none}
       <div class="fcol">
         <h3>Chơi ngay</h3>
         <p class="fnote">Mở trên điện thoại hay máy tính đều được. Tiến trình lưu ngay trong trình duyệt bạn đang dùng.</p>
-        <a class="btn go sm" href="https://claude.ai/artifact/262HZowwArWTh56y2Vmx2Q" target="_blank" rel="noopener">Chơi Vỉa Hè Sài Gòn</a>
+        <a class="btn go sm" href="play/">Chơi Vỉa Hè Sài Gòn</a>
       </div>
     </div>
     <div class="fbar">
@@ -544,7 +554,7 @@ if(!RM&&matchMedia('(hover:hover)').matches){
       const mob=hero.clientWidth<760;
       const z0=(mob?15:12.5)-(1-intro)*(-5)-prog*7;
       cam.position.set(mx*1.6+(mob?1.6:3.0)+(1-intro)*-2.5,1.55-my*.22+prog*.6,z0+(1-intro)*5-(1-intro)*5+(1-intro)*5);
-      cam.lookAt(mx*.5+(mob?3.2:-3.0),(mob?7.4:2.3)+prog*.4,-6);
+      cam.lookAt(mx*.5+(mob?3.2:-3.0),(mob?7.4:1.95)+prog*.4,-6);
       if(!RM)sprites.forEach(s=>{const u=s.userData;if(u.bob)s.position.y=u.y0+Math.abs(Math.sin(t*2.2+u.ph))*u.bob;if(u.sway)s.rotation.z=Math.sin(t*1.3+u.ph)*u.sway});
       if(!RM){const a=pg.attributes.position;for(let i=0;i<N;i++){a.array[i*3+1]+=pv[i]*.01;if(a.array[i*3+1]>8)a.array[i*3+1]=0}a.needsUpdate=true}
       R.render(scene,cam);
