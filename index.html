@@ -39,8 +39,9 @@ h1,h2,h3{margin:0;text-wrap:balance}
 /* ---------- shared pieces ---------- */
 .bgfill{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center}
 .scrim{position:absolute;inset:0;z-index:-1}
-section{position:relative;isolation:isolate}
-.sec{padding-block:clamp(72px,9vw,120px)}
+section{position:relative;isolation:isolate;overflow:clip}
+.dn{overflow:visible}
+.sec{padding-block:clamp(72px,9vw,120px) clamp(120px,11vw,170px)}
 .h2{font:800 clamp(34px,4.8vw,60px)/1.02 var(--h);letter-spacing:-.01em;color:var(--ink)}
 .h2.l{color:var(--cream);text-shadow:0 3px 0 rgba(0,0,0,.28),0 10px 30px rgba(0,0,0,.4)}
 .lead{margin-top:14px;max-width:34em;font-size:18px;color:#5b3d22}
@@ -106,7 +107,7 @@ section{position:relative;isolation:isolate}
 
 /* ---------- 2. day & night ---------- */
 .dn{padding:0}
-.band{position:relative;isolation:isolate;overflow:hidden;padding-block:clamp(64px,8vw,104px)}
+.band{position:relative;isolation:isolate;overflow:hidden;padding-block:clamp(64px,8vw,104px) clamp(120px,11vw,160px)}
 .band .grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,5vw,72px);align-items:center}
 .band.rev .grid{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
 .band.rev .txt{order:2}
@@ -250,12 +251,36 @@ section{position:relative;isolation:isolate}
 @media(max-width:900px){.fgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.fgrid{grid-template-columns:1fr}}
 
-/* ---------- 3D scroll + tilt ---------- */
-.t3{transform:perspective(1100px) translate3d(var(--tx,0px),var(--ty,0px),var(--tz,0px)) rotateX(calc(var(--rx,0deg) + var(--mrx,0deg))) rotateY(calc(var(--ry,0deg) + var(--mry,0deg))) scale(var(--sc,1));opacity:var(--op,1);transform-style:preserve-3d;will-change:transform,opacity}
-.t3.hv{transition:transform .18s ease-out}
-.card.glare::after,.wood.glare::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.38),transparent 45%);opacity:var(--ga,0);transition:opacity .2s}
+/* ---------- crossfade seams between sections ---------- */
+.xf{margin-top:-96px}
+.xf.sec{padding-top:clamp(16px,2.5vw,40px)}
+.xf.band{padding-top:clamp(16px,2.5vw,40px)}
+.xf::before{content:'';display:block;height:96px;pointer-events:none}
+.xf>.bgfill,.xf>.scrim{-webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent 7%,#000 calc(7% + 150px));mask-image:linear-gradient(to bottom,transparent 0,transparent 7%,#000 calc(7% + 150px))}
+/* ---------- 3D reveal (triggered, springy) + scroll tilt + hover tilt ---------- */
+@property --tx{syntax:'<length>';inherits:false;initial-value:0px}
+@property --ty{syntax:'<length>';inherits:false;initial-value:0px}
+@property --tz{syntax:'<length>';inherits:false;initial-value:0px}
+@property --rx{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --ry{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --mrx{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --mry{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --srx{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --sry{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --sc{syntax:'<number>';inherits:false;initial-value:1}
+@property --op{syntax:'<number>';inherits:false;initial-value:1}
+.t3{--ez:cubic-bezier(.22,1.25,.36,1);transform:perspective(1100px) translate3d(var(--tx),var(--ty),var(--tz)) rotateX(calc(var(--rx) + var(--mrx) + var(--srx))) rotateY(calc(var(--ry) + var(--mry) + var(--sry))) scale(var(--sc));opacity:var(--op);transform-style:preserve-3d;will-change:transform,opacity;
+ transition:--tx 1.05s var(--ez) var(--d,0s),--ty 1.05s var(--ez) var(--d,0s),--tz 1.05s var(--ez) var(--d,0s),--rx 1.05s var(--ez) var(--d,0s),--ry 1.05s var(--ez) var(--d,0s),--sc 1.05s var(--ez) var(--d,0s),--op .7s ease-out var(--d,0s),--mrx .35s ease-out 0s,--mry .35s ease-out 0s}
+.t3.done{--d:0s!important}
+.t3[data-k=up]:not(.in){--ty:80px;--rx:26deg;--tz:-180px;--op:0}
+.t3[data-k=l]:not(.in){--tx:-130px;--ry:30deg;--tz:-150px;--ty:30px;--op:0}
+.t3[data-k=r]:not(.in){--tx:130px;--ry:-30deg;--tz:-150px;--ty:30px;--op:0}
+.t3[data-k=z]:not(.in){--tz:-320px;--sc:.88;--rx:14deg;--op:0}
+.t3[data-k=flip]:not(.in){--rx:-55deg;--ty:50px;--sc:.94;--op:0}
+.cart.t3{transition:--ry .35s ease-out,--sc .35s ease-out,--tz .35s ease-out,--mrx .35s,--mry .35s}
+.card.glare::after,,.wood.glare::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.38),transparent 45%);opacity:var(--ga,0);transition:opacity .2s}
 .card,.wood{position:relative}
-.bgfill{transform:translate3d(0,var(--py,0px),0) scale(1.18)}
+.bgfill{transform:translate3d(0,var(--py,0px),0) scale(1.24)}
 .hero .bgfill{transform:scaleX(-1) translate3d(calc(var(--mx,0px) * -1),var(--py,0px),0) scale(1.1)}
 .hero .girl{transform:translate3d(var(--mx,0px),0,0) scale(1)}
 .fly{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
@@ -561,28 +586,23 @@ if(!RM){
   const T=[['.day .head,.xe .top,.bp .head,.kc .head,.life>.wrap>div:first-child,.final h2','up'],
    ['.step:nth-child(1)','l'],['.step:nth-child(2)','up'],['.step:nth-child(3)','r'],
    ['.band.d .txt,.band.n .txt.l','l'],['.band .grid>div:not(.txt)','r'],
-   ['.reg','up'],['.person','up'],['.lc','up'],['.trade','z'],['.fstats','z'],['.final .lead,.final .btns','up'],
+   ['.reg','flip'],['.person','flip'],['.lc','flip'],['.trade','z'],['.fstats','z'],['.final .lead,.final .btns','up'],
    ['.may .dev>div:first-child','l'],['.phones','r'],['.soon','up']];
   const els=[];
-  T.forEach(([sel,k])=>document.querySelectorAll(sel).forEach(el=>{if(el.dataset.k)return;el.dataset.k=k;el.classList.add('t3');const i=[...el.parentElement.children].indexOf(el);el.dataset.dl=((i%6)*.045).toFixed(3);els.push(el)}));
+  T.forEach(([sel,k])=>document.querySelectorAll(sel).forEach(el=>{if(el.dataset.k)return;el.dataset.k=k;el.classList.add('t3');const i=[...el.parentElement.children].indexOf(el);el.style.setProperty('--d',((i%6)*.09).toFixed(2)+'s');els.push(el)}));
   // the txt blocks in the bands: fix kind per band
   document.querySelectorAll('.band.rev .txt').forEach(e=>e.dataset.k='r');
   document.querySelectorAll('.band.rev .grid>div:not(.txt)').forEach(e=>e.dataset.k='l');
-  const A=mob?.6:1;
-  function apply(el,e){const k=el.dataset.k,u=1-e,S=el.style;
-    let tx=0,ty=0,tz=0,rx=0,ry=0,sc=1;
-    if(k==='up'){rx=u*30*A;ty=u*90*A;tz=-u*220*A}
-    else if(k==='l'){tx=-u*150*A;ry=u*32*A;tz=-u*160*A;ty=u*40}
-    else if(k==='r'){tx=u*150*A;ry=-u*32*A;tz=-u*160*A;ty=u*40}
-    else if(k==='z'){tz=-u*420*A;sc=.88+.12*e;rx=u*14*A}
-    S.setProperty('--tx',tx.toFixed(1)+'px');S.setProperty('--ty',ty.toFixed(1)+'px');S.setProperty('--tz',tz.toFixed(1)+'px');S.setProperty('--rx',rx.toFixed(2)+'deg');S.setProperty('--ry',ry.toFixed(2)+'deg');S.setProperty('--sc',sc.toFixed(3));S.setProperty('--op',cl(e*1.6,0,1).toFixed(2))}
   const secs=[...document.querySelectorAll('section')],bgs=secs.map(s=>s.querySelector(':scope>.bgfill'));
   const cl2=$('cartList');
   function coverflow(){const r=cl2.getBoundingClientRect(),c=r.left+r.width/2;cl2.querySelectorAll('.cart').forEach(el=>{const b=el.getBoundingClientRect(),d=cl2.clientWidth?(b.left+b.width/2-c)/(r.width/2):0,a=cl(d,-1.4,1.4);el.classList.add('t3');el.style.setProperty('--ry',(-a*18).toFixed(1)+'deg');el.style.setProperty('--sc',(1-Math.abs(a)*.07).toFixed(3));el.style.setProperty('--tz',(-Math.abs(a)*60).toFixed(0)+'px')})}
+  const io='IntersectionObserver'in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const el=e.target;el.classList.add('in');io.unobserve(el);setTimeout(()=>el.classList.add('done'),1900)}}),{rootMargin:'0px 0px -7% 0px',threshold:0}):null;
+  els.forEach(el=>io?io.observe(el):el.classList.add('in','done'));
+  secs.concat([...document.querySelectorAll('.dn .band')]).forEach(x=>{if(!x.classList.contains('hero')&&!x.classList.contains('dn'))x.classList.add('xf')});
   let tk=0;
   function frame(){tk=0;const H=vh();
-    els.forEach(el=>{const r=el.getBoundingClientRect();if(r.bottom<-200||r.top>H*1.3){if(r.top>H*1.3)apply(el,0);return}const dl=+el.dataset.dl,st=H*(1.06-dl*.5),en=H*.66,p=cl((st-r.top)/(st-en),0,1);apply(el,eo(p))});
-    secs.forEach((s,i)=>{const b=bgs[i];if(!b||s.classList.contains('hero'))return;const r=s.getBoundingClientRect();if(r.bottom<0||r.top>H)return;const c=(r.top+r.height/2-H/2)/H;b.style.setProperty('--py',(c*-70).toFixed(1)+'px')});
+    const W=innerWidth;els.forEach(el=>{if(!el.classList.contains('in'))return;const r=el.getBoundingClientRect();if(r.bottom<-100||r.top>H+100)return;const c=cl((r.top+r.height/2-H/2)/(H*.7),-1,1),xo=(r.left+r.width/2)/W-.5;el.style.setProperty('--srx',(-c*5).toFixed(2)+'deg');el.style.setProperty('--sry',(xo*c*-12).toFixed(2)+'deg')});
+    secs.forEach((s,i)=>{const b=bgs[i];if(!b||s.classList.contains('hero'))return;const r=s.getBoundingClientRect();if(r.bottom<0||r.top>H)return;const c=(r.top+r.height/2-H/2)/H;b.style.setProperty('--py',(c*-50).toFixed(1)+'px')});
     const h=secs[0].getBoundingClientRect();if(h.bottom>0)secs[0].querySelector('.bgfill').style.setProperty('--py',(Math.min(scrollY,900)*.22).toFixed(1)+'px');
     coverflow()}
   const bar=document.querySelector('.bar'),req=()=>{bar.classList.toggle('sc',scrollY>innerHeight*.7);if(!tk)tk=requestAnimationFrame(frame)};
