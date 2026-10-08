@@ -34,7 +34,7 @@ a{color:inherit}
 p{margin:0;text-wrap:pretty}
 h1,h2,h3{margin:0;text-wrap:balance}
 :focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:8px}
-.wrap{width:min(1180px,100% - 40px);margin-inline:auto}
+.wrap{width:min(1240px,100% - 48px);margin-inline:auto}
 
 /* ---------- shared pieces ---------- */
 .bgfill{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center}
@@ -45,7 +45,7 @@ section{position:relative;isolation:isolate}
 .h2.l{color:var(--cream);text-shadow:0 3px 0 rgba(0,0,0,.28),0 10px 30px rgba(0,0,0,.4)}
 .lead{margin-top:14px;max-width:34em;font-size:18px;color:#5b3d22}
 .lead.l{color:#fbeccb;text-shadow:0 2px 12px rgba(0,0,0,.55)}
-.script{font:700 clamp(24px,2.6vw,34px)/1 var(--script);color:var(--gold-d)}
+.script{font:700 clamp(26px,2.8vw,36px)/1.1 var(--script);color:#a4540a}
 .script.l{color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.6)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 30px;border-radius:18px;font:800 20px/1 var(--h);text-decoration:none;border:0;cursor:pointer;color:#4a2606;background:linear-gradient(#ffd877,#f4a21f);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 5px 0 var(--gold-dd),0 16px 26px rgba(0,0,0,.35);transition:transform .15s,box-shadow .15s}
 .btn:hover{transform:translateY(-2px)}
@@ -62,7 +62,7 @@ section{position:relative;isolation:isolate}
 .bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .bar a,.bar nav{pointer-events:auto}
 .bar .logo{height:58px;width:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
-.bar nav{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:rgba(40,24,22,.42);backdrop-filter:blur(14px) saturate(1.3);box-shadow:inset 0 0 0 1px rgba(255,246,224,.28),0 10px 30px rgba(0,0,0,.3)}
+.bar nav{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:rgba(34,20,18,.7);backdrop-filter:blur(14px) saturate(1.3);box-shadow:inset 0 0 0 1px rgba(255,246,224,.28),0 10px 30px rgba(0,0,0,.3)}
 .bar nav a{padding:9px 16px;border-radius:999px;font:700 15px/1 var(--h);text-decoration:none;color:var(--cream);transition:background .2s}
 .bar nav a:hover{background:rgba(255,246,224,.16)}
 .bar nav a.cta{background:linear-gradient(#ffd877,#f4a21f);color:#4a2606;padding:10px 20px;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 3px 0 var(--gold-dd)}
@@ -74,8 +74,8 @@ section{position:relative;isolation:isolate}
 .hero .scrim{background:linear-gradient(90deg,rgba(12,14,38,.88) 0%,rgba(12,14,38,.55) 36%,rgba(12,14,38,0) 62%),linear-gradient(0deg,rgba(20,26,58,.95) 0%,rgba(20,26,58,0) 22%)}
 .hero .in{position:relative}
 .hero .script{font-size:clamp(30px,3.6vw,48px);transform:rotate(-2deg);display:inline-block}
-.hero h1{margin-top:6px;font:700 clamp(46px,6.6vw,98px)/.98 var(--serif);letter-spacing:-.03em;color:var(--cream);text-shadow:0 4px 0 rgba(0,0,0,.25),0 14px 40px rgba(0,0,0,.55);max-width:8.2em}
-.hero h1 em{display:block;font-style:normal;color:var(--gold);background:linear-gradient(#ffe38f,#ffb12b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 4px 0 rgba(120,60,0,.55))}
+.hero h1{margin-top:6px;font:700 clamp(46px,6.6vw,98px)/.98 var(--serif);letter-spacing:-.012em;word-spacing:.08em;color:var(--cream);text-shadow:0 4px 0 rgba(0,0,0,.25),0 14px 40px rgba(0,0,0,.55);max-width:8.6em}
+.hero h1 em{display:block;font-style:normal;color:var(--gold);text-shadow:0 3px 0 rgba(120,60,0,.6),0 12px 34px rgba(0,0,0,.5)}
 .hero .sub{margin-top:20px;max-width:28em;font-size:clamp(16px,1.4vw,19px);color:#fbeccb;text-shadow:0 2px 14px rgba(0,0,0,.7)}
 .hero .btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
@@ -99,7 +99,7 @@ section{position:relative;isolation:isolate}
 .step{padding:22px 22px 26px;display:flex;flex-direction:column;gap:14px;position:relative}
 .step .num{position:absolute;top:-22px;left:22px;z-index:2}
 .step .wood{margin-top:12px}
-.step h3{font:800 26px/1.1 var(--h);margin-top:6px}
+.step h3{font:800 26px/1.1 var(--h);margin-top:6px;white-space:nowrap}
 .step p{font-size:15.5px;color:#5b3d22;line-height:1.55}
 @media(max-width:900px){.steps{grid-template-columns:1fr;gap:42px}}
 
@@ -124,8 +124,6 @@ section{position:relative;isolation:isolate}
 .stat img{width:56px;height:56px;object-fit:contain}
 .stat b{display:block;font:800 19px/1.1 var(--h);color:var(--gold)}
 .stat span{font-size:14.5px;color:#ece3ff}
-.band .wood{transform:rotate(1.2deg)}
-.band.rev .wood{transform:rotate(-1.2deg)}
 @media(max-width:900px){.band .grid,.band.rev .grid{grid-template-columns:1fr}.band.rev .txt{order:0}}
 
 /* ---------- 3. carts ---------- */
@@ -138,12 +136,12 @@ section{position:relative;isolation:isolate}
 .carts{margin-top:40px;display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:20px 6px 34px;scrollbar-width:none}
 .carts::-webkit-scrollbar{display:none}
 .cart{flex:0 0 min(290px,76vw);scroll-snap-align:start;padding:16px 18px 20px;display:flex;flex-direction:column;position:relative;transition:transform .3s}
-.cart:hover{transform:translateY(-8px)}
+
 .cart .lv{position:absolute;top:12px;left:12px;z-index:2;font:800 13px/1 var(--h);padding:6px 10px;border-radius:999px;background:var(--leaf);color:#fff}
 .cart .pic{height:200px;overflow:hidden;display:block;border-radius:16px;background:radial-gradient(ellipse at 50% 90%,rgba(255,180,70,.55),transparent 65%),linear-gradient(#ffeec2,#fbe0a0);margin-bottom:12px;padding-bottom:6px}
 .cart .pic img{height:100%;width:100%;object-fit:contain;object-position:bottom;filter:drop-shadow(0 12px 10px rgba(60,30,10,.4))}
 .cart h3{font:800 24px/1.1 var(--h)}
-.cart p{margin-top:6px;font-size:14.5px;line-height:1.45;color:#5b3d22;min-height:3em}
+.cart p{margin-top:6px;font-size:14.5px;line-height:1.45;color:#5b3d22;min-height:4.4em}
 .cart .meta{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font:700 15px/1 var(--h)}
 .cart .meta .pr{color:var(--red);font-size:18px}
 .cart .meta .rp{display:inline-flex;align-items:center;gap:4px;color:#8a5f20}
@@ -155,7 +153,7 @@ section{position:relative;isolation:isolate}
 .bp .head{text-align:center}.bp .head .lead{margin-inline:auto;color:#4a2f18;text-shadow:0 1px 8px rgba(255,246,224,.7)}
 .regions{margin-top:48px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
 .reg{overflow:hidden;position:relative;padding:0;transition:transform .3s}
-.reg:hover{transform:translateY(-8px) rotate(-.8deg)}
+
 .reg .ph{aspect-ratio:4/3;position:relative;overflow:hidden;background:#d9c08b}
 .reg .ph img.b{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .reg:hover .ph img.b{transform:scale(1.08)}
@@ -183,12 +181,12 @@ section{position:relative;isolation:isolate}
 .kc .head{text-align:center}.kc .head .lead{margin-inline:auto}
 .people{margin-top:54px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
 .person{padding:0 12px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .3s}
-.person:hover{transform:translateY(-8px)}
+
 .person .pl{height:200px;width:100%;margin-top:-34px;display:flex;align-items:flex-end;justify-content:center}
 .person img{height:100%;width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 10px 8px rgba(60,30,10,.35))}
-.person b{font:800 20px/1.1 var(--h);margin-top:8px}
+.person b{font:800 19px/1.15 var(--h);margin-top:8px;min-height:2.3em;display:flex;align-items:center;justify-content:center}
 .person .tm{font:700 12.5px/1 var(--h);padding:5px 10px;border-radius:999px;background:var(--leaf);color:#fff}
-.person span.d{font-size:13.5px;line-height:1.4;color:#5b3d22}
+.person span.d{font-size:13.5px;line-height:1.4;color:#5b3d22;min-height:5.6em}
 @media(max-width:1000px){.people{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:48px}}
 @media(max-width:560px){.people{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;row-gap:44px}}
 
@@ -251,10 +249,20 @@ section{position:relative;isolation:isolate}
 @media(max-width:900px){.fgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.fgrid{grid-template-columns:1fr}}
 
-/* ---------- reveal ---------- */
-html.rv [data-r]{opacity:0;transform:translateY(40px) scale(.97);transition:opacity .7s ease,transform .9s cubic-bezier(.16,.84,.24,1);transition-delay:var(--d,0s)}
-html.rv [data-r].in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}html.rv [data-r]{opacity:1;transform:none;transition:none}.cart,.reg,.person{transition:none}}
+/* ---------- 3D scroll + tilt ---------- */
+.t3{transform:perspective(1100px) translate3d(var(--tx,0px),var(--ty,0px),var(--tz,0px)) rotateX(calc(var(--rx,0deg) + var(--mrx,0deg))) rotateY(calc(var(--ry,0deg) + var(--mry,0deg))) scale(var(--sc,1));opacity:var(--op,1);transform-style:preserve-3d;will-change:transform,opacity}
+.t3.hv{transition:transform .18s ease-out}
+.card.glare::after,.wood.glare::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.38),transparent 45%);opacity:var(--ga,0);transition:opacity .2s}
+.card,.wood{position:relative}
+.bgfill{transform:translate3d(0,var(--py,0px),0) scale(1.18)}
+.hero .bgfill{transform:scaleX(-1) translate3d(calc(var(--mx,0px) * -1),var(--py,0px),0) scale(1.1)}
+.hero .girl{transform:translate3d(var(--mx,0px),0,0) scale(1)}
+.fly{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.fly i{position:absolute;width:6px;height:6px;border-radius:50%;background:#ffd27a;box-shadow:0 0 14px 4px rgba(255,190,80,.75);animation:flt var(--d,9s) ease-in-out infinite;left:var(--x);bottom:-10px;opacity:0}
+@keyframes flt{0%{transform:translate(0,0);opacity:0}15%{opacity:.9}100%{transform:translate(var(--dx,30px),-80vh);opacity:0}}
+@media(prefers-reduced-motion:reduce){.fly{display:none}.t3{transform:none!important;opacity:1!important}}
+.cart:hover .pic img,.reg:hover .ph img.b{transform:scale(1.08)}
+.cart,.reg,.person{transition:none}
 </style>
 </head>
 <body>
@@ -275,7 +283,7 @@ html.rv [data-r].in{opacity:1;transform:none}
 
 <main id="top">
 <section class="hero" aria-label="Vỉa Hè Sài Gòn">
-  <div class="bgfill" id="heroBg"></div><div class="scrim"></div>
+  <div class="bgfill" id="heroBg"></div><div class="scrim"></div><div class="fly" id="fly"></div>
   <div class="wrap in">
     <span class="script l">Sài Gòn ơi, hôm nay bán gì?</span>
     <h1>Đẩy xe ra phố,<em>bán tới khi đèn lồng sáng.</em></h1>
@@ -297,25 +305,25 @@ html.rv [data-r].in{opacity:1;transform:none}
 <section class="day sec" id="ngay">
   <div class="bgfill"></div>
   <div class="wrap">
-    <div class="head" data-r>
+    <div class="head">
       <span class="script">từ 6 giờ sáng đến 8 giờ tối</span>
       <h2 class="h2">Một ngày bán hàng dài hai phút rưỡi</h2>
       <p class="lead">Mỗi ngày là một vòng ngắn: chuẩn bị, bán, rồi tính sổ để mai bán khá hơn.</p>
     </div>
     <div class="steps">
-      <article class="step card" data-r>
+      <article class="step card">
         <div class="num">1</div>
         <div class="wood"><img src="s/market.webp" alt="Chợ đầu mối trong game" width="1280" height="720" loading="lazy"></div>
-        <h3>Sáng: nhập hàng ở chợ</h3>
+        <h3>Sáng: nhập hàng</h3>
         <p>Giá chợ đổi mỗi ngày, có món đang hot, có món đang rẻ. Mua vừa đủ vốn rồi xem xe chở được bao nhiêu.</p>
       </article>
-      <article class="step card" data-r>
+      <article class="step card">
         <div class="num">2</div>
         <div class="wood"><img src="s/street.webp" alt="Phố Sài Gòn trong game, xe bánh mì đang bán" width="1280" height="720" loading="lazy"></div>
-        <h3>Ngày: đẩy xe ra phố</h3>
+        <h3>Ngày: ra phố bán</h3>
         <p>Mỗi điểm bán có giờ cao điểm và món khách ưa riêng. Chạm vào khách để bán, đừng để họ đứng chờ sốt ruột.</p>
       </article>
-      <article class="step card" data-r>
+      <article class="step card">
         <div class="num">3</div>
         <div class="wood"><img src="s/cart.webp" alt="Màn nâng cấp xe" width="1280" height="720" loading="lazy"></div>
         <h3>Tối: tính sổ, nâng xe</h3>
@@ -329,7 +337,7 @@ html.rv [data-r].in{opacity:1;transform:none}
   <div class="band d">
     <div class="bgfill"></div><div class="scrim"></div>
     <div class="wrap grid">
-      <div class="txt" data-r>
+      <div class="txt">
         <span class="script l">ban ngày</span>
         <h2 class="h2 l">Phố có giờ cao điểm</h2>
         <p class="lead l">Sáng bán đồ ăn, trưa bán nước mát, chiều tan trường là đông nhất. Đứng đúng chỗ, đúng giờ thì khách tự tới.</p>
@@ -340,13 +348,13 @@ html.rv [data-r].in{opacity:1;transform:none}
         </div>
         <div class="kh"><span>Học sinh</span><span>Dân văn phòng</span><span>Shipper</span><span>Cặp đôi</span></div>
       </div>
-      <div data-r><div class="wood"><img src="s/street.webp" alt="Phố ban ngày trong game" width="1280" height="720" loading="lazy"></div></div>
+      <div><div class="wood"><img src="s/street.webp" alt="Phố ban ngày trong game" width="1280" height="720" loading="lazy"></div></div>
     </div>
   </div>
   <div class="band n rev">
     <div class="bgfill"></div><div class="scrim"></div>
     <div class="wrap grid">
-      <div class="txt" data-r>
+      <div class="txt">
         <span class="script l">ban đêm</span>
         <h2 class="h2 l">Tối về, nâng cấp xe</h2>
         <p class="lead l">Hết ngày, tiền lời đổ vào xe. Mỗi chiếc nâng được năm cấp, càng lên cao khách càng đông.</p>
@@ -356,7 +364,7 @@ html.rv [data-r].in{opacity:1;transform:none}
           <div class="stat"><img src="a/n/i_star.webp" alt=""><div><b>Thu hút</b><span>Hút khách quen và khách ghé ngang</span></div></div>
         </div>
       </div>
-      <div data-r><div class="wood"><img src="s/cart.webp" alt="Màn nâng cấp xe trong game" width="1280" height="720" loading="lazy"></div></div>
+      <div><div class="wood"><img src="s/cart.webp" alt="Màn nâng cấp xe trong game" width="1280" height="720" loading="lazy"></div></div>
     </div>
   </div>
 </section>
@@ -364,7 +372,7 @@ html.rv [data-r].in{opacity:1;transform:none}
 <section class="xe sec" id="xe">
   <div class="bgfill"></div><div class="scrim"></div>
   <div class="wrap">
-    <div class="top" data-r>
+    <div class="top">
       <div>
         <span class="script l">mở khoá dần theo uy tín</span>
         <h2 class="h2 l">Mười hai chiếc xe</h2>
@@ -379,15 +387,15 @@ html.rv [data-r].in{opacity:1;transform:none}
 <section class="bp sec" id="bonphuong">
   <div class="bgfill"></div><div class="scrim"></div>
   <div class="wrap">
-    <div class="head" data-r>
+    <div class="head">
       <span class="script">đặc sản rẻ ở nơi làm ra, đắt ở nơi đang thèm</span>
       <h2 class="h2">Phiên chợ bốn phương</h2>
       <p class="lead">Ra sân bay, chọn hạng vé, mang hàng đi bán lời hơn bán quanh quận.</p>
     </div>
     <div class="regions" id="regList"></div>
-    <div class="soon" data-r><span>Sắp mở thêm: Nha Trang và những thành phố mới</span></div>
+    <div class="soon"><span>Sắp mở thêm: Nha Trang và những thành phố mới</span></div>
 
-    <div class="trade card" data-r>
+    <div class="trade card">
       <div>
         <h3>Mỗi chuyến bay là một quyết định buôn bán</h3>
         <ul>
@@ -404,7 +412,7 @@ html.rv [data-r].in{opacity:1;transform:none}
 <section class="kc sec" id="khach">
   <div class="bgfill"></div>
   <div class="wrap">
-    <div class="head" data-r>
+    <div class="head">
       <span class="script">nhớ vài ngày là nhớ luôn</span>
       <h2 class="h2">Khách trên phố đều có giờ và có gu</h2>
       <p class="lead">Nhóm nào ghé lúc nào, mê món nào, bạn sẽ nhớ dần sau vài ngày bán.</p>
@@ -416,7 +424,7 @@ html.rv [data-r].in{opacity:1;transform:none}
 <section class="life sec" id="moi">
   <div class="bgfill"></div><div class="scrim"></div>
   <div class="wrap">
-    <div data-r>
+    <div>
       <span class="script l">không chỉ là bán hàng</span>
       <h2 class="h2 l">Sống trọn một ngày ở Sài Gòn</h2>
       <p class="lead l">Vỉa Hè Sài Gòn đang lớn thành game sống ở phố: có điện thoại, bạn bè, nghề tay trái và một căn nhà để nâng cấp.</p>
@@ -428,7 +436,7 @@ html.rv [data-r].in{opacity:1;transform:none}
 <section class="may sec" id="may">
   <div class="bgfill"></div><div class="scrim"></div>
   <div class="wrap dev">
-    <div data-r>
+    <div>
       <span class="script l">không cần cài</span>
       <h2 class="h2 l">Mở trình duyệt là chơi</h2>
       <ul>
@@ -438,7 +446,7 @@ html.rv [data-r].in{opacity:1;transform:none}
         <li><i>🌧️</i>Nhạc nền, tiếng phố, tiếng mưa. Chỉnh trong cài đặt.</li>
       </ul>
     </div>
-    <div class="phones" data-r>
+    <div class="phones">
       <div class="phone"><img src="s/phone.webp" alt="Màn chơi trên điện thoại" width="585" height="1200" loading="lazy"></div>
       <div class="phone"><img src="s/cart.webp" alt="Màn nâng cấp xe" loading="lazy" style="object-position:30% 50%"></div>
     </div>
@@ -448,13 +456,13 @@ html.rv [data-r].in{opacity:1;transform:none}
 <section class="final">
   <div class="bgfill"></div><div class="scrim"></div>
   <div class="wrap">
-    <h2 data-r><span class="script l">chiều xuống rồi</span>Xe đã đầy hàng. <em>Ra phố thôi.</em></h2>
-    <p class="lead l" data-r>Ván đầu chỉ vài phút để biết bạn có mê nghề bán hàng rong không. Không cần cài, không cần đăng nhập.</p>
-    <div class="btns" data-r>
+    <h2><span class="script l">chiều xuống rồi</span>Xe đã đầy hàng. <em>Ra phố thôi.</em></h2>
+    <p class="lead l">Ván đầu chỉ vài phút để biết bạn có mê nghề bán hàng rong không. Không cần cài, không cần đăng nhập.</p>
+    <div class="btns">
       <a class="btn" href="play/">Chơi ngay</a>
       <a class="btn out" href="#ngay">Xem cách chơi</a>
     </div>
-    <dl class="fstats" data-r>
+    <dl class="fstats">
       <div><dt>12</dt><dd>loại xe đẩy</dd></div>
       <div><dt>8</dt><dd>thành phố để buôn</dd></div>
       <div><dt>32</dt><dd>đặc sản</dd></div>
@@ -527,9 +535,9 @@ $('cartList').innerHTML=CARTS.map((c,i)=>`<article class="cart card"><span class
 $('cl').onclick=()=>$('cartList').scrollBy({left:-320,behavior:'smooth'});
 $('cr').onclick=()=>$('cartList').scrollBy({left:320,behavior:'smooth'});
 const REG=[['Sài Gòn','Miền Nam · nơi xuất phát','s_ngatu','st_saigon'],['Cần Thơ','Miền Tây · chợ nổi','reg_canTho','st_canTho'],['Đà Nẵng','Miền Trung · biển','reg_daNang','st_daNang'],['Huế','Miền Trung · cố đô','reg_hue','st_hue'],['Hội An','Miền Trung · phố cổ','reg_hoiAn','st_hoiAn'],['Hà Nội','Miền Bắc · thủ đô','reg_hanoi','st_hanoi'],['Đà Lạt','Cao nguyên · mát lạnh','reg_daLat','st_daLat'],['Phú Quốc','Biển đảo · hải sản','reg_phuQuoc','st_phuQuoc']];
-$('regList').innerHTML=REG.map(r=>`<article class="reg card" data-r><div class="ph"><img class="b" src="a/n/${r[2]}.webp" alt="" loading="lazy"><img class="st" src="a/n/${r[3]}.webp" alt="Con dấu ${r[0]}"></div><div class="cp"><h3>${r[0]}</h3><small>${r[1]}</small></div></article>`).join('');
+$('regList').innerHTML=REG.map(r=>`<article class="reg card"><div class="ph"><img class="b" src="a/n/${r[2]}.webp" alt="" loading="lazy"><img class="st" src="a/n/${r[3]}.webp" alt="Con dấu ${r[0]}"></div><div class="cp"><h3>${r[0]}</h3><small>${r[1]}</small></div></article>`).join('');
 const PPL=[['Học sinh','n/npc_student','Tan trường là đông nhất, mê đồ mát và đồ vặt.','15–17h'],['Dân văn phòng','n/npc_office','Xuống phố giờ nghỉ trưa và tan ca.','11–13h'],['Shipper','n/npc_ship','Ghé nhanh, mua nhanh, không thích đợi.','Cả ngày'],['Cặp đôi','n/npc_couple','Dạo tối, hay mua hai phần.','Sau 18h'],['Chàng guitar','n/npc_guitar','Ngồi ven đường, kéo khách đứng lại nghe.','Chiều tối'],['Người chụp ảnh','n/npc_photo','Đi tìm góc phố đẹp, tiện tay mua nước.','Sáng sớm']];
-$('people').innerHTML=PPL.map(p=>`<div class="person card" data-r><div class="pl"><img src="a/${p[1]}.webp" alt="${p[0]}" loading="lazy"></div><span class="tm">${p[3]}</span><b>${p[0]}</b><span class="d">${p[2]}</span></div>`).join('');
+$('people').innerHTML=PPL.map(p=>`<div class="person card"><div class="pl"><img src="a/${p[1]}.webp" alt="${p[0]}" loading="lazy"></div><span class="tm">${p[3]}</span><b>${p[0]}</b><span class="d">${p[2]}</span></div>`).join('');
 const LIFE=[
  ['📱','Điện thoại & Townly','Nhắn tin với khách quen, lướt mạng xã hội của phố, nhận quà và lời nhắn.',1],
  ['⚡','Năng lượng & tâm trạng','Mệt thì bán chậm, vui thì khách trả hậu. Uống nước mía cho tỉnh.',1],
@@ -539,20 +547,53 @@ const LIFE=[
  ['🏠','Nhà sáu bậc','Từ phòng trọ lên nhà phố, thêm nội thất và đồ trang trí.',0],
  ['🎭','Chọn nhân vật','Chọn dáng, tóc, áo, màu da trước khi ra phố.',0],
  ['🏆','Sự kiện & bộ sưu tập','Lễ hội, mưa bão, gặp người lạ, gom đủ bộ huy hiệu.',0]];
-$('lifeGrid').innerHTML=LIFE.map(l=>`<article class="lc card" data-r><span class="st ${l[3]?'ok':'wip'}">${l[3]?'Đã có':'Đang làm'}</span><div class="ic">${l[0]}</div><h3>${l[1]}</h3><p>${l[2]}</p></article>`).join('');
+$('lifeGrid').innerHTML=LIFE.map(l=>`<article class="lc card"><span class="st ${l[3]?'ok':'wip'}">${l[3]?'Đã có':'Đang làm'}</span><div class="ic">${l[0]}</div><h3>${l[1]}</h3><p>${l[2]}</p></article>`).join('');
 
-/* parallax + reveal */
+/* ---------- 3D: scrub on scroll, tilt on hover, coverflow, depth parallax ---------- */
 const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(!RM){
-  const hb=$('heroBg');let tk=0;
-  addEventListener('scroll',()=>{if(tk)return;tk=requestAnimationFrame(()=>{tk=0;const y=Math.min(scrollY,900);hb.style.transform=`scaleX(-1) translateY(${y*.18}px) scale(${1+y*.0001})`})},{passive:true});
-}
-if(!RM&&'IntersectionObserver' in window){
-  const els=[...document.querySelectorAll('[data-r]')];
-  els.forEach(el=>{const sib=[...el.parentElement.children].indexOf(el);el.style.setProperty('--d',Math.min(sib,6)*.07+'s')});
-  document.documentElement.classList.add('rv');
-  const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('in');io.unobserve(e.target);setTimeout(()=>{e.target.removeAttribute('data-r');e.target.style.removeProperty('--d')},1800)}),{threshold:.1,rootMargin:'0px 0px -5% 0px'});
-  els.forEach(el=>io.observe(el));
+  const vh=()=>innerHeight,cl=(v,a,b)=>Math.max(a,Math.min(b,v)),eo=x=>1-Math.pow(1-x,3);
+  const mob=innerWidth<820;
+  // fireflies
+  const fl=$('fly');for(let i=0;i<16;i++){const e=document.createElement('i');e.style.cssText=`--x:${Math.random()*100}%;--d:${7+Math.random()*7}s;--dx:${(Math.random()-.5)*160}px;animation-delay:${-Math.random()*10}s`;fl.appendChild(e)}
+  // targets: [selector, kind]
+  const T=[['.day .head,.xe .top,.bp .head,.kc .head,.life>.wrap>div:first-child,.final h2','up'],
+   ['.step:nth-child(1)','l'],['.step:nth-child(2)','up'],['.step:nth-child(3)','r'],
+   ['.band.d .txt,.band.n .txt.l','l'],['.band .grid>div:not(.txt)','r'],
+   ['.reg','up'],['.person','up'],['.lc','up'],['.trade','z'],['.fstats','z'],['.final .lead,.final .btns','up'],
+   ['.may .dev>div:first-child','l'],['.phones','r'],['.soon','up']];
+  const els=[];
+  T.forEach(([sel,k])=>document.querySelectorAll(sel).forEach(el=>{if(el.dataset.k)return;el.dataset.k=k;el.classList.add('t3');const i=[...el.parentElement.children].indexOf(el);el.dataset.dl=((i%6)*.045).toFixed(3);els.push(el)}));
+  // the txt blocks in the bands: fix kind per band
+  document.querySelectorAll('.band.rev .txt').forEach(e=>e.dataset.k='r');
+  document.querySelectorAll('.band.rev .grid>div:not(.txt)').forEach(e=>e.dataset.k='l');
+  const A=mob?.6:1;
+  function apply(el,e){const k=el.dataset.k,u=1-e,S=el.style;
+    let tx=0,ty=0,tz=0,rx=0,ry=0,sc=1;
+    if(k==='up'){rx=u*30*A;ty=u*90*A;tz=-u*220*A}
+    else if(k==='l'){tx=-u*150*A;ry=u*32*A;tz=-u*160*A;ty=u*40}
+    else if(k==='r'){tx=u*150*A;ry=-u*32*A;tz=-u*160*A;ty=u*40}
+    else if(k==='z'){tz=-u*420*A;sc=.88+.12*e;rx=u*14*A}
+    S.setProperty('--tx',tx.toFixed(1)+'px');S.setProperty('--ty',ty.toFixed(1)+'px');S.setProperty('--tz',tz.toFixed(1)+'px');S.setProperty('--rx',rx.toFixed(2)+'deg');S.setProperty('--ry',ry.toFixed(2)+'deg');S.setProperty('--sc',sc.toFixed(3));S.setProperty('--op',cl(e*1.6,0,1).toFixed(2))}
+  const secs=[...document.querySelectorAll('section')],bgs=secs.map(s=>s.querySelector(':scope>.bgfill'));
+  const cl2=$('cartList');
+  function coverflow(){const r=cl2.getBoundingClientRect(),c=r.left+r.width/2;cl2.querySelectorAll('.cart').forEach(el=>{const b=el.getBoundingClientRect(),d=cl2.clientWidth?(b.left+b.width/2-c)/(r.width/2):0,a=cl(d,-1.4,1.4);el.classList.add('t3');el.style.setProperty('--ry',(-a*18).toFixed(1)+'deg');el.style.setProperty('--sc',(1-Math.abs(a)*.07).toFixed(3));el.style.setProperty('--tz',(-Math.abs(a)*60).toFixed(0)+'px')})}
+  let tk=0;
+  function frame(){tk=0;const H=vh();
+    els.forEach(el=>{const r=el.getBoundingClientRect();if(r.bottom<-200||r.top>H*1.3){if(r.top>H*1.3)apply(el,0);return}const dl=+el.dataset.dl,st=H*(1.0-dl),en=H*.6,p=cl((st-r.top)/(st-en),0,1);apply(el,eo(p))});
+    secs.forEach((s,i)=>{const b=bgs[i];if(!b||s.classList.contains('hero'))return;const r=s.getBoundingClientRect();if(r.bottom<0||r.top>H)return;const c=(r.top+r.height/2-H/2)/H;b.style.setProperty('--py',(c*-70).toFixed(1)+'px')});
+    const h=secs[0].getBoundingClientRect();if(h.bottom>0)secs[0].querySelector('.bgfill').style.setProperty('--py',(Math.min(scrollY,900)*.22).toFixed(1)+'px');
+    coverflow()}
+  const req=()=>{if(!tk)tk=requestAnimationFrame(frame)};
+  addEventListener('scroll',req,{passive:true});addEventListener('resize',req);cl2.addEventListener('scroll',req,{passive:true});
+  frame();setTimeout(frame,300);
+  // hero depth on mouse
+  const hero=secs[0];if(matchMedia('(hover:hover)').matches){
+    hero.addEventListener('pointermove',e=>{const x=(e.clientX/innerWidth-.5);hero.style.setProperty('--mx',(x*26).toFixed(1)+'px');hero.querySelector('.bgfill').style.setProperty('--mx',(x*16).toFixed(1)+'px');const g=hero.querySelector('.girl');if(g)g.style.setProperty('--mx',(-x*34).toFixed(1)+'px')});
+    // tilt + glare on cards and wood frames
+    document.querySelectorAll('.card,.wood').forEach(el=>{el.classList.add('glare');
+      el.addEventListener('pointermove',e=>{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;if(!el.classList.contains('t3'))el.classList.add('t3');el.classList.add('hv');el.style.setProperty('--mry',(x*10).toFixed(2)+'deg');el.style.setProperty('--mrx',(-y*8).toFixed(2)+'deg');el.style.setProperty('--gx',(x*100+50)+'%');el.style.setProperty('--gy',(y*100+50)+'%');el.style.setProperty('--ga',.9)});
+      el.addEventListener('pointerleave',()=>{el.style.setProperty('--mry','0deg');el.style.setProperty('--mrx','0deg');el.style.setProperty('--ga',0)})})}
 }
 </script>
 </body>
