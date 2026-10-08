@@ -4,7 +4,7 @@ const RURL = () => process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API
 const RTOK = () => process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || '';
 const SECRET = () => process.env.SESSION_SECRET || '';
 // Google Client ID is public by design (it is sent to every browser), so a default is safe to keep in code.
-const CLIENT_ID = () => process.env.GOOGLE_CLIENT_ID || '202059039898-j92cgsglfcchogen43r9jk96ri4pgnh1.apps.googleusercontent.com';
+const CLIENT_ID = () => process.env.GOOGLE_CLIENT_ID || '288520258114-mo8lr8cseq71485305qhhtjae3gbcurt.apps.googleusercontent.com';
 
 async function redis(...cmd) {
   if (!RURL() || !RTOK()) throw new HttpError(503, 'Chưa gắn database (thiếu biến môi trường UPSTASH_REDIS_REST_URL / TOKEN).');
