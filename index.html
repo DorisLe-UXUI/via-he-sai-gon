@@ -61,7 +61,8 @@ section{position:relative;isolation:isolate}
 .bar{position:fixed;z-index:30;left:0;right:0;top:0;padding:calc(12px + env(safe-area-inset-top,0px)) 0 0;pointer-events:none}
 .bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .bar a,.bar nav{pointer-events:auto}
-.bar .logo{height:58px;width:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.bar .logo{height:58px;width:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));transition:opacity .3s,transform .3s}
+.bar.sc .logo{opacity:0;transform:translateY(-20px);pointer-events:none}
 .bar nav{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:rgba(34,20,18,.7);backdrop-filter:blur(14px) saturate(1.3);box-shadow:inset 0 0 0 1px rgba(255,246,224,.28),0 10px 30px rgba(0,0,0,.3)}
 .bar nav a{padding:9px 16px;border-radius:999px;font:700 15px/1 var(--h);text-decoration:none;color:var(--cream);transition:background .2s}
 .bar nav a:hover{background:rgba(255,246,224,.16)}
@@ -580,11 +581,11 @@ if(!RM){
   function coverflow(){const r=cl2.getBoundingClientRect(),c=r.left+r.width/2;cl2.querySelectorAll('.cart').forEach(el=>{const b=el.getBoundingClientRect(),d=cl2.clientWidth?(b.left+b.width/2-c)/(r.width/2):0,a=cl(d,-1.4,1.4);el.classList.add('t3');el.style.setProperty('--ry',(-a*18).toFixed(1)+'deg');el.style.setProperty('--sc',(1-Math.abs(a)*.07).toFixed(3));el.style.setProperty('--tz',(-Math.abs(a)*60).toFixed(0)+'px')})}
   let tk=0;
   function frame(){tk=0;const H=vh();
-    els.forEach(el=>{const r=el.getBoundingClientRect();if(r.bottom<-200||r.top>H*1.3){if(r.top>H*1.3)apply(el,0);return}const dl=+el.dataset.dl,st=H*(1.0-dl),en=H*.6,p=cl((st-r.top)/(st-en),0,1);apply(el,eo(p))});
+    els.forEach(el=>{const r=el.getBoundingClientRect();if(r.bottom<-200||r.top>H*1.3){if(r.top>H*1.3)apply(el,0);return}const dl=+el.dataset.dl,st=H*(1.06-dl*.5),en=H*.66,p=cl((st-r.top)/(st-en),0,1);apply(el,eo(p))});
     secs.forEach((s,i)=>{const b=bgs[i];if(!b||s.classList.contains('hero'))return;const r=s.getBoundingClientRect();if(r.bottom<0||r.top>H)return;const c=(r.top+r.height/2-H/2)/H;b.style.setProperty('--py',(c*-70).toFixed(1)+'px')});
     const h=secs[0].getBoundingClientRect();if(h.bottom>0)secs[0].querySelector('.bgfill').style.setProperty('--py',(Math.min(scrollY,900)*.22).toFixed(1)+'px');
     coverflow()}
-  const req=()=>{if(!tk)tk=requestAnimationFrame(frame)};
+  const bar=document.querySelector('.bar'),req=()=>{bar.classList.toggle('sc',scrollY>innerHeight*.7);if(!tk)tk=requestAnimationFrame(frame)};
   addEventListener('scroll',req,{passive:true});addEventListener('resize',req);cl2.addEventListener('scroll',req,{passive:true});
   frame();setTimeout(frame,300);
   // hero depth on mouse
