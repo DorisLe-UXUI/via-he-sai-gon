@@ -2561,7 +2561,7 @@ const unread=()=>(S.life?S.life.msgs.filter(m=>!m.read||(m.gift&&!m.claimed)).le
 #phone .phch{display:flex;align-items:flex-end;gap:5px;height:70px;margin-top:6px}#phone .phch i{flex:1;background:linear-gradient(#ffc15c,#f08e1c);border-radius:5px 5px 0 0;min-height:3px}
 @media(min-width:800px){#phone{align-items:center}#phone .phs{border-radius:34px;border-bottom:3px solid #2b3555;height:min(780px,90vh)}}
 @media(max-width:520px){#phBtn{top:124px;right:8px;width:42px;height:42px}}`;document.head.appendChild(st);
-  const b=document.createElement('button');b.id='phBtn';b.setAttribute('aria-label','Mở điện thoại');b.innerHTML='📱<i></i>';document.body.appendChild(b);
+  const b=document.createElement('button');b.id='phBtn';b.setAttribute('aria-label','Mở điện thoại');b.innerHTML='<img src="a/ui/app_phone.webp" alt=""><i></i>';document.body.appendChild(b);
   const h=document.createElement('div');h.id='phone';document.body.appendChild(h);b.onclick=()=>phOpen();h.addEventListener('click',e=>{if(e.target===h)phClose()})}
 function phOpen(a){ensureLife();if(sheet&&!sheet.hidden)closeSheet();phApp=a||null;$('phone').classList.add('on');phRender()}
 function phClose(){$('phone').classList.remove('on');phApp=null}
@@ -2569,7 +2569,7 @@ const phGo=fn=>{phClose();setTimeout(fn,30)};
 const APPS=[['msg','💬','Tin nhắn','#3fae6a'],['tw','📸','Townly','#d65a9a'],['news','📰','Tin tức','#c9482e'],['bank','🏦','Ngân hàng','#2f6fb3'],['mkt','🛒','Chợ','#e0912c'],['map','🗺️','Bản đồ','#2e8b57'],['bag','🎒','Túi','#8a5a2c'],['cal','📅','Lịch','#6a5acd'],['pass','🛂','Hộ chiếu','#b3452b'],['book','📒','Sổ tay','#9a6a2c'],['qst','📜','Nhiệm vụ','#7a4aa8'],['on','👥','Bạn bè','#2aa6a0'],['set','⚙️','Cài đặt','#59627a']];
 function phRender(){const h=$('phone');if(!h.classList.contains('on'))return;const L=ensureLife();let body='',title='Điện thoại';
   const bars=`<div class="phst"><div>⚡ Sức bền ${Math.round(L.en)}/100<div class="phbar"><i style="width:${L.en}%;background:${L.en<20?'#e2471e':'#7fd36e'}"></i></div></div><div>😊 Tâm trạng ${Math.round(L.mood)}/100<div class="phbar"><i style="width:${L.mood}%;background:${L.mood<30?'#e2471e':'#ffd27a'}"></i></div></div></div>`;
-  if(!phApp){const un=unread();body=`<div class="phgrid">${APPS.map(a=>`<button class="phapp" onclick="phAppGo('${a[0]}')"><span style="background:${a[3]}">${a[1]}</span>${a[2]}${a[0]==='msg'&&un?`<i>${un}</i>`:''}</button>`).join('')}</div>
+  if(!phApp){const un=unread();body=`<div class="phgrid">${APPS.filter(a=>!PH_DOCK.includes(a[0])).map(a=>phIcon(a,un)).join('')}</div>
     <div class="phcard"><b>Hôm nay · ${wk().n}</b><br><small>${wk().t}</small><br><button class="phbtn" ${(L.rest.d===S.day&&L.rest.n>=3)?'disabled':''} onclick="drink()">🧋 Uống trà đá nghỉ chút (−10k, +25 sức, +5 vui)</button><br><small>Sức bền thấp bán lẻ giảm 5%, tâm trạng cao bán thêm 3%.</small></div>`}
   else if(phApp==='msg'){title='Tin nhắn';body=L.msgs.length?L.msgs.map(m=>{m.read=true;return `<div class="phcard"><div class="phrow"><img src="a/${m.img}.webp" alt=""><div><b>${m.from}</b> <small>ngày ${m.day}</small><div>${m.text}</div>${m.gift?(m.claimed?'<small>Đã nhận quà</small>':`<button class="phbtn" onclick="claimMsg('${m.id}')">🎁 Nhận quà +${m.gift}k</button>`):''}</div></div></div>`}).join(''):'<div class="phcard"><small>Chưa có tin nhắn. Bán hàng cho khách quen để họ nhắn cho mày.</small></div>'}
   else if(phApp==='tw'){title='Townly';body=L.posts.length?L.posts.map(p=>`<div class="phcard"><div class="phrow"><img src="a/${p.av}.webp" alt=""><div><b>${p.u}</b> <small>ngày ${p.day}</small><div>${p.t}</div>${p.tag?`<span class="phtag">${p.tag}</span>`:''}<br><button class="phbtn" style="padding:3px 10px;font-size:13px" onclick="likePost('${p.id}')">${L.likes[p.id]?'❤️ Đã thích':'🤍 Thích'}</button></div></div></div>`).join(''):'<div class="phcard"><small>Bắt đầu ngày mới để thấy bài đăng.</small></div>'}
@@ -2582,7 +2582,8 @@ function phRender(){const h=$('phone');if(!h.classList.contains('on'))return;con
   else if(phApp==='on'&&window.onlineBody){title='Bạn bè & online';body=onlineBody()}
   else if(phApp==='cal'){title='Lịch';body=`<div class="phcard"><b>Tuần này</b><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;text-align:center">${DOW.map((d,i)=>`<div style="border-radius:8px;padding:6px 0;background:${i===dowI()?'#f2b632;color:#2a1a08':'#26304f'}">${d.s}</div>`).join('')}</div><small>${wk().t}</small></div>
     <div class="phcard"><b>Hợp đồng đang giữ (${S.contracts.length}/2)</b>${S.contracts.map(c=>`<div>${c.n} ${IT(c.item).name} · hạn ngày ${c.due} · +${c.reward}k</div>`).join('')||'<br><small>Chưa nhận hợp đồng nào.</small>'}<br><button class="phbtn" onclick="phGo(()=>hubOpen('con'))">Mở hợp đồng</button></div>`}
-  h.innerHTML=`<div class="phs"><div class="phtop">${phApp?'<button onclick="phApp=null;phRender()">‹ Về</button>':''}<b>${title}</b><button onclick="phClose()">Đóng</button></div>${phApp?'':bars}<div class="phbd">${body}</div></div>`}
+  const un2=unread(),clk=(()=>{try{return fmtH(hour())}catch(e){return ''}})();
+  h.innerHTML=`<div class="phs ${phApp?'app':'home'}"><div class="phsb"><span>${clk}</span><i class="isl"></i><span class="sig"><b></b><b></b><b></b><b></b><em style="--bt:${Math.round(L.en)}%"></em></span></div><div class="phtop">${phApp?'<button class="bk" onclick="phApp=null;phRender()" aria-label="Về màn hình chính">‹</button>':''}<b>${title}</b><button class="x" onclick="phClose()" aria-label="Đóng điện thoại">✕</button></div>${phApp?'':bars}<div class="phbd">${body}</div>${phApp?'':`<div class="phdock">${APPS.filter(a=>PH_DOCK.includes(a[0])).map(a=>phIcon(a,un2,true)).join('')}</div>`}<button class="phhome" aria-label="Về màn hình chính" onclick="phApp?(phApp=null,phRender()):phClose()"></button></div>`}
 function phAppGo(k){const M={mkt:()=>showMarket(),map:()=>showMap(),bag:()=>showInv(),pass:()=>showPassport(),book:()=>hubOpen('bond'),qst:()=>showMissions(),set:()=>showSettings()};
   if(M[k]){if(k==='mkt'&&S.open){toast('Dọn hàng trước rồi hãy ra chợ');return}phGo(M[k]);return}phApp=k;phRender()}
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey)return;if(e.key==='Escape')phClose();if((e.key==='p'||e.key==='P')&&(S.phase==='play'||S.phase==='shop')){$('phone').classList.contains('on')?phClose():phOpen()}});
@@ -2761,6 +2762,197 @@ async function lgDone(){LG.open=false;
       onOk:()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));localStorage.setItem('vhsg-cloudbase',r.save.updatedAt)}catch(e){}location.reload()},
       onNo:()=>{ON.base=r.save.updatedAt;try{localStorage.setItem('vhsg-cloudbase',ON.base)}catch(e){}showChars()}});return}}catch(e){}
   showChars()}
+// ===================== UI 3: điện thoại kiểu thiết bị thật + icon 3D =====================
+const PH_DOCK=['msg','mkt','map','bank'];
+function phIcon(a,un,dock){return `<button class="phapp${dock?' dk':''}" onclick="phAppGo('${a[0]}')"><span class="ai"><img src="a/ui/app_${a[0]}.webp" alt="" draggable="false" onerror="this.replaceWith(document.createTextNode('${a[1]}'))"></span>${dock?'':`<em>${a[2]}</em>`}${a[0]==='msg'&&un?`<i>${un}</i>`:''}</button>`}
+(function(){const st=document.createElement('style');st.textContent=`
+#phBtn{background:none!important;box-shadow:none!important;border:0!important;padding:0!important;width:62px!important;height:62px!important;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));transition:transform .2s}
+#phBtn img{width:100%;height:100%;object-fit:contain;animation:phWig 5s ease-in-out infinite}#phBtn:hover{transform:translateY(-3px) rotate(-6deg)}
+#phBtn.dot img{animation:phRing 1.6s ease-in-out infinite}
+@keyframes phWig{0%,92%,100%{transform:none}94%{transform:rotate(-8deg)}96%{transform:rotate(8deg)}98%{transform:rotate(-4deg)}}
+@keyframes phRing{0%,60%,100%{transform:none}65%{transform:rotate(-12deg)}70%{transform:rotate(12deg)}75%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}
+#phone{background:rgba(8,10,24,.6);backdrop-filter:blur(6px);perspective:1400px}
+#phone .phs{position:relative;width:min(400px,100%);border:0;border-radius:48px;padding:10px;background:linear-gradient(145deg,#3a3f5e,#151829 40%,#0c0e1c);
+ box-shadow:inset 0 0 0 2px #5b6190,inset 0 0 0 5px #0b0d1a,0 0 0 1px #000,0 40px 80px rgba(0,0,0,.6);transform-origin:50% 100%;animation:phUp3 .5s cubic-bezier(.16,1.15,.3,1) forwards}
+@keyframes phUp3{from{transform:translateY(60%) rotateX(28deg) scale(.86);opacity:0}to{transform:none;opacity:1}}
+#phone .phs::before{content:'';position:absolute;inset:10px;border-radius:38px;z-index:0;background:url(a/ui/wall.webp) center/cover,#1b2140;}
+#phone .phs::after{content:'';position:absolute;inset:10px;border-radius:38px;z-index:0;background:linear-gradient(180deg,rgba(10,12,30,.15),rgba(10,12,30,.05) 30%,rgba(10,12,30,.55))}
+#phone .phs.app::after{background:linear-gradient(180deg,rgba(14,18,40,.88),rgba(14,18,40,.94))}
+#phone .phs>*{position:relative;z-index:1}
+#phone .phsb{display:flex;align-items:center;justify-content:space-between;padding:10px 26px 2px;font:700 14px 'Be Vietnam Pro';color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#phone .phsb .isl{width:96px;height:28px;border-radius:16px;background:#05060d;box-shadow:inset 0 0 0 1px #1d2033}
+#phone .phsb .sig{display:flex;align-items:flex-end;gap:2px}#phone .phsb .sig b{width:3px;background:#fff;border-radius:1px}
+#phone .phsb .sig b:nth-child(1){height:4px}#phone .phsb .sig b:nth-child(2){height:6px}#phone .phsb .sig b:nth-child(3){height:8px}#phone .phsb .sig b:nth-child(4){height:10px}
+#phone .phsb .sig em{margin-left:6px;width:24px;height:11px;border-radius:3px;box-shadow:inset 0 0 0 1.5px #fff;position:relative;background:linear-gradient(90deg,#7fd36e var(--bt),transparent 0) 2px 2px/calc(100% - 4px) calc(100% - 4px) no-repeat}
+#phone .phs.home .phtop{padding:8px 22px 4px}#phone .phtop b{font:800 20px 'Baloo 2';text-shadow:0 2px 6px rgba(0,0,0,.5)}
+#phone .phtop button{width:34px;height:34px;padding:0;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(10px);font:800 18px/34px 'Be Vietnam Pro';box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+#phone .phtop .bk{font-size:24px;line-height:30px}
+#phone .phst{padding:0 18px 8px}#phone .phst div{background:rgba(255,255,255,.14);backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+#phone .phbd{padding:6px 18px 12px}
+#phone .phgrid{grid-template-columns:repeat(4,1fr);gap:16px 6px;padding:8px 0 4px}
+#phone .phapp{gap:5px;transition:transform .2s}#phone .phapp:hover{transform:translateY(-3px)}
+#phone .phapp span.ai{width:64px;height:64px;border-radius:18px;background:none;box-shadow:none;font-size:30px;filter:drop-shadow(0 6px 6px rgba(0,0,0,.4))}
+#phone .phapp span.ai img{width:100%;height:100%;object-fit:contain}
+#phone .phapp em{font:600 11.5px 'Be Vietnam Pro';font-style:normal;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);max-width:78px;text-align:center;line-height:1.2}
+#phone .phapp:active span.ai{transform:scale(.9)}
+#phone .phgrid .phapp{animation:icIn .45s cubic-bezier(.2,1.3,.3,1) both}
+${Array.from({length:20},(_,i)=>`#phone .phgrid .phapp:nth-child(${i+1}){animation-delay:${(.05+i*.025).toFixed(3)}s}`).join('')}
+@keyframes icIn{from{opacity:0;transform:translateY(16px) scale(.7)}to{opacity:1;transform:none}}
+#phone .phdock{margin:4px 14px 6px;padding:10px 8px;border-radius:30px;display:flex;justify-content:space-around;background:rgba(255,255,255,.2);backdrop-filter:blur(16px) saturate(1.4);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+#phone .phdock .phapp span.ai{width:58px;height:58px}
+#phone .phhome{display:block;margin:2px auto 6px;width:130px;height:5px;border-radius:3px;border:0;padding:0;background:rgba(255,255,255,.85);cursor:pointer}
+#phone .phcard{background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);border-radius:18px}
+#phone .phs.home .phcard{background:rgba(20,24,52,.55);backdrop-filter:blur(14px)}
+@media(min-width:800px){#phone .phs{height:min(800px,92vh);border-radius:48px;border:0}}
+@media(max-width:520px){#phone{align-items:flex-end}#phone .phs{border-radius:40px 40px 0 0;height:92vh}#phone .phs::before,#phone .phs::after{border-radius:32px 32px 0 0}#phBtn{width:52px!important;height:52px!important}}
+@media(prefers-reduced-motion:reduce){#phone .phs,#phone .phgrid .phapp,#phBtn img{animation:none}}
+`;document.head.appendChild(st)})();
+// ---------- icon 3D thay emoji trong điện thoại, mini-game, hộp thoại ----------
+const EMI={'🌱':'l2/plot_sprout','🥬':'l2/crop_0','🍅':'l2/crop_1','🍓':'l2/crop_2','🌼':'l2/crop_3','🛒':'l2/sk_sell','🎣':'l2/job_fish','☕':'l2/job_cook','🛵':'l2/job_ride','🏍️':'l2/job_ride',
+ '🐟':'l2/fish_0','🐠':'l2/fish_1','🦐':'l2/fish_3','🦀':'l2/fish_4','🦑':'l2/fish_5','🎏':'l2/fish_6','🫖':'l2/ck_0','🧊':'l2/ck_1','🥛':'l2/ck_2','🥄':'l2/ck_3',
+ '🏠':'l2/rd_0','🏢':'l2/rd_1','🏫':'l2/rd_3','🌟':'u/i/ach_badge_02','⭐':'u/i/ach_badge_01','💼':'l2/job_cook','📚':'u/i/col_book_1','🎁':'l2/ev_gift','👛':'u/i/ev_wallet','🎪':'u/i/ev_festival','🌧️':'u/i/ev_rain','📸':'l2/ev_camera','🔧':'u/i/ev_broken_cart','☁️':'u/i/cloud_a','🛂':'u/i/passport_closed','✈️':'u/i/plane_side','🧳':'u/i/bag_25kg','🗺️':'u/i/tab_map'};
+const EMRE=new RegExp('('+Object.keys(EMI).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).sort((a,b)=>b.length-a.length).join('|')+')','gu');
+const emImg=(k,c)=>`<img class="emi${c?' '+c:''}" src="a/${EMI[k]}.webp" alt="" draggable="false">`;
+function emSwap(root){if(!root)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>EMRE.test(n.nodeValue)?(EMRE.lastIndex=0,1):2});const list=[];let n;while(n=w.nextNode())list.push(n);
+  list.forEach(t=>{if(t.parentNode&&t.parentNode.closest&&t.parentNode.closest('textarea,input,.noemi'))return;const span=document.createElement('span');span.className='emw';span.innerHTML=t.nodeValue.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(EMRE,m=>emImg(m));t.replaceWith(span)})}
+{const mo=new MutationObserver(ms=>{mo.disconnect();ms.forEach(m=>m.addedNodes.forEach(x=>{if(x.nodeType===1)emSwap(x);else if(x.nodeType===3&&x.parentNode)emSwap(x.parentNode)}));obs()});
+ const obs=()=>['phone','mg'].forEach(id=>{const e=document.getElementById(id);if(e)mo.observe(e,{childList:true,subtree:true})});setTimeout(obs,0);addEventListener('load',obs)}
+{const _m=modal;modal=function(o){if(o&&!o.img&&o.ic&&EMI[o.ic])o=Object.assign({},o,{img:EMI[o.ic]});return _m(o)}}
+(function(){const st=document.createElement('style');st.textContent=`
+#mg .bar{width:100%!important;height:40px!important;border:2px solid #8a5a2a!important;border-radius:20px!important;background:linear-gradient(#8fd3ef,#3d8fc0)!important}#mg .bar .zone{background:rgba(127,211,110,.85)!important;box-shadow:inset 0 0 0 2px #fff}
+img.emi{width:1.35em;height:1.35em;object-fit:contain;vertical-align:-.32em;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+#mg .seq img.emi,#mg .arena img.emi{width:44px;height:44px}#mg h3 img.emi{width:1.5em;height:1.5em}
+#phone .l2hero{position:relative;border-radius:20px;overflow:hidden;margin-bottom:12px;box-shadow:0 10px 24px rgba(0,0,0,.4)}
+#phone .l2hero img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+#phone .l2hero .cap{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;background:linear-gradient(transparent,rgba(8,10,24,.85));color:#fff}
+#phone .l2hero .cap b{font:800 18px 'Baloo 2'}#phone .l2hero .cap small{color:#d7def5}
+#phone .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+#phone .tile{position:relative;border:0;border-radius:16px;padding:8px 6px 8px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);color:#eef1fb;font:600 11.5px 'Be Vietnam Pro';text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .15s,background .15s}
+#phone .tile:hover{transform:translateY(-2px);background:rgba(255,255,255,.13)}
+#phone .tile img{width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
+#phone .tile.tall img{width:70px;height:100px}
+#phone .tile.on{box-shadow:inset 0 0 0 2px #ffd27a;background:rgba(255,210,122,.14)}
+#phone .tile.lock img{filter:brightness(0) opacity(.45)}
+#phone .tile small{color:#ffd27a;font:800 12px 'Baloo 2'}#phone .tile .own{color:#7fd36e}
+#phone .tile .ct{position:absolute;top:6px;right:8px;font:800 11px 'Baloo 2';color:#fff;background:#e2471e;border-radius:8px;padding:0 6px}
+#phone .mepv{display:flex;gap:12px;align-items:flex-end;margin-bottom:12px;padding:10px;border-radius:20px;background:radial-gradient(circle at 50% 80%,rgba(255,210,122,.35),transparent 60%),rgba(255,255,255,.06)}
+#phone .mepv img{height:190px;width:auto;filter:drop-shadow(0 10px 10px rgba(0,0,0,.45))}
+#phone .jobc{display:flex;gap:12px;align-items:center}#phone .jobc>img{width:70px;height:70px;object-fit:contain;flex:none;filter:drop-shadow(0 6px 6px rgba(0,0,0,.4))}
+#phone .plot{display:flex;gap:10px;align-items:center}#phone .plot>img{width:74px;height:74px;object-fit:contain;flex:none}
+`;document.head.appendChild(st)})();
+// ---------- giao diện mới cho Nhà, Nhân vật, Bộ sưu tập, Nghề ----------
+const HOME_IMG=['home1_room','home2_small_apt','home3_better_apt','home4_studio','home5_large_apt','home6_penthouse'];
+const FURN_IMG=['furn_fan','furn_desk_a','furn_plant_b','furn_lamp_a','furn_sofa_a','furn_tv','furn_fridge','furn_bookshelf','furn_rug_b','furn_poster_b','furn_coffee_machine','furn_desk_b'];
+const COS_IMG={hair:['c/hair_01','c/hair_02','c/hair_03','c/hair_04','c/hair_05','c/hair_06'],outfit:['c/outfit_01','c/outfit_02','c/outfit_03','c/outfit_06','c/outfit_08','c/outfit_07'],hat:[null,'i/hat_01','i/hat_02','i/hat_03','i/hat_05','i/hat_06']};
+{const _l2=l2Body;l2Body=function(a){const x=ensureL2();
+ if(a==='home'){const t=x.home.t,nx=HOMES[t+1];
+  return `<div class="l2hero"><img src="a/u/s/${HOME_IMG[t]}.webp" alt=""><div class="cap"><b>Bậc ${t+1}/6 · ${HOMES[t][0]}</b><br><small>Điểm tiện nghi ${homeBonus()} · mỗi sáng hồi thêm sức và tâm trạng</small></div></div>`+
+   (nx?`<div class="phcard jobc"><img src="a/u/s/${HOME_IMG[t+1]}.webp" style="width:96px;height:54px;object-fit:cover;border-radius:10px"><div><b>Tiếp theo: ${nx[0]}</b><br><button class="phbtn" onclick="homeUp()">Chuyển nhà · ${fmt(nx[2])}</button></div></div>`:'<div class="phcard"><b>Mày đã ở nhà đẹp nhất phố.</b></div>')+
+   `<h3>Nội thất</h3><div class="tiles">${FURN.map((f,i)=>{const own=x.home.f.includes(i);return `<button class="tile ${own?'on':''}" ${own?'':`onclick="furnBuy(${i})"`}><img src="a/u/i/${FURN_IMG[i]}.webp" alt="">${f[0]}${own?'<small class="own">Đã có</small>':`<small>${f[2]}k · +${f[3]}</small>`}</button>`}).join('')}</div>`}
+ if(a==='me'){const c=x.cos,pv=c.outfit>0?COS_IMG.outfit[c.outfit]:COS_IMG.hair[c.hair];
+  const row=(k,lab,tall)=>`<h3>${lab}</h3><div class="tiles">${COSM[k].map((n,i)=>{const id=k[0]+i,own=x.cos.own[id]||i===0,im=COS_IMG[k][i];return `<button class="tile ${tall?'tall':''} ${c[k]===i?'on':''}" onclick="cosPick('${k}',${i})">${im?`<img src="a/u/${im}.webp" alt="">`:'<span style="height:64px;display:grid;place-items:center;font-size:26px;opacity:.6">∅</span>'}${n}${own?'':'<small>60k</small>'}</button>`}).join('')}</div>`;
+  return `<div class="mepv"><img src="a/u/${pv}.webp" alt=""><div><b style="font:800 20px 'Baloo 2'">${esc(S.pname||'Nhân vật')}</b><br><small>Tóc: ${COSM.hair[c.hair]}<br>Đồ: ${COSM.outfit[c.outfit]}<br>Mũ: ${COSM.hat[c.hat]}</small></div></div>`+row('hair','Kiểu tóc',1)+row('outfit','Trang phục',1)+row('hat','Mũ',0)}
+ if(a==='col'){const tile=(k,img,name)=>{const n=x.col[k]||0;return `<div class="tile ${n?'':'lock'}"><img src="a/l2/${img}.webp" alt="">${n?name:'???'}${n?`<span class="ct">${n}</span>`:''}</div>`};
+  const tot=FISH.length+CROPS.length,got=Object.keys(x.col).filter(k=>x.col[k]).length;
+  return `<div class="phcard"><b>Đã thu ${got}/${tot} loại</b><div class="phbar" style="margin-top:6px"><i style="width:${got/tot*100}%;background:#ffd27a"></i></div></div><h3>Cá và hải sản</h3><div class="tiles">${FISH.map((f,i)=>tile('f'+i,'fish_'+i,f[0])).join('')}</div><h3>Cây trồng</h3><div class="tiles">${CROPS.map((c,i)=>tile('c'+i,'crop_'+i,c[0])).join('')}</div>`}
+ if(a==='job'){
+  const jobs=[['fish','job_fish','Câu cá','Bấm đúng vùng xanh'],['ride','job_ride','Giao hàng','Chạm các điểm giao'],['cook','job_cook','Pha chế','Nhớ và bấm thứ tự']];
+  const plotImg=f=>!f?'plot_empty':f.r?'plot_ripe':(S.day-f.at)>=f.g/2?'plot_grow':'plot_sprout';
+  return `<div class="phcard"><small>Mỗi ca mất 15 sức, tối đa 4 ca một ngày (hôm nay ${x.jd.d===S.day?x.jd.n:0}/4). Chỉ làm được khi không đang bán.</small></div>`+
+   jobs.map(j=>`<div class="phcard jobc"><img src="a/l2/${j[1]}.webp" alt=""><div style="flex:1"><b>${j[2]}</b> <small>cấp ${skLv(j[0])}</small><br><small>${j[3]}</small><br><button class="phbtn" onclick="jobStart('${j[0]}')">Đi làm</button></div></div>`).join('')+
+   `<h3>Vườn nhỏ</h3>`+x.farm.map((f,i)=>`<div class="phcard plot"><img src="a/l2/${plotImg(f)}.webp" alt=""><div style="flex:1">${f?`<b>${CROPS[f.c][0]}</b><br><small>${f.r?'Chín rồi':'Còn '+Math.max(1,f.at+f.g-S.day)+' ngày'}</small>${f.r?`<br><button class="phbtn" onclick="harvest(${i})">Thu hoạch +${CROPS[f.c][4]}k</button>`:''}`:`<b>Ô đất ${i+1}</b><div class="tiles" style="grid-template-columns:repeat(4,1fr);margin:6px 0 0">${CROPS.map((c,j)=>`<button class="tile" style="padding:4px" onclick="plant(${i},${j})"><img src="a/l2/seed_${j}.webp" alt="" style="width:40px;height:40px">${c[2]}k</button>`).join('')}</div>`}</div></div>`).join('')}
+ if(a==='sk'){const ic={sell:'sk_sell',fish:'sk_fish',cook:'sk_cook',ride:'sk_ride',farm:'sk_farm',charm:'sk_charm'};
+  return `<div class="phcard"><b>Điểm kỹ năng: ${x.pts}</b><br><small>Làm nghề để lên cấp nghề, mỗi cấp được 1 điểm.</small></div>`+SKILLS.map(s=>`<div class="phcard jobc"><img src="a/l2/${ic[s[0]]||'sk_sell'}.webp" alt="" style="width:56px;height:56px"><div style="flex:1"><b>${s[2]}</b> · cấp ${skLv(s[0])}/5<div class="phbar" style="margin:4px 0"><i style="width:${skLv(s[0])*20}%;background:#ffd27a"></i></div><small>${s[3]}</small><br><button class="phbtn" ${x.pts<1||skLv(s[0])>=5?'disabled':''} onclick="skUp('${s[0]}')">Nâng cấp (1 điểm)</button></div></div>`).join('')}
+ return _l2(a)}}
+// ô ở app Bộ sưu tập
+{const i=APPS.findIndex(a=>a[0]==='col');}
+// ===================== CHUYẾN BAY MỚI: sân bay → bản đồ 3D có máy bay bay theo đường chấm → cửa sổ máy bay → điểm đến =====================
+const MAPPOS={hanoi:[.50,.20],hue:[.355,.29],daNang:[.55,.41],hoiAn:[.60,.50],daLat:[.45,.62],saigon:[.56,.74],canTho:[.51,.87],phuQuoc:[.355,.86],nhaTrang:[.64,.60],vungTau:[.62,.79],sapa:[.40,.08],ninhBinh:[.47,.27],quyNhon:[.66,.53]};
+(function(){const st=document.createElement('style');st.textContent=`
+#fly .fx{position:absolute;inset:0;overflow:hidden;background:#0b1a2e}#fly canvas{display:none}
+#fly .fx .stg{position:absolute;inset:0;opacity:0;will-change:opacity}
+#fly .fx .bgc{position:absolute;inset:-4%;background-size:cover;background-position:center;will-change:transform}
+#fly .fmw{perspective:1300px}#fly .fmt{position:absolute;inset:0;transform:rotateX(24deg);transform-style:preserve-3d}
+#fly .fmap{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;box-shadow:0 0 0 4000px #2a8fc4}
+#fly .fmap>img.m{position:absolute;inset:0;width:100%;height:100%;display:block}
+#fly .fmap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#fly .pin{position:absolute;width:5.2%;transform:translate(-50%,-92%);filter:drop-shadow(0 6px 6px rgba(0,0,0,.4))}
+#fly .pin.to{width:7%;animation:pinB 1s ease-in-out infinite}#fly .pin.lk{opacity:.85}
+#fly .pin b{position:absolute;left:50%;top:100%;transform:translateX(-50%);white-space:nowrap;font:800 13px var(--display,'Baloo 2');color:#fff;background:rgba(40,22,10,.75);padding:1px 8px;border-radius:8px;margin-top:2px}
+@keyframes pinB{0%,100%{transform:translate(-50%,-92%)}50%{transform:translate(-50%,-110%)}}
+#fly .pl{position:absolute;left:0;top:0;width:min(17vw,150px);transform-origin:50% 50%;will-change:transform;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
+#fly .psh{position:absolute;left:0;top:0;width:min(17vw,150px);opacity:.28;filter:blur(3px);will-change:transform}
+#fly .cl{position:absolute;pointer-events:none;will-change:transform;filter:drop-shadow(0 10px 14px rgba(0,40,80,.25))}
+#fly .side{position:absolute;width:min(46vw,520px);left:0;top:0;will-change:transform;filter:drop-shadow(0 18px 18px rgba(0,0,0,.35))}
+#fly .win{position:absolute;inset:0;background:url(a/u/s/bg_plane_window.webp) center/cover}
+#fly .dest{position:absolute;left:50%;top:50%;width:min(80vw,760px);aspect-ratio:16/9;border-radius:28px;overflow:hidden;transform:translate(-50%,-50%) scale(.9);box-shadow:0 30px 60px rgba(0,0,0,.5),0 0 0 6px #fff6dd;background-size:cover;background-position:center}
+#fly .dest i{position:absolute;right:4%;top:6%;width:22%;transform:rotate(-12deg) scale(2.4);opacity:0;transition:transform .45s cubic-bezier(.3,1.6,.4,1),opacity .2s}
+#fly .dest i.on{transform:rotate(-12deg) scale(1);opacity:1}#fly .dest i img{width:100%}
+#fly .dest .nm{position:absolute;left:0;right:0;bottom:0;padding:40px 22px 16px;background:linear-gradient(transparent,rgba(10,8,20,.75));color:#fff;font:800 clamp(24px,4vw,40px) var(--display,'Baloo 2')}
+#fly .ft{z-index:3}#flySkip{z-index:4}
+`;document.head.appendChild(st)})();
+function playFlight(from,dest,done){
+  const el=$('fly');el.hidden=false;el.classList.remove('out');requestAnimationFrame(()=>el.classList.add('on'));
+  let fx=el.querySelector('.fx');if(fx)fx.remove();fx=document.createElement('div');fx.className='fx';el.insertBefore(fx,el.firstChild);
+  const P=(r,d)=>MAPPOS[r]||(CITY[r]?[CITY[r][0],CITY[r][1]]:d||[.5,.5]);
+  const A=P(from),B=P(dest),R=REGIONS[dest]||{};
+  const pins=REG_ORDER.map(r=>{const p=P(r),ok=S.unlockedRegions.includes(r),cls=r===dest?'to':r===from?'fr':ok?'':'lk',src=r===dest?'pin_current':r===from?'pin_home':ok?'pin_unlocked':'pin_locked';
+    return `<div class="pin ${cls}" style="left:${p[0]*100}%;top:${p[1]*100}%"><img src="a/u/i/${src}.webp" alt="" style="width:100%">${r===dest||r===from?`<b>${REGIONS[r].name}</b>`:''}</div>`}).join('');
+  const mid=[(A[0]+B[0])/2+(B[1]-A[1])*.22,(A[1]+B[1])/2-Math.abs(B[0]-A[0])*.25-.06];
+  const bez=u=>[(1-u)*(1-u)*A[0]+2*(1-u)*u*mid[0]+u*u*B[0],(1-u)*(1-u)*A[1]+2*(1-u)*u*mid[1]+u*u*B[1]];
+  const pathD=`M${A[0]*1280} ${A[1]*720} Q${mid[0]*1280} ${mid[1]*720} ${B[0]*1280} ${B[1]*720}`;
+  const clouds=Array.from({length:7},(_,i)=>({x:Math.random(),y:Math.random(),s:.16+Math.random()*.22,v:.25+Math.random()*.5,img:i%3?'cloud_a':'cloud_b'}));
+  fx.innerHTML=`<div class="stg s1"><div class="bgc" style="background-image:url(a/u/s/bg_airport_gate.webp)"></div></div>
+   <div class="stg s2"><div class="bgc" style="background-image:url(a/u/s/bg_runway.webp)"></div><img class="side" src="a/u/i/plane_side.webp" alt=""></div>
+   <div class="stg s3 fmw"><div class="fmt"><div class="fmap"><img class="m" src="a/u/s/map_vn_b.webp" alt=""><svg viewBox="0 0 1280 720" preserveAspectRatio="none"><path d="${pathD}" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="7" stroke-dasharray="2 16" stroke-linecap="round" transform="translate(3 5)" mask="url(#fmk)"/><mask id="fmk" maskUnits="userSpaceOnUse"><path id="fmkp" d="${pathD}" fill="none" stroke="#fff" stroke-width="20" stroke-dasharray="0 99999"/></mask><path id="fpath" d="${pathD}" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="2 16" stroke-linecap="round" mask="url(#fmk)"/></svg>${pins}</div></div>
+     <img class="psh" src="a/u/i/plane_shadow.webp" alt=""><img class="pl" src="a/u/i/plane_topdown.webp" alt="">
+     ${clouds.map((c,i)=>`<img class="cl" data-i="${i}" src="a/u/i/${c.img}.webp" alt="" style="width:${c.s*100}vw">`).join('')}</div>
+   <div class="stg s4"><div class="win"></div><div class="dest" style="background-image:url(a/n/${R.art}.webp)"><i><img src="a/n/${R.st}.webp" alt=""></i><div class="nm">${R.e||''} ${R.name||''}</div></div></div>`;
+  const q=s=>fx.querySelector(s),S1=q('.s1'),S2=q('.s2'),S3=q('.s3'),S4=q('.s4'),map=q('.fmap'),pl=q('.pl'),sh=q('.psh'),side=q('.side'),stamp=q('.dest i'),dst=q('.dest'),cls=[...fx.querySelectorAll('.cl')],path=q('#fpath'),mk=q('#fmkp');
+  const reduce=SET.reduce,dur=reduce?1500:7200,t0=performance.now();let fin=false;
+  $('flyT').textContent='✈️ ĐANG BAY ĐẾN '+(R.name||'').toUpperCase()+'...';$('flyTip').textContent=R.tip||'';
+  const finish=()=>{if(fin)return;fin=true;cancelAnimationFrame(flyRaf);el.classList.add('out');setTimeout(()=>{el.hidden=true;el.classList.remove('on','out');fx.remove();done()},380)};
+  $('flySkip').onclick=finish;
+  const sm=(a,b,x)=>{x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x)};
+  const TH=24*Math.PI/180,PER=1300;
+  let plen=0;try{plen=mk.getTotalLength()}catch(e){}
+  let stamped=false;
+  function frame(now){if(fin)return;const t=clamp((now-t0)/dur,0,1),W=innerWidth,H=innerHeight;$('flyP').style.width=(t*100)+'%';
+    // 1. cổng sân bay → 2. đường băng cất cánh
+    S1.style.opacity=1-sm(.1,.16,t);S1.firstChild.style.transform=`scale(${1+t*.4})`;
+    S2.style.opacity=sm(.1,.16,t)*(1-sm(.26,.32,t));const k2=sm(.12,.3,t);S2.firstChild.style.transform=`scale(${1.05+k2*.15})`;
+    side.style.transform=`translate(${(-.4+k2*1.5)*W}px,${(.62-k2*.5)*H}px) rotate(${-k2*14}deg) scale(${.6+k2*.7})`;
+    // 3. bản đồ
+    const k3=sm(.26,.33,t)*(1-sm(.84,.9,t));S3.style.opacity=k3;
+    if(k3>0){const u=sm(.3,.84,t),p=bez(u),pn=bez(Math.min(1,u+.01));
+      const base=Math.max(W,H*16/9),bw=base,bh=base*9/16,z=1.25+Math.sin(u*Math.PI)*.35+sm(.75,.84,t)*.4;
+      let cx=p[0],cy=p[1];const hx=W/(2*z*bw),hy=H/(2*z*bh);cx=clamp(cx,hx,1-hx);cy=clamp(cy,hy*.8,1-hy*.8);
+      map.style.width=bw+'px';map.style.height=bh+'px';map.style.transform=`translate(${W/2}px,${H/2}px) scale(${z}) translate(${-cx*bw}px,${-cy*bh}px)`;
+      // máy bay: chiếu toạ độ bản đồ lên màn hình (có nghiêng 3D)
+      const proj=(mx,my)=>{const dx=(mx-cx)*bw*z,dy=(my-cy)*bh*z,s=PER/(PER-dy*Math.sin(TH));return [W/2+dx*s,H/2+dy*Math.cos(TH)*s,s]};
+      const a=proj(p[0],p[1]),b=proj(pn[0],pn[1]),ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI+90,lift=Math.sin(u*Math.PI);
+      const ps=(.9+lift*.35)*a[2],pw=pl.offsetWidth||120;
+      pl.style.transform=`translate(${a[0]-pw/2}px,${a[1]-pw/2-lift*30}px) rotate(${ang}deg) scale(${ps})`;
+      sh.style.transform=`translate(${a[0]-pw/2+18+lift*40}px,${a[1]-pw/2+26+lift*50}px) rotate(${ang}deg) scale(${ps*.9})`;
+      if(plen)mk.setAttribute('stroke-dasharray',`${(plen*u).toFixed(1)} ${plen*2}`);
+      cls.forEach((c,i)=>{const o=clouds[i],yy=((o.y+t*o.v*1.6)%1.3-.15)*H,xx=((o.x-t*o.v*.6+2)%1.2-.1)*W;c.style.transform=`translate(${xx}px,${yy}px)`;c.style.opacity=.85})}
+    // 4. cửa sổ máy bay → thẻ điểm đến + đóng dấu
+    const k4=sm(.84,.9,t);S4.style.opacity=k4;if(k4>0){dst.style.transform=`translate(-50%,-50%) scale(${.82+sm(.86,.93,t)*.18})`;dst.style.opacity=sm(.86,.92,t);if(t>.93&&!stamped){stamped=true;stamp.classList.add('on');try{sfx.sale()}catch(e){}}}
+    if(t>=1){finish();return}flyRaf=requestAnimationFrame(frame)}
+  flyRaf=requestAnimationFrame(frame)}
+// ---------- sân bay & chọn vé dùng ảnh mới ----------
+function patchAir(){const r=sheet.querySelector('.airv');if(!r)return;
+  r.querySelectorAll('.tvhero img').forEach(im=>{if(/air_scene/.test(im.src))im.src='a/u/s/bg_airport_lobby.webp'});
+  const chip={tvPass:'passport_closed',tvDex:'col_book_1',tvHist:'ic_flight_time',tvMkt:'board_departure'};
+  Object.keys(chip).forEach(id=>{const b=document.getElementById(id);if(b&&!b.querySelector('img'))b.innerHTML=`<img class="emi" src="a/u/i/${chip[id]}.webp" alt="">`+b.innerHTML.replace(/^\S+\s/,'')});
+  const tk={eco:'ticket_economy',std:'ticket_business',pre:'ticket_first'};
+  r.querySelectorAll('.tvcls button').forEach((b,i)=>{if(b.querySelector('img.tki'))return;const id=b.dataset.c,src=tk[id]||['ticket_economy','ticket_business','ticket_first'][i];b.insertAdjacentHTML('afterbegin',`<img class="tki" src="a/u/i/${src}.webp" alt="">`)});
+  r.querySelectorAll('.tvcls small').forEach((s,i)=>{s.innerHTML=s.innerHTML.replace('🧳',`<img class="emi" src="a/u/i/${['bag_15kg','bag_25kg','bag_40kg'][i]||'bag_25kg'}.webp" alt="">`)});
+  r.querySelectorAll('.tvl span').forEach(s=>{s.innerHTML=s.innerHTML.replace('✈️','<img class="emi" src="a/u/i/plane_side.webp" alt="">').replace('🧳','<img class="emi" src="a/u/i/bag_15kg.webp" alt="">').replace('⏱','<img class="emi" src="a/u/i/ic_flight_time.webp" alt="">')})}
+{const _a=showAirport;showAirport=function(){_a.apply(this,arguments);patchAir()}}
+{const _f=showFlight;showFlight=function(){_f.apply(this,arguments);patchAir()}}
+(function(){const st=document.createElement('style');st.textContent=`.tvcls button img.tki{display:block;width:84%;max-width:120px;margin:0 auto 4px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25));transition:transform .2s}.tvcls button.on img.tki{transform:translateY(-4px) rotate(-4deg) scale(1.06)}
+.tvchips button img.emi{width:1.5em;height:1.5em;margin-right:4px}#fly .pin.lk{width:3.6%!important;opacity:.55}`;document.head.appendChild(st)})();
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
