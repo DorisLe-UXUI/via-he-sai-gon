@@ -863,7 +863,7 @@ button.sm{min-width:36px;height:34px;border-radius:10px;background:#fff;border:2
 </style>
 
 <canvas id="c"></canvas>
-<div id="load"><div class="lw"><img class="logo" src="logo.png" alt="Vỉa Hè Sài Gòn"><div class="lbar"><div class="lf"><i id="lp"></i><span id="lsc">🛵</span></div><b id="lpct">0%</b></div><small id="lt">Đang chuẩn bị quán xá...</small></div><div class="ltipc"><i>💡</i><div><b>Mẹo nhỏ:</b><span id="ltip">Hoàn thành đơn hàng sẽ giúp bạn kiếm thêm nhiều tiền hơn!</span></div></div></div>
+<div id="load"><div class="lw"><img class="logo" src="logo.webp" alt="Vỉa Hè Sài Gòn"><div class="lbar"><div class="lf"><i id="lp"></i><span id="lsc">🛵</span></div><b id="lpct">0%</b></div><small id="lt">Đang chuẩn bị quán xá...</small></div><div class="ltipc"><i>💡</i><div><b>Mẹo nhỏ:</b><span id="ltip">Hoàn thành đơn hàng sẽ giúp bạn kiếm thêm nhiều tiền hơn!</span></div></div></div>
 <div id="scr" hidden></div>
 <div id="hud">
   <div class="goal"><i id="goalB"></i></div>
@@ -1471,7 +1471,7 @@ function showNotebook(){sheet.hidden=false;const own=Object.values(S.premises).f
   const gc=$('goCho');if(gc)gc.onclick=()=>{closeStall();P.x=SPOTS.find(s=>s.id==='cho').x+90;P.dir=-1;closeSheet();sfx.horn();toast('Vèo. Tới chợ.')};
   $('out').onclick=()=>{closeSheet();sfx.tap()};$('wipe').onclick=()=>{try{localStorage.removeItem('vhsg-2d-v1')}catch(e){}location.reload()}}
 $('menuBtn').onclick=()=>{if(S.phase!=='play')return;sfx.tap();tab=S.statPts?'s':'q';sheet.hidden?showNotebook():closeSheet()};
-function showIntro(hasSave){sheet.hidden=false;sheet.innerHTML=`<img src="logo.png" alt="Vỉa Hè Sài Gòn" style="width:min(70vw,360px);display:block;margin:-4px auto 6px">
+function showIntro(hasSave){sheet.hidden=false;sheet.innerHTML=`<img src="logo.webp" alt="Vỉa Hè Sài Gòn" style="width:min(70vw,360px);display:block;margin:-4px auto 6px">
   <p>100k và một chiếc xe đẩy. Nhập hàng ở 🛒 Chợ, đẩy xe khắp 3 quận, tìm chỗ đông rồi <b>bày hàng</b>, chạm bong bóng khách để bán. Né xe, né công an, đối phó bảo kê, canh trời mưa. Mua giấy phép mở quận mới, thuê hay mua mặt bằng, sắm đồ cho có duyên, mua nhà, mua xe máy.</p>
   <div class="tip">🏆 Mục tiêu: sở hữu 3 mặt bằng + ${fmt(GOAL_CASH)} tiền mặt = Ông trùm hàng rong.</div>
   ${hasSave?`<div class="row" style="margin-top:8px"><button class="pri good" id="cont">Chơi tiếp · ngày ${S.day}</button><button class="pri" id="start">Chơi mới</button></div>`:`<button class="pri" id="start" style="margin-top:10px">Đi chợ nhập hàng 🛵</button>`}`;
@@ -1976,7 +1976,7 @@ tipT=setInterval(tipTick,3200);
 // ---- home ----
 function showIntro(hasSave){
   const bar=hasSave?`<div class="stb"><div class="pl"><img src="a/220.webp" alt=""><b>${fmt(S.cash)}</b></div><div class="pl day"><span>☀️</span><b>NGÀY ${S.day}</b><span>06:00</span></div><div class="pl rp"><span>⭐</span><b>${(Math.round(S.rep*10)/10).toFixed(1)}</b><i class="bar"><u style="width:${Math.min(100,S.rep/5*100)}%"></u></i></div><button class="rb2" id="hSnd" aria-label="Âm thanh">${SET.master>0?'🔊':'🔇'}</button><button class="rb2" id="hSet" aria-label="Cài đặt">⚙️</button></div>`:'';
-  scrShow(`${bar}<div class="hmain"><img class="logo" src="logo.png" alt="Vỉa Hè Sài Gòn">
+  scrShow(`${bar}<div class="hmain"><img class="logo" src="logo.webp" alt="Vỉa Hè Sài Gòn">
   <div class="parch"><p>100k và một chiếc xe đẩy. Nhập hàng ở Chợ, đẩy xe khắp 3 quận, tìm chỗ đông rồi bày hàng, chạm bong bóng khách để bán. Né xe, né công an, đối phó bảo kê, canh trời mưa. Mua giấy phép mở quận mới, thuê hay mua mặt bằng, sắm đồ cho có duyên, mua nhà, mua xe máy.</p><div class="goal">🏆 Mục tiêu: sở hữu 3 mặt bằng + ${fmt(GOAL_CASH)} tiền mặt = Ông trùm hàng rong.</div></div>
   <div class="cta">${hasSave?`<button class="big y" id="cont"><span>Chơi tiếp<small>Ngày ${S.day}${S.pname?' · '+S.pname:''}</small></span><i>🛵</i></button>`:''}<button class="big g" id="start"><span>${hasSave?'Chơi mới':'Bắt đầu chơi'}</span><img src="a/${CARTS[0].sp}.webp" alt=""></button></div></div>${heroDeco()}`,'home');
   const ct=$('cont');if(ct)ct.onclick=()=>{sfx.tap();scrHide();showMarket(false)};
@@ -2727,7 +2727,7 @@ function showLogin(){
     ${LG.err?`<div class="lgerr">${esc(LG.err)}</div>`:''}
     <div class="or">Hoặc</div><button class="lb guest" id="guest">Chơi ngay <small>(Không cần đăng nhập)</small></button>`;
   }
-  scrShow(`<img class="logo sm" src="logo.png" alt=""><div class="lcard">${body}</div><p class="terms">${ON.user?'Đổi máy chỉ cần đăng nhập lại là chơi tiếp.':'Không đăng nhập thì tiến trình chỉ lưu trên trình duyệt này.'}</p>`,'login');
+  scrShow(`<img class="logo sm" src="logo.webp" alt=""><div class="lcard">${body}</div><p class="terms">${ON.user?'Đổi máy chỉ cần đăng nhập lại là chơi tiếp.':'Không đăng nhập thì tiến trình chỉ lưu trên trình duyệt này.'}</p>`,'login');
   const q=id=>document.getElementById(id);
   if(ON.user){q('lgGo').onclick=()=>{sfx.tap();lgDone()};q('lgOut').onclick=async()=>{sfx.tap();await oapi('auth',{method:'DELETE'});ON.user=null;showLogin()};return}
   if(LG.mode){
@@ -3294,6 +3294,31 @@ async function onClaim(){const r=await oapi('friends',{method:'POST',body:{claim
 #mg .cseq{display:flex;align-items:center;justify-content:center;gap:4px;margin:8px 0}#mg .cseq img{width:52px;height:52px;object-fit:contain}#mg .cseq b{color:#8a5a2a}
 #mg .seq.cing{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#mg .seq.cing button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px;font-size:12px;height:auto}#mg .seq.cing img{width:48px;height:48px;object-fit:contain}#mg .seq.cing small{font:600 11px 'Be Vietnam Pro'}
 `;document.head.appendChild(st)})();
+// ===================== TẢI NỀN NHẸ NHÀNG + PWA + ĐO LƯỜNG =====================
+function bgPreload(){const c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||''))return;const ids=[...new Set(allIds())].filter(id=>!IM[id]);let i=0;
+  const step=()=>{const n=/3g/.test(c.effectiveType||'')?2:6;for(let k=0;k<n&&i<ids.length;k++)load1(ids[i++]);if(i<ids.length)(window.requestIdleCallback||setTimeout)(step,{timeout:600})};step()}
+// PWA: cài lên màn hình chính, chơi lại được khi mạng chập chờn
+(function(){if(!document.querySelector('link[rel=manifest]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.appendChild(l);
+  [['apple-touch-icon','../ico/apple-touch-icon.png'],['icon','../ico/icon-192.png']].forEach(([r,h])=>{const x=document.createElement('link');x.rel=r;x.href=h;document.head.appendChild(x)});
+  const m=document.createElement('meta');m.name='apple-mobile-web-app-capable';m.content='yes';document.head.appendChild(m)}
+ if('serviceWorker'in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))})();
+let deferredInstall=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e});
+function installApp(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;return}
+  const ios=/iphone|ipad/i.test(navigator.userAgent);modal({img:'ui/app_phone',c:'#2f7a43',tag:'Cài game',title:'Thêm vào màn hình chính',text:ios?'Trên iPhone: bấm nút <b>Chia sẻ</b> ở thanh Safari, chọn <b>Thêm vào MH chính</b>.':'Mở menu trình duyệt (⋮) và chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.',cta:'Đã hiểu'})}
+// đo lường ẩn danh: chỉ đếm sự kiện theo ngày, không gửi thông tin cá nhân
+const EVQ=[];let evT=0;function track(name){if(!/^[a-z0-9_]{1,24}$/.test(name))return;EVQ.push(name);clearTimeout(evT);evT=setTimeout(evFlush,4000)}
+function evFlush(){if(!EVQ.length||!ON.on)return;const b=EVQ.splice(0,30);try{navigator.sendBeacon?navigator.sendBeacon('/api/ev',new Blob([JSON.stringify({e:b})],{type:'application/json'})):fetch('/api/ev',{method:'POST',body:JSON.stringify({e:b}),headers:{'Content-Type':'application/json'},keepalive:true})}catch(e){}}
+addEventListener('pagehide',evFlush);
+setTimeout(()=>track('open'),3000);
+{const _sd=startDay;startDay=function(){_sd.apply(this,arguments);track('day_start');if(S.day===2)track('d2');if(S.day===7)track('d7');if(S.day===30)track('d30')}}
+{const _ed=endDay;endDay=function(){_ed.apply(this,arguments);track('day_end')}}
+{const _sc=showChars;showChars=function(){track('char_screen');return _sc.apply(this,arguments)}}
+{const _lp=lgPost;lgPost=async function(b){track(b.credential?'login_google':b.email?'login_email':'login_fb');return _lp(b)}}
+{const _pf=playFlight;playFlight=function(a,b,c){track('flight');return _pf(a,b,c)}}
+{const _bb=bizBuy;bizBuy=function(k){const n=bizN();_bb(k);if(bizN()>n)track('biz_'+k)}}
+{const _po=phOpen;phOpen=function(a){track('phone'+(a?'_'+a:''));return _po(a)}}
+// nút cài game trong Cài đặt của điện thoại & hồ sơ
+{const _sp=showProfile;showProfile=function(){_sp.apply(this,arguments);const pb=document.querySelector('#prof .pbtn');if(pb&&!matchMedia('(display-mode: standalone)').matches){pb.insertAdjacentHTML('beforeend','<button id="pfInst">Cài lên màn hình chính</button>');document.getElementById('pfInst').onclick=()=>{document.getElementById('prof').remove();installApp()}}}}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
@@ -3443,7 +3468,7 @@ function coreIds(){const ids=[40,43,36,224,193,42,41,240,284,283,89,287,227,187,
 function allIds(){const ids=[];LOTS.forEach(l=>ids.push(l.id));DECOR.forEach(d=>ids.push(d.id));OUTFITS.forEach(o=>ids.push(+o.id));COMPETITORS.forEach(c=>ids.push(c.cart,c.v));WALKERS2.forEach(w=>ids.push(w));OUTFITS.forEach(o=>ids.push(OA(o.id)));ids.push(319,320,223,211,184,203,308,306);return ids}
 buildWorld();
 const hasSave=load();camera.x=clamp(P.x-VW/2,0,WORLD-VW);
-preload(coreIds(),(n,t)=>{lpSet(n/t)}).then(()=>{$('lt').textContent='Xong!';ui();setTimeout(()=>{$('load').hidden=true;showIntro(hasSave);S.phase='shop';if(portrait&&!sessionStorage.getItem('turn'))$('turn').hidden=false},250);requestAnimationFrame(frame);setTimeout(()=>preload(allIds()),1200)}).catch(e=>{$('load').querySelector('small').textContent='Lỗi: '+e.message});
+preload(coreIds(),(n,t)=>{lpSet(n/t)}).then(()=>{$('lt').textContent='Xong!';ui();setTimeout(()=>{$('load').hidden=true;showIntro(hasSave);S.phase='shop';if(portrait&&!sessionStorage.getItem('turn'))$('turn').hidden=false},250);requestAnimationFrame(frame);setTimeout(bgPreload,2500)}).catch(e=>{$('load').querySelector('small').textContent='Lỗi: '+e.message});
 $('turnOk').onclick=()=>{$('turn').hidden=true;try{sessionStorage.setItem('turn',1)}catch(e){}};
 
 function cartPlate(cc,x,by,ch,io){const sw=ch*io.i.naturalWidth/io.i.naturalHeight,[fx,fy,fw,fh,txt]=cc.lab,cx=x+(fx-.5)*sw,cy=by-ch*(1-fy),w=fw*sw,h=fh*ch;

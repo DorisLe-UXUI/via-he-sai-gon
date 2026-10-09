@@ -1,0 +1,2 @@
+{"name":"Vỉa Hè Sài Gòn","short_name":"Vỉa Hè SG","description":"Game bán hàng rong ở vỉa hè Sài Gòn","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#141a3a","theme_color":"#171c3a","lang":"vi",
+"icons":[{"src":"../ico/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"../ico/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}

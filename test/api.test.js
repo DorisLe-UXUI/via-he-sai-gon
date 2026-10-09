@@ -18,6 +18,7 @@ function cmd(a){const [c,...r]=a;const C=c.toUpperCase();
  case'LRANGE':{const l=kv.get(r[0]);return Array.isArray(l)?l.slice(+r[1],+r[2]+1):[]}
  case'LTRIM':{const l=kv.get(r[0]);if(Array.isArray(l))kv.set(r[0],l.slice(+r[1],+r[2]+1));return'OK'}
  case'DEL':kv.delete(r[0]);return 1;
+ case'HINCRBY':{const h=H(r[0]);const v=(+h.get(r[1])||0)+(+r[2]);h.set(r[1],String(v));return v}
  case'INCR':{const v=(+kv.get(r[0])||0)+1;kv.set(r[0],String(v));return v}
  case'EXPIRE':return 1;
  case'SADD':{const s=kv.get(r[0])||new Set();s.add(r[1]);kv.set(r[0],s);return 1}
@@ -29,7 +30,7 @@ const people={tokA:{sub:'1',name:'Doris',aud:process.env.GOOGLE_CLIENT_ID,iss:'a
 global.fetch=async(url,opt)=>{
  if(String(url).startsWith('http://fake-redis')){if(opt.headers.Authorization!=='Bearer t')return{ok:false,status:401,json:async()=>({error:'no'})};try{return{ok:true,json:async()=>({result:cmd(JSON.parse(opt.body))})}}catch(e){return{ok:false,status:500,json:async()=>({error:e.message})}}}
  const t=new URL(url).searchParams.get('id_token');const p=people[t];return p?{ok:true,json:async()=>p}:{ok:false,json:async()=>({})}};
-const mods={auth:require('../api/auth'),save:require('../api/save'),score:require('../api/score'),friends:require('../api/friends'),config:require('../api/config')};
+const mods={auth:require('../api/auth'),save:require('../api/save'),score:require('../api/score'),friends:require('../api/friends'),config:require('../api/config'),ev:require('../api/ev')};
 async function call(m,method,body,cookie){return new Promise(async res=>{const r={headers:{},setHeader(k,v){this.headers[k]=v},end(s){res({status:this.statusCode,json:JSON.parse(s),headers:this.headers})}};await mods[m]({method,headers:{cookie:cookie||''},body},r)})}
 const cookieOf=r=>(r.headers['Set-Cookie']||'').split(';')[0];
 let fail=0;const ok=(c,n)=>{console.log((c?'PASS ':'FAIL ')+n);if(!c)fail++};
@@ -64,6 +65,7 @@ let fail=0;const ok=(c,n)=>{console.log((c?'PASS ':'FAIL ')+n);if(!c)fail++};
  const gl=await call('friends','GET',null,cb);ok(gl.json.gifts.length===1&&gl.json.gifts[0].from==='Doris','gift arrives');
  const gc=await call('friends','POST',{claim:1},cb);ok(gc.json.total===20,'claim gift');
  ok((await call('friends','GET',null,cb)).json.gifts.length===0,'gifts cleared');
+ await call('ev','POST',{e:['open','open','day_end','BAD NAME']});const ev=await call('ev','GET');const d0=Object.values(ev.json.days)[0];ok(d0.open===2&&d0.day_end===1&&!d0['BAD NAME'],'event counters');
  ok((await call('auth','DELETE',null,ca)).status===200,'logout');
  const er=await call('auth','POST',{email:'Doris@Mail.com',password:'abc123',mode:'register',name:'Doris E'});ok(er.status===200&&er.json.user.via==='email'&&/^[A-Z0-9]{6}$/.test(er.json.user.code),'email register');
  ok((await call('auth','POST',{email:'doris@mail.com',password:'abc123',mode:'register'})).status===409,'email duplicate blocked');
