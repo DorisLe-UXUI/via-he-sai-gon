@@ -13,8 +13,13 @@ const SECRET = () => process.env.SESSION_SECRET || '';
 // Google Client ID is public by design (it is sent to every browser), so a default is safe to keep in code.
 const CLIENT_ID = () => process.env.GOOGLE_CLIENT_ID || '288520258114-mo8lr8cseq71485305qhhtjae3gbcurt.apps.googleusercontent.com';
 
+const TCPURL = () => process.env.REDIS_URL || process.env.KV_URL || process.env.UPSTASH_REDIS_URL || '';
 async function redis(...cmd) {
-  if (!RURL() || !RTOK()) throw new HttpError(503, 'Chưa gắn database (thiếu biến môi trường UPSTASH_REDIS_REST_URL / TOKEN).');
+  if ((!RURL() || !RTOK()) && TCPURL()) {
+    try { const v = await require('./resp').cmd(TCPURL(), cmd.map(String)); return v; }
+    catch (e) { throw new HttpError(502, 'Database lỗi: ' + (e.message || e)); }
+  }
+  if (!RURL() || !RTOK()) throw new HttpError(503, 'Chưa gắn database (thiếu biến môi trường REDIS_URL hoặc UPSTASH_REDIS_REST_URL / TOKEN).');
   const r = await fetch(RURL(), { method: 'POST', headers: { Authorization: 'Bearer ' + RTOK(), 'Content-Type': 'application/json' }, body: JSON.stringify(cmd.map(String)) });
   const j = await r.json().catch(() => ({}));
   if (!r.ok || j.error) throw new HttpError(502, 'Database lỗi: ' + (j.error || r.status));
@@ -67,5 +72,5 @@ async function googleVerify(idToken) {
   return { sub: j.sub, name: j.name || 'Người chơi', picture: j.picture || '', email: j.email || '' };
 }
 const clean = (s, n) => String(s == null ? '' : s).replace(/[<>\u0000-\u001f]/g, '').slice(0, n);
-const dbStatus = () => ({ db: !!(RURL() && RTOK()), secret: !!SECRET(), envNames: Object.keys(process.env).filter(n => /REDIS|KV_|UPSTASH|SESSION_SECRET/.test(n)) });
+const dbStatus = () => ({ db: !!((RURL() && RTOK()) || TCPURL()), mode: RURL() && RTOK() ? 'rest' : TCPURL() ? 'tcp' : 'none', secret: !!SECRET(), envNames: Object.keys(process.env).filter(n => /REDIS|KV_|UPSTASH|SESSION_SECRET/.test(n)) });
 module.exports = { dbStatus, redis, sign, verify, session, setCookie, readBody, send, handler, needUser, googleVerify, HttpError, clean, CLIENT_ID };
