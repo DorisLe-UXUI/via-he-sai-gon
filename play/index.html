@@ -1132,6 +1132,12 @@ const lampsX=()=>DECOR.filter(d=>d.k==='lamp').map(d=>d.x);
 const VEH=[ // id, chiều cao, tốc độ, trọng số
  [22,76,230,3],[132,76,250,3],[123,70,210,2],[316,76,230,2],[264,84,170,1.4],[32,84,160,1],[157,92,150,1],[207,88,140,.8],[96,70,95,1],[14,66,200,1],[114,66,210,1],[293,70,200,1.2],[111,96,150,.8],[181,78,170,.8],[262,86,150,.8],[261,84,70,.6],[269,74,80,.6],[89,76,180,.8]];
 const traffic=[];
+// ảnh gốc quay đầu sang TRÁI (còn lại quay phải) để lật đúng chiều chạy; làn gần chạy sang phải, làn xa sang trái (đi bên phải đường)
+const VEH_L=new Set([22,316,264,89,276]);
+// giữ khoảng cách: xe sau không chui qua xe trước cùng làn, chạy chậm lại theo xe trước
+function trafficFollow(){for(const v of traffic){if(v.base==null)v.base=v.sp;if(v.stopped)continue;let gap=1e9,lead=null;
+  for(const w of traffic){if(w===v||w.dir!==v.dir||Math.abs(w.y-v.y)>6)continue;const d=(w.x-v.x)*v.dir;if(d>0&&d<gap){gap=d;lead=w}}
+  const need=(v.h+(lead?lead.h:0))*1.15+40;if(lead&&gap<need){v.sp=Math.min(v.sp,Math.max(0,lead.sp*(gap<need*.7?.6:1)))}else if(v.sp<v.base)v.sp=Math.min(v.base,v.sp+120*.016)}}
 function spawnVeh(extra){const tot=VEH.reduce((a,v)=>a+v[3],0);let r=Math.random()*tot,v=VEH[0];for(const x of VEH){r-=x[3];if(r<=0){v=x;break}}
   const dir=Math.random()<.5?-1:1;const o={id:v[0],h:v[1],sp:v[2]*rnd(.8,1.15),dir,y:dir<0?500:526,x:0,ph:Math.random()*9};
   const vw=VW+260;o.x=dir<0?camera.x+vw:camera.x-260;if(extra)Object.assign(o,extra);traffic.push(o)}
@@ -1313,6 +1319,7 @@ function tick(dt){if(typeof MO!=='undefined'&&MO)return;
   // coin
   for(let i=coins.length-1;i>=0;i--){const c=coins[i];if(Math.abs(c.x-P.x)<70&&Math.abs(c.y-P.y)<60){coins.splice(i,1);addCash(3);S.tips+=3;fly(c.x,c.y-60,'+3k dừa rớt','good');sfx.coin();ui()}}
   // traffic
+  trafficFollow();
   for(let i=traffic.length-1;i>=0;i--){const v=traffic[i];if(v.stop&&Math.abs(v.x-P.x)<40){v.sp=0;v.stopped=true}v.x+=v.dir*v.sp*dt;if(Math.abs(v.x-(camera.x+VW/2))>VW+450)traffic.splice(i,1)}
   if(traffic.length<4&&Math.random()<dt*1.0)spawnVeh();
   if(Math.random()<dt*.008)spawnVeh({id:251,h:98,sp:300,siren:true});
@@ -3363,7 +3370,7 @@ function entities(){const L=[],vx0=camera.x-260,vx1=camera.x+VW+260;
   Object.entries(S.premises).forEach(([id,p])=>{const s=SPOTS.find(x=>x.id===id);if(!s||s.x<vx0||s.x>vx1)return;const x=s.x+430;add(398,()=>{shadow(x,398,80);spr(p.own?319:320,x,398,170);});add(386,()=>{drawChar(318,x+4,388,{h:128,ph:s.x,hop:0});if(Math.sin(S.t*.9+s.x)>.98)fly(x,330,'+','good')});add(400,()=>{pill(x,206,'🏪 '+(p.own?'Quầy của mình':'Quầy thuê'),null,'hot')})});
   // đối thủ
   compObjs.forEach(o=>{const x=o.s.x-600;if(x<vx0||x>vx1)return;add(LANE+3,()=>{shadow(x,LANE+6,90);spr(o.c.cart,x,LANE+6,160);});add(LANE+10,()=>{drawChar(o.c.v,x+105,LANE+8,{h:138,ph:o.ph});if(Math.abs(P.x-x)<420)pill(x,LANE-170,'🏪 '+o.c.name,'đối thủ')})});
-  traffic.forEach(v=>{if(v.x<vx0-100||v.x>vx1+100)return;add(v.y,()=>{const bob=v.sp?Math.sin(S.t*14+v.ph)*1.2:0;const fl=(v.id===89)?v.dir>0:v.dir<0;spr(v.id,v.x,v.y+bob,v.h,{flip:fl});if(v.siren){const f=Math.floor(S.t*6)%2;ctx.save();ctx.globalCompositeOperation='lighter';const gx=v.x,gy=v.y-v.h+6;const gr=ctx.createRadialGradient(gx,gy,0,gx,gy,50);gr.addColorStop(0,f?'rgba(255,40,40,.8)':'rgba(40,90,255,.8)');gr.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gr;ctx.fillRect(gx-50,gy-50,100,100);ctx.restore()}})});
+  traffic.forEach(v=>{if(v.x<vx0-100||v.x>vx1+100)return;add(v.y,()=>{const bob=v.sp?Math.sin(S.t*14+v.ph)*1.2:0;const fl=VEH_L.has(v.id)?v.dir>0:v.dir<0;spr(v.id,v.x,v.y+bob,v.h,{flip:fl});if(v.siren){const f=Math.floor(S.t*6)%2;ctx.save();ctx.globalCompositeOperation='lighter';const gx=v.x,gy=v.y-v.h+6;const gr=ctx.createRadialGradient(gx,gy,0,gx,gy,50);gr.addColorStop(0,f?'rgba(255,40,40,.8)':'rgba(40,90,255,.8)');gr.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gr;ctx.fillRect(gx-50,gy-50,100,100);ctx.restore()}})});
   if(!AMB.length)buildAmbient();
   AMB.forEach(a=>{const ax=ambX(a);if(ax<vx0||ax>vx1)return;if(S.phase==='play'&&S.open&&Math.abs(ax-P.x)<170)return;drawAmb(a,ax,add)});
   walkers.forEach(w=>{if(w.x<vx0||w.x>vx1)return;add(w.y,()=>drawChar(w.id,w.x,w.y,{mv:w.pause<=0,ph:w.ph,flip:w.dir<0}))});
