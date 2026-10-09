@@ -3785,6 +3785,97 @@ Object.assign(EMO,{wave:['u/c/pl_wave','Chào'],like:['u/c/pl_thumb','Ok'],laugh
 #rtP .empt{display:flex;align-items:center;gap:8px}#rtP .empt img{height:60px;width:auto}
 #rtP .re img{object-fit:contain}
 `;document.head.appendChild(st)})();
+// ===================== ĐỜI SỐNG THẬT: hoá đơn, thuế & giấy phép, gia đình, xe máy riêng, học thêm, lễ tết, livestream =====================
+if(!SAVE_KEYS.includes('rl'))SAVE_KEYS.push('rl');
+const rl=()=>{if(!S.rl)S.rl={bills:[],paidAt:0,late:0,tax:{lic:false,due:0,owe:0},fam:{par:60,sent:0,rel:null,love:0,wed:false,kids:[]},bike:{fuel:100,insp:S.day+14,helmet:false},learn:{},live:{fol:0,n:0,best:0},hol:{}};return S.rl};
+const MONTH=7,mth=d=>Math.floor((d-1)/MONTH)+1;
+// ---------- hoá đơn mỗi "tháng" (7 ngày game) ----------
+function billCalc(){const x=(typeof ensureL2==='function')?ensureL2():{home:{t:0}},t=x.home?x.home.t:0,ap=(x.home&&x.home.f||[]).length;
+  return [['Tiền điện',Math.round(60+t*45+ap*12),'it_contract'],['Tiền nước',Math.round(25+t*10),'it_oil'],['Internet & điện thoại',70,'od_map'],['Tiền chợ, ăn uống',Math.round(150+((rl().fam.kids||[]).length)*120+(rl().fam.wed?120:0)),'od_bag']]}
+function billIssue(){const R=rl();R.bills=billCalc().map(b=>({n:b[0],v:b[1],ic:b[2],due:S.day+3,paid:false}));R.lastMonth=mth(S.day);
+  setTimeout(()=>{try{sfx.pop()}catch(e){};modal({img:'u/i/it_contract',c:'#2f6fb3',tag:'Hoá đơn tháng '+mth(S.day),title:'Hoá đơn tới rồi',text:R.bills.map(b=>`${b.n}: <b>${fmt(b.v)}</b>`).join('<br>')+`<br><small>Hạn trả 3 ngày. Trễ hạn bị cắt điện nước (sáng không hồi sức) và tụt tín dụng.</small>`,cta:'Trả ngay',cta2:'Để sau',onOk:billPayAll})},1700)}
+function billPayAll(){const R=rl(),due=R.bills.filter(b=>!b.paid),tot=due.reduce((a,b)=>a+b.v,0);if(!tot){toast('Không còn hoá đơn nào');return}if(S.cash<tot){toast('💸 Cần '+fmt(tot)+' để trả hết');return}
+  addCash(-tot);due.forEach(b=>b.paid=true);R.late=0;try{credAdj(3);finLog('Trả hoá đơn tháng −'+fmt(tot))}catch(e){};toast('✅ Đã trả hoá đơn '+fmt(tot));save();phRender()}
+// ---------- thuế khoán + giấy phép kinh doanh ----------
+const taxAmt=()=>Math.round(40+Math.max(0,(S.history||[]).slice(-7).reduce((a,b)=>a+b,0))*.03+((typeof bizN==='function'?bizN():0)*60));
+function licBuy(){const T=rl().tax;if(T.lic)return;if(S.cash<150){toast('💸 Giấy phép 150k');return}addCash(-150);T.lic=true;toast('📜 Đã có giấy phép kinh doanh hộ cá thể');try{bumpRep(.05)}catch(e){};save();phRender()}
+function taxPay(){const T=rl().tax;if(!T.owe){toast('Không nợ thuế');return}if(S.cash<T.owe){toast('💸 Cần '+fmt(T.owe));return}addCash(-T.owe);try{finLog('Nộp thuế khoán −'+fmt(T.owe));credAdj(4)}catch(e){};T.owe=0;T.due=0;toast('✅ Đã nộp thuế');save();phRender()}
+function inspect(){const T=rl().tax;let fine=0,why=[];if(!T.lic&&S.level>=3){fine+=200;why.push('chưa có giấy phép kinh doanh')}if(T.owe&&S.day>T.due){fine+=Math.round(T.owe*.5);why.push('nợ thuế quá hạn')}
+  if(!fine){modal({img:'u/c/npc_banker',c:'#2f7a43',tag:'Đoàn kiểm tra phường',title:'Giấy tờ đầy đủ',text:'Đoàn kiểm tra xem giấy phép và biên lai thuế, mọi thứ ổn. Uy tín tăng nhẹ.',cta:'Cảm ơn'});try{bumpRep(.05)}catch(e){};return}
+  addCash(-Math.min(S.cash,fine));try{bumpRep(-.1);mood(-8)}catch(e){};modal({ic:'⚠️',c:'#c4351c',tag:'Đoàn kiểm tra phường',title:'Bị phạt '+fmt(fine),text:'Lý do: '+why.join(', ')+'.<br><small>Mở app Hoá đơn & thuế để làm giấy phép và nộp thuế đúng hạn.</small>',cta:'Đã hiểu',cta2:'Mở app',onNo:()=>phOpen('bills')})}
+// ---------- gia đình ----------
+const PARTNERS=[['u/c/pl_talk','Tuấn'],['u/c/pl_wave','Thảo'],['u/c/pl_thumb','Khang'],['u/c/pl_phone','Vy']];
+function famSend(n){const F=rl().fam;if(S.cash<n){toast('💸 Không đủ tiền');return}addCash(-n);F.sent+=n;F.par=Math.min(100,F.par+Math.round(n/20));mood(6);toast('💌 Đã gửi '+fmt(n)+' về quê. Ba mẹ vui lắm.');save();phRender()}
+function famCall(){const F=rl().fam;if(F.called===S.day){toast('Hôm nay gọi rồi');return}F.called=S.day;F.par=Math.min(100,F.par+4);mood(8);toast('📞 Má dặn: "Ăn uống đủ, đừng thức khuya nghe con."');save();phRender()}
+function famDate(){const F=rl().fam;if(!F.rel){F.rel=pick(PARTNERS);F.love=10;toast('💕 Mày quen '+F.rel[1]+' ở quán cà phê đầu hẻm');save();phRender();return}
+  if(F.dated===S.day){toast('Hôm nay đi chơi rồi');return}if(S.cash<80){toast('💸 Hẹn hò cần 80k');return}addCash(-80);F.dated=S.day;F.love=Math.min(100,F.love+12);mood(12);energy(-10);toast('💕 Đi ăn kem với '+F.rel[1]+', thân thêm');save();phRender()}
+function famWed(){const F=rl().fam;if(F.wed||!F.rel||F.love<80)return;if(S.cash<3000){toast('💸 Đám cưới cần 3 triệu');return}addCash(-3000);F.wed=true;mood(30);try{sfx.fanfare()}catch(e){};
+  const gift=Math.round(800+Math.random()*1200);addCash(gift);modal({img:'u/s/ev_tet',c:'#d2432f',tag:'Đám cưới',title:'Về chung một nhà với '+F.rel[1],text:'Bạn bè hàng xóm tới đông vui, phong bì mừng cưới <b>'+fmt(gift)+'</b>. Từ giờ vợ/chồng phụ bán: khách vui hơn, mỗi sáng hồi thêm sức.',cta:'Hạnh phúc quá'});save();phRender()}
+function famKid(){const F=rl().fam;if(!F.wed||F.kids.length>=2)return;if(S.cash<1000){toast('💸 Cần 1 triệu chuẩn bị đón bé');return}addCash(-1000);F.kids.push({born:S.day,n:pick(['Bin','Bống','Su','Mít','Tôm','Na'])});mood(25);toast('👶 Chào mừng bé '+F.kids[F.kids.length-1].n+'!');save();phRender()}
+// ---------- xe máy riêng ----------
+const BK=()=>rl().bike;
+function fuelUp(){const b=BK(),need=100-b.fuel;if(need<5){toast('Bình xăng còn đầy');return}const c=Math.round(need*.9);if(S.cash<c){toast('💸 Cần '+fmt(c));return}addCash(-c);b.fuel=100;toast('⛽ Đổ đầy bình −'+fmt(c));save();phRender()}
+function bikeInsp(){const b=BK();if(S.cash<120){toast('💸 Đăng kiểm 120k');return}addCash(-120);b.insp=S.day+28;toast('📋 Đã đăng kiểm, hạn tới ngày '+b.insp);save();phRender()}
+function helmetBuy(){const b=BK();if(b.helmet)return;if(S.cash<90){toast('💸 Mũ bảo hiểm 90k');return}addCash(-90);b.helmet=true;toast('🪖 Đã mua mũ bảo hiểm');save();phRender()}
+setInterval(()=>{try{if(S.phase!=='play'||!S.riding)return;const b=BK();b.fuel=Math.max(0,b.fuel-.6);if(b.fuel<=0){setRiding(false);toast('⛽ Hết xăng! Dắt bộ tới cây xăng (app Sửa xe)')}
+  if(Math.random()<.004&&!MO){let f=0,w=[];if(!b.helmet){f+=150;w.push('không đội mũ bảo hiểm')}if(S.day>b.insp){f+=200;w.push('xe quá hạn đăng kiểm')}
+   if(f){addCash(-Math.min(S.cash,f));setRiding(false);modal({img:'u/i/od_helmet',c:'#c4351c',tag:'CSGT',title:'Bị thổi phạt '+fmt(f),text:'Lý do: '+w.join(', ')+'.',cta:'Lần sau nhớ'})}}}catch(e){}},1000);
+// ---------- học thêm ----------
+const COURSES=[['cook','Khoá nấu ăn','u/c/npc_doctor',400,'Món ăn bán giá +5%, nấu ăn dễ hơn'],['eng','Tiếng Anh giao tiếp','u/c/pl_phone',600,'Khách Tây trả gấp rưỡi, ghé nhiều hơn'],['acc','Kế toán cơ bản','u/c/npc_banker',500,'Lãi tiết kiệm +0,2%, phí sàn online −3%'],['mkt','Marketing online','u/c/pl_cheer',700,'Livestream hút người xem gấp đôi, Giao Nhanh nhiều đơn hơn']];
+const learned=k=>!!(rl().learn[k]&&rl().learn[k].done);
+function courseGo(k){const L=rl().learn,C=COURSES.find(c=>c[0]===k);L[k]=L[k]||{p:0};if(L[k].done)return;if(!L[k].paid){if(S.cash<C[3]){toast('💸 Học phí '+fmt(C[3]));return}addCash(-C[3]);L[k].paid=true}
+  if(L[k].day===S.day){toast('Hôm nay học rồi, mai học tiếp');return}if(S.life&&S.life.en<20){toast('Mệt quá, nghỉ chút rồi học');return}
+  L[k].day=S.day;L[k].p+=1;energy(-15);try{addXp('cook',4)}catch(e){};if(L[k].p>=5){L[k].done=true;try{sfx.fanfare()}catch(e){};modal({img:C[2],c:'#6a5acd',tag:'Tốt nghiệp',title:C[1],text:'Hiệu quả: '+C[4]+'.',cta:'Tuyệt'})}else toast('📚 Buổi '+L[k].p+'/5 · '+C[1]);save();phRender()}
+{const _ip=itemPrice;itemPrice=function(i){return _ip(i)*(learned('cook')?1.05:1)}}
+// ---------- lễ, tết ----------
+const HOLS=[[5,'Ngày Phụ nữ 8/3','Mua hoa tặng mẹ và chị em hàng xóm?',100,.08],[12,'Ngày 20/10','Tặng quà cô giáo cũ và mẹ?',100,.08],[20,'Đám cưới bạn thân','Bạn thân cưới, đi phong bì bao nhiêu?',300,.12],[27,'Lì xì Tết','Lì xì con nít trong hẻm và gửi tiền Tết về quê?',400,.2]];
+function holCheck(){const d=((S.day-1)%28)+1,R=rl(),h=HOLS.find(x=>x[0]===d);if(!h||R.hol[S.day])return;R.hol[S.day]=1;
+  setTimeout(()=>modal({img:d===27?'u/s/ev_tet':'l2/ev_gift',c:'#d2432f',tag:'Lễ tết',title:h[1],text:h[2]+`<br><small>Chi ${fmt(h[3])}: uy tín và tâm trạng tăng. Không chi thì hàng xóm hơi buồn.</small>`,cta:'Chi '+fmt(h[3]),cta2:'Thôi',
+   onOk:()=>{if(S.cash<h[3]){toast('💸 Không đủ tiền');return}addCash(-h[3]);bumpRep(h[4]);mood(12);if(d===27){rl().fam.par=Math.min(100,rl().fam.par+15)}try{sfx.gift()}catch(e){}},onNo:()=>{bumpRep(-h[4]/3);mood(-4)}}),2600)}
+// ---------- livestream ----------
+let LV=null;
+function liveStart(){const V=rl().live;if(LV)return;if(S.phase!=='play'||!S.open){toast('Bày hàng ra phố rồi mới livestream');return}if(S.life&&S.life.en<15){toast('Mệt quá, không lên hình nổi');return}
+  LV={t:0,view:Math.round(5+V.fol*.15),rev:0,hearts:0,end:performance.now()+45000};energy(-10);V.n++;phRender();toast('🔴 Đang livestream trên Townly');try{track('live')}catch(e){}}
+function liveTick(){if(!LV)return;const V=rl().live,m=learned('mkt')?2:1;LV.view=Math.max(1,Math.round(LV.view*(0.96+Math.random()*.1)+Math.random()*3*m*(1+charm()*.1)));LV.hearts+=Math.round(LV.view*.05*Math.random());
+  if(Math.random()<.18*m&&S.open){const it=pick(unlockedItems().filter(i=>(S.stock[i.id]||0)>0));if(it){S.stock[it.id]--;const p=Math.round(itemPrice(it)*1.15);addCash(p);LV.rev+=p;S.totalSold=(S.totalSold||0)+1}}
+  if(performance.now()>LV.end||!S.open)liveEnd();else if(phApp==='live')phRender()}
+function liveEnd(){if(!LV)return;const V=rl().live,nf=Math.round(LV.view*.12+LV.hearts*.02);V.fol+=nf;V.best=Math.max(V.best,LV.view);const r=LV;LV=null;
+  modal({img:'ui/app_tw',c:'#d65a9a',tag:'Livestream',title:'Kết thúc live',text:`Người xem cao nhất ${r.view} · ${r.hearts} tim · bán qua live <b>${fmt(r.rev)}</b><br>+${nf} người theo dõi (tổng ${V.fol})`,cta:'Tuyệt'});phRender()}
+setInterval(()=>{try{liveTick()}catch(e){}},1500);
+// ---------- hiệu ứng vào các hệ có sẵn ----------
+{const _sd=startDay;startDay=function(){_sd.apply(this,arguments);try{const R=rl();
+  if(!R.lastMonth||mth(S.day)>R.lastMonth&&S.day>1)billIssue();
+  const unpaid=R.bills.filter(b=>!b.paid&&S.day>b.due);if(unpaid.length){R.late++;energy(-25);try{credAdj(-10)}catch(e){};setTimeout(()=>toast('💡 Bị cắt điện nước vì nợ hoá đơn, sáng nay mệt hơn'),2000)}
+  if(R.fam.wed){energy(10);mood(4)}R.fam.par=Math.max(0,R.fam.par-1);if(R.fam.par<25&&S.day%5===0)setTimeout(()=>toast('📞 Má gọi: "Lâu quá không thấy con gọi về..."'),2400);
+  R.fam.kids.forEach(k=>{if(S.day-k.born>=14&&(S.day-k.born)%MONTH===0){const fee=150;if(S.cash>=fee){addCash(-fee);setTimeout(()=>toast('🎒 Đóng học phí cho bé '+k.n+' −'+fmt(fee)),2800)}}});
+  if(S.day%MONTH===0){const T=R.tax;T.owe+=taxAmt();T.due=S.day+3;setTimeout(()=>toast('🧾 Thuế khoán tháng này: '+fmt(T.owe)+', hạn 3 ngày'),3000)}
+  if(S.day>4&&Math.random()<.08)setTimeout(()=>{try{inspect()}catch(e){}},9000);
+  holCheck()}catch(e){console.warn(e)}}}
+{const _ed=endDay;endDay=function(){_ed.apply(this,arguments);try{const R=rl();if(learned('acc')&&fin().sav>0){const it=Math.round(fin().sav*.002);fin().sav+=it}if(R.fam.kids.length)mood(3)}catch(e){}}}
+{const _sc=spawnCustomer;spawnCustomer=function(){const n=cust.length;_sc.apply(this,arguments);if(cust.length>n&&learned('eng')&&Math.random()<.12){const c=cust[cust.length-1];const a=ARCH.find(x=>x.id==='tay');if(a&&!c.local&&!c.regName){c.arch=Object.assign({},a,{pay:a.pay*1.5});c.name='Ông Tây ba lô'}}}}
+if(typeof FOOD_CUT!=='undefined'){const _ft=foodTick;foodTick=function(){_ft();if(learned('mkt')&&Math.random()<.5)_ft()}}
+// ---------- giao diện ----------
+const rowB=(l,v,c='')=>`<div style="display:flex;justify-content:space-between;gap:8px"><span>${l}</span><b class="${c}">${v}</b></div>`;
+function billsBody(){const R=rl(),T=R.tax,due=R.bills.filter(b=>!b.paid);
+  return `<div class="phcard"><b>Hoá đơn tháng ${R.lastMonth||mth(S.day)}</b>${R.bills.length?R.bills.map(b=>`<div class="bill"><img src="a/u/i/${b.ic}.webp" alt=""><span>${b.n}</span><b class="${b.paid?'ok':S.day>b.due?'neg':''}">${b.paid?'Đã trả':fmt(b.v)}</b></div>`).join(''):'<small>Chưa có hoá đơn</small>'}${due.length?`<small>Hạn trả: ngày ${due[0].due}</small><br><button class="phbtn" onclick="billPayAll()">Trả hết ${fmt(due.reduce((a,b)=>a+b.v,0))}</button>`:''}<br><small>Mỗi tháng (7 ngày game) có hoá đơn mới. Nhà to, nhiều đồ điện, có gia đình thì hoá đơn cao hơn.</small></div>
+  <h3>Thuế & giấy phép</h3><div class="phcard">${rowB('Giấy phép kinh doanh',T.lic?'Đã có':'Chưa có',T.lic?'ok':'neg')}${rowB('Thuế khoán đang nợ',fmt(T.owe),T.owe?'neg':'ok')}${T.owe?rowB('Hạn nộp','ngày '+T.due):''}
+   <div class="bbtn">${T.lic?'':'<button class="phbtn" onclick="licBuy()">Làm giấy phép · 150k</button>'}${T.owe?`<button class="phbtn" onclick="taxPay()">Nộp thuế ${fmt(T.owe)}</button>`:''}</div><small>Từ cấp 3 đoàn kiểm tra phường có thể ghé. Thiếu giấy phép phạt 200k, nợ thuế quá hạn phạt 50%. Thuế khoán tính theo doanh thu tuần và số cơ sở.</small></div>`}
+function famBody(){const F=rl().fam;
+  return `<div class="phcard jobc"><img src="a/u/c/pl_wave.webp" alt="" style="height:90px;width:auto"><div style="flex:1"><b>Ba mẹ ở quê</b><div class="phbar" style="margin:5px 0"><i style="width:${F.par}%;background:#ff7a8a"></i></div><small>Tình cảm ${F.par}/100 · đã gửi về ${fmt(F.sent)}</small><div class="bbtn"><button class="phbtn" onclick="famCall()">Gọi điện</button><button class="phbtn" onclick="famSend(100)">Gửi 100k</button><button class="phbtn" onclick="famSend(500)">Gửi 500k</button></div></div></div>
+  <h3>Tình yêu</h3>${F.rel?`<div class="phcard jobc"><img src="a/${F.rel[0]}.webp" alt="" style="height:90px;width:auto"><div style="flex:1"><b>${F.rel[1]}</b> ${F.wed?'<small class="own">Vợ/chồng</small>':''}<div class="phbar" style="margin:5px 0"><i style="width:${F.love}%;background:#e2471e"></i></div><small>Thân thiết ${F.love}/100</small><div class="bbtn">${F.wed?'':`<button class="phbtn" onclick="famDate()">Hẹn hò · 80k</button>`}${!F.wed&&F.love>=80?`<button class="phbtn" onclick="famWed()">Cưới · 3 triệu</button>`:''}</div></div></div>`:`<div class="phcard"><small>Chưa có ai. Ra quán cà phê đầu hẻm biết đâu gặp người thương.</small><br><button class="phbtn" onclick="famDate()">Đi cà phê làm quen</button></div>`}
+  ${F.wed?`<h3>Con cái</h3><div class="phcard">${F.kids.length?F.kids.map(k=>`<div>👶 Bé <b>${k.n}</b> · ${S.day-k.born} ngày tuổi${S.day-k.born>=14?' · đang đi học (150k/tháng)':''}</div>`).join(''):'<small>Chưa có bé.</small>'}${F.kids.length<2?`<br><button class="phbtn" onclick="famKid()">Đón bé · 1 triệu</button>`:''}<br><small>Có con tốn tiền chợ và học phí, nhưng mỗi tối về nhà vui hơn.</small></div>`:''}`}
+function learnBody(){const L=rl().learn;return `<div class="phcard"><small>Mỗi khoá 5 buổi, mỗi ngày học 1 buổi (tốn 15 sức). Học xong có hiệu quả vĩnh viễn.</small></div>`+COURSES.map(c=>{const s=L[c[0]]||{p:0};return `<div class="phcard jobc"><img src="a/${c[2]}.webp" alt="" style="height:80px;width:auto"><div style="flex:1"><b>${c[1]}</b> ${s.done?'<small class="own">Đã tốt nghiệp</small>':''}<br><small>${c[4]}</small><div class="phbar" style="margin:5px 0"><i style="width:${s.p*20}%;background:#b38cf0"></i></div>${s.done?'':`<button class="phbtn" onclick="courseGo('${c[0]}')">${s.paid?'Học buổi '+(s.p+1)+'/5':'Đăng ký · '+fmt(c[3])}</button>`}</div></div>`}).join('')}
+function liveBody(){const V=rl().live;return `<div class="phcard ecoh" style="background:linear-gradient(135deg,rgba(214,90,154,.4),rgba(120,40,90,.2))"><div><b>Townly Live · ${esc(S.pname||'Mày')}</b><br><small>${V.fol} người theo dõi · ${V.n} lần live · kỷ lục ${V.best} người xem</small></div></div>
+  ${LV?`<div class="phcard live"><b class="rec">● LIVE</b> <b>${LV.view} người xem</b> · ${LV.hearts} tim<br><small>Đã bán qua live ${fmt(LV.rev)} · còn ${Math.max(0,Math.round((LV.end-performance.now())/1000))} giây</small><br><button class="phbtn alt" onclick="LV.end=0;liveTick()">Kết thúc</button></div>`:`<div class="phcard"><small>Đang bày hàng ngoài phố thì livestream được 45 giây: người xem đặt mua giá +15%, ai thích thì theo dõi. Càng đông theo dõi lần sau càng nhiều người xem. Duyên cao và học Marketing thì hút khách hơn.</small><br><button class="phbtn" onclick="liveStart()">🔴 Bắt đầu live</button></div>`}`}
+APPS.splice(Math.max(0,APPS.findIndex(a=>a[0]==='bank')+1),0,['bills','🧾','Hoá đơn & thuế','#59627a'],['family','👪','Gia đình','#e2667a'],['learn','📚','Học thêm','#6a5acd'],['live','🔴','Townly Live','#d65a9a']);
+L2APPS.push(['bills','🧾','Hoá đơn & thuế','#59627a'],['family','👪','Gia đình','#e2667a'],['learn','📚','Học thêm','#6a5acd'],['live','🔴','Townly Live','#d65a9a']);
+{const _l=l2Body;l2Body=function(a){if(a==='bills')return billsBody();if(a==='family')return famBody();if(a==='learn')return learnBody();if(a==='live')return liveBody();let h=_l(a);
+  if(a==='fix'&&S.owned.xemay){const b=BK();h+=`<h3>Xe máy riêng</h3><div class="phcard">${rowB('Xăng',Math.round(b.fuel)+'%',b.fuel<20?'neg':'')}<div class="phbar" style="margin:4px 0"><i style="width:${b.fuel}%;background:#ffd27a"></i></div>${rowB('Đăng kiểm','hạn ngày '+b.insp,S.day>b.insp?'neg':'')}${rowB('Mũ bảo hiểm',b.helmet?'Có':'Chưa có',b.helmet?'ok':'neg')}<div class="bbtn"><button class="phbtn" onclick="fuelUp()">Đổ xăng</button><button class="phbtn" onclick="bikeInsp()">Đăng kiểm · 120k</button>${b.helmet?'':'<button class="phbtn" onclick="helmetBuy()">Mua mũ · 90k</button>'}</div><small>Chạy xe tốn xăng. Không mũ hoặc quá hạn đăng kiểm dễ bị CSGT thổi phạt.</small></div>`}
+  if(a==='mall'&&learned('acc'))h=h.replace('Sàn thu 12%','Sàn thu 9% (đã học kế toán)');return h}}
+if(typeof MALL_CUT!=='undefined'){const _md=mallDay;mallDay=function(){const r=_md();if(r&&learned('acc')){const b=Math.round(r.tot*.03);addCash(b);r.tot+=b}return r}}
+if(typeof UNL!=='undefined'){Object.assign(UNL,{bills:[1,2],family:[2,3],learn:[3,3],live:[4,4]});Object.assign(UNL_TIP,{bills:'Hoá đơn & thuế: điện, nước, internet, tiền chợ mỗi tháng, thuế khoán và giấy phép kinh doanh.',family:'Gia đình: gọi điện, gửi tiền về quê, hẹn hò, cưới, đón con.',learn:'Học thêm: nấu ăn, tiếng Anh, kế toán, marketing, mỗi khoá có hiệu quả vĩnh viễn.',live:'Townly Live: livestream bán hàng khi đang bày xe, kiếm người theo dõi.'})}
+(function(){const st=document.createElement('style');st.textContent=`#phone .bill{display:flex;align-items:center;gap:8px;margin:5px 0}#phone .bill img{width:30px;height:30px;object-fit:contain}#phone .bill span{flex:1}#phone .ok{color:#7fd36e}
+#phone .live{box-shadow:inset 0 0 0 2px #e2471e}#phone .rec{color:#ff5a4a;animation:recb 1s steps(2) infinite}@keyframes recb{50%{opacity:.3}}`;document.head.appendChild(st)})();
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
