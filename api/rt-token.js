@@ -11,5 +11,5 @@ module.exports = C.handler(['GET'], async (req, res) => {
   }
   const s = C.needUser(req);
   const name = (await C.redis('HGET', 'user:' + s.uid, 'name')) || 'Người chơi';
-  C.send(res, 200, { token: C.sign({ k: 'rt', uid: s.uid, name: C.clean(name, 24) }, 60 * 60 * 6), url: process.env.RT_URL || '' });
+  C.send(res, 200, { token: C.sign({ k: 'rt', uid: s.uid, name: C.clean(name, 24) }, 60 * 60 * 6), url: process.env.RT_URL || 'https://vhsg-realtime.vankhanh-le.workers.dev' });
 });

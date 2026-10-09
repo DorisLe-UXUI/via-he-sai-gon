@@ -3678,7 +3678,7 @@ if(typeof UNL!=='undefined'){UNL.food=[2,2];UNL.mall=[0,0,()=>Object.keys(S.carg
 #phone .pr{display:flex;align-items:center;gap:8px;margin-top:4px}#phone .pr button{width:28px;height:28px;border-radius:50%;border:0;background:#26304f;color:#fff;font:800 16px sans-serif;cursor:pointer}
 `;document.head.appendChild(st)})();
 // ===================== PHỐ ONLINE: thấy người chơi khác + chat (máy chủ Cloudflare) =====================
-const RT_DEFAULT='';// điền khi có địa chỉ worker, hoặc đặt RT_URL trên Vercel
+const RT_DEFAULT='https://vhsg-realtime.vankhanh-le.workers.dev';// điền khi có địa chỉ worker, hoặc đặt RT_URL trên Vercel
 const RT={ws:null,url:'',room:'',shard:0,me:null,peers:new Map(),chat:[],unread:0,open:false,muted:new Set(),retry:0,last:'',lastSend:0,status:'off'};
 try{JSON.parse(localStorage.getItem('vhsg-muted')||'[]').forEach(u=>RT.muted.add(u))}catch(e){}
 const EMO={wave:['u/i/mascot_helper','Chào'],heart:['n/i_star','Thích'],laugh:['n/g_cheer','Haha'],fire:['u/i/ev_price_up','Đỉnh'],like:['n/g_thumb','Ok'],buy:['n/i_coin','Mua đi']};
