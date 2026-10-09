@@ -3628,6 +3628,84 @@ REGIONS.canTho.unlock={rep:1,cash:500};REGIONS.vungTau.unlock={rep:1,cash:800};
    <li><b>Bán lời rồi bay tiếp</b>, gom đủ bộ đặc sản một miền để nhận danh hiệu.</li></ol>
    ${nextR?`<div class="nx">Gần mở nhất: <b>${REGIONS[nextR.x].name}</b>, còn thiếu ${nextR.q.lines.filter(l=>!l.ok).map(l=>l.t).join(', ')||'không gì, bấm để mở'}</div>`:''}</details>`)}}
 (function(){const st=document.createElement('style');st.textContent=`.airguide{margin:10px 0;background:#fff8e4;border-radius:16px;padding:10px 14px;box-shadow:inset 0 0 0 2px #e8c98a;color:#3a2210;font:500 13.5px/1.5 var(--body)}.airguide summary{font:800 15px var(--display);cursor:pointer;color:#8e4d06}.airguide ol{margin:8px 0 6px;padding-left:20px}.airguide li{margin:3px 0}.airguide .nx{background:#2f7a43;color:#fff;border-radius:10px;padding:6px 10px;font-weight:600}`;document.head.appendChild(st)})();
+// ===================== PHỐ ONLINE: thấy người chơi khác + chat (máy chủ Cloudflare) =====================
+const RT_DEFAULT='';// điền khi có địa chỉ worker, hoặc đặt RT_URL trên Vercel
+const RT={ws:null,url:'',room:'',shard:0,me:null,peers:new Map(),chat:[],unread:0,open:false,muted:new Set(),retry:0,last:'',lastSend:0,status:'off'};
+try{JSON.parse(localStorage.getItem('vhsg-muted')||'[]').forEach(u=>RT.muted.add(u))}catch(e){}
+const EMO={wave:['u/i/mascot_helper','Chào'],heart:['n/i_star','Thích'],laugh:['n/g_cheer','Haha'],fire:['u/i/ev_price_up','Đỉnh'],like:['n/g_thumb','Ok'],buy:['n/i_coin','Mua đi']};
+async function rtStart(){if(!ON.user||RT.ws)return;try{const r=await oapi('rt-token');if(!r.token)return;RT.url=(r.url||RT_DEFAULT).replace(/\/$/,'');if(!RT.url){RT.status='nocfg';return}RT.token=r.token;rtConnect()}catch(e){}}
+function rtRoom(){return (S.region||'saigon')+'-'+RT.shard}
+function rtConnect(){const room=rtRoom();RT.room=room;RT.status='connecting';let ws;try{ws=new WebSocket(RT.url.replace(/^http/,'ws')+'/room/'+room+'?t='+encodeURIComponent(RT.token))}catch(e){return rtLater()}RT.ws=ws;
+  ws.onopen=()=>{RT.retry=0;RT.status='on';rtSend(true);rtUI()};
+  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}rtOn(m)};
+  ws.onclose=e=>{RT.ws=null;RT.peers.clear();RT.status='off';rtUI();if(e.code===4001){RT.shard++;return rtConnect()}if(e.code===4002)return;rtLater()};
+  ws.onerror=()=>{}}
+function rtLater(){const d=Math.min(30000,2000*Math.pow(1.6,RT.retry++));setTimeout(()=>{if(!RT.ws&&ON.user)rtConnect()},d)}
+function rtOn(m){if(m.t==='hi'){RT.me=m.me;RT.peers.clear();m.players.forEach(p=>rtPeer(p));RT.chat=(m.hist||[]).slice(-40);rtUI()}
+  else if(m.t==='join'){rtPeer(m.p);rtSys(m.p.n+' vừa ra phố')}
+  else if(m.t==='leave'){const p=RT.peers.get(m.u);if(p)rtSys(p.n+' đã về');RT.peers.delete(m.u);rtUI()}
+  else if(m.t==='p'){const p=RT.peers.get(m.u);if(p){p.tx=m.x;p.d=m.d;p.m=m.m;p.o=m.o;p.l=m.l||p.l;p.c=m.c||p.c}else rtPeer({u:m.u,n:'Người chơi',x:m.x,d:m.d,m:m.m,o:m.o,l:m.l,c:m.c})}
+  else if(m.t==='chat'){if(RT.muted.has(m.u))return;RT.chat.push(m);if(RT.chat.length>60)RT.chat.shift();const p=RT.peers.get(m.u);if(p){p.say=m.m;p.sayT=performance.now()}if(m.u===RT.me){RT.mySay=m.m;RT.mySayT=performance.now()}if(!RT.open&&m.u!==RT.me){RT.unread++;try{sfx.pop()}catch(e){}}rtUI()}
+  else if(m.t==='emo'){const p=RT.peers.get(m.u);if(p&&!RT.muted.has(m.u)){p.emo=m.e;p.emoT=performance.now()}}
+  else if(m.t==='sys'){rtSys(m.m)}}
+function rtSys(t){RT.chat.push({sys:1,m:t,ts:Date.now()});if(RT.chat.length>60)RT.chat.shift();rtUI()}
+function rtPeer(p){if(!p||!p.u||p.u===RT.me)return;const o=RT.peers.get(p.u)||{};Object.assign(o,{u:p.u,n:p.n||o.n,x:o.x??p.x,tx:p.x,d:p.d,m:p.m,o:p.o,l:p.l,c:p.c});RT.peers.set(p.u,o);rtUI()}
+function rtSend(force){if(!RT.ws||RT.ws.readyState!==1)return;const now=performance.now();let cs='';try{cs=curCart().sp}catch(e){}
+  const st=JSON.stringify([Math.round(P.x/4),P.dir,P.mv?1:0,S.open?1:0,S.look||S.outfit,cs]);if(!force&&(st===RT.last||now-RT.lastSend<200))return;RT.last=st;RT.lastSend=now;
+  RT.ws.send(JSON.stringify({t:'p',x:Math.round(P.x),d:P.dir,m:P.mv?1:0,o:S.open?1:0,l:String(S.look||S.outfit||''),c:cs}))}
+setInterval(()=>{try{if(S.phase==='play')rtSend();if(RT.ws&&RT.room!==rtRoom().replace(/-\d+$/,'-'+RT.shard)){}const want=(S.region||'saigon');if(RT.ws&&!RT.room.startsWith(want+'-')){RT.shard=0;try{RT.ws.close(4003)}catch(e){}RT.ws=null;setTimeout(rtConnect,200)}}catch(e){}},200);
+setInterval(()=>{if(RT.ws&&RT.ws.readyState===1)RT.ws.send('{"t":"ping"}')},25000);
+setInterval(()=>{if(ON.user&&!RT.ws&&RT.status!=='nocfg'&&RT.status!=='connecting')rtStart()},5000);
+function rtChat(text){text=String(text||'').trim();if(!text||!RT.ws)return;RT.ws.send(JSON.stringify({t:'chat',m:text.slice(0,120)}))}
+function rtEmo(e){if(!RT.ws)return;RT.ws.send(JSON.stringify({t:'emo',e}));RT.myEmo=e;RT.myEmoT=performance.now()}
+function rtMute(u){if(RT.muted.has(u))RT.muted.delete(u);else RT.muted.add(u);try{localStorage.setItem('vhsg-muted',JSON.stringify([...RT.muted]))}catch(e){}rtUI()}
+function rtReport(u){if(RT.ws)RT.ws.send(JSON.stringify({t:'report',u}));RT.muted.add(u);rtUI()}
+// ---------- vẽ người chơi khác trên phố ----------
+function bubble(x,y,text,col){ctx.save();ctx.font='600 12px "Be Vietnam Pro",sans-serif';const words=String(text).split(' ');let lines=[''],mw=170;words.forEach(w=>{const t=(lines[lines.length-1]+' '+w).trim();if(ctx.measureText(t).width>mw&&lines[lines.length-1])lines.push(w);else lines[lines.length-1]=t});lines=lines.slice(0,3);
+  const w=Math.max(...lines.map(l=>ctx.measureText(l).width))+18,h=lines.length*15+10;ctx.fillStyle=col||'rgba(255,250,235,.96)';ctx.strokeStyle='rgba(90,50,20,.6)';ctx.lineWidth=1.5;rr(x-w/2,y-h-8,w,h,9);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(x-6,y-8);ctx.lineTo(x,y);ctx.lineTo(x+6,y-8);ctx.fill();
+  ctx.fillStyle='#3a2210';ctx.textAlign='center';lines.forEach((l,i)=>ctx.fillText(l,x,y-h-8+18+i*15));ctx.restore()}
+function nameTag(x,y,n){ctx.save();ctx.font='700 11px "Be Vietnam Pro",sans-serif';const w=ctx.measureText(n).width+14;ctx.fillStyle='rgba(42,166,160,.92)';rr(x-w/2,y-16,w,17,8);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(n,x,y-4);ctx.restore()}
+function drawPeers(){const now=performance.now(),dt=1/60;RT.peers.forEach(p=>{if(p.tx==null)return;p.x+= (p.tx-p.x)*Math.min(1,.18);if(RT.muted.has(p.u)&&false)return;
+  const x=p.x,y=LANE-6,cx=x,bx=x-p.d*128;let cid=p.c||'z/vietnamese_banh_mi_street_cart';try{if(img(cid)){const io=IM[cid];const ch=io&&io.ok?Math.min(195,Math.round(180*io.i.naturalHeight/io.i.naturalWidth)):170;ctx.save();ctx.globalAlpha=.92;shadow(cx,y+10,86);spr(cid,cx,y+10,ch);ctx.restore()}}catch(e){}
+  let id=p.l||'287';if(/^\d+$/.test(id))id=+id;const h=(typeof id==='string'&&id.startsWith('u/'))?160:(chH(id)||148);drawChar(id,bx,y+2,{h,mv:p.m,ph:1,flip:p.d<0,a:.97});
+  nameTag(bx,y-h-4,p.n||'Người chơi');
+  if(p.say&&now-p.sayT<6000&&!RT.muted.has(p.u))bubble(bx,y-h-24,p.say);
+  if(p.emo&&now-p.emoT<2500){const E=EMO[p.emo];if(E)ico(E[0],bx,y-h-60-Math.sin((now-p.emoT)/300)*6,46)}})
+  if(RT.mySay&&now-RT.mySayT<6000){const bx=P.x-P.dir*128,h=chH(S.look||+S.outfit)||150;bubble(bx,LANE-h-20,RT.mySay,'rgba(255,236,170,.97)')}
+  if(RT.myEmo&&now-RT.myEmoT<2500){const E=EMO[RT.myEmo],bx=P.x-P.dir*128;if(E)ico(E[0],bx,LANE-210,46)}}
+{const _dp=drawPlayer;drawPlayer=function(){try{if(RT.peers.size||RT.mySay||RT.myEmo)drawPeers()}catch(e){}return _dp.apply(this,arguments)}}
+// ---------- khung chat ----------
+(function(){const b=document.createElement('button');b.id='rtBtn';b.setAttribute('aria-label','Chat phố');b.innerHTML='<img src="a/ui/app_msg.webp" alt=""><b id="rtN"></b><i id="rtU"></i>';document.body.appendChild(b);
+ const p=document.createElement('div');p.id='rtP';p.innerHTML=`<div class="rh"><b id="rtT">Chat phố</b><span id="rtS"></span><button id="rtX" aria-label="Đóng chat">✕</button></div><div class="rp" id="rtPl"></div><div class="rm" id="rtM"></div>
+  <div class="re">${Object.keys(EMO).map(k=>`<button data-e="${k}" title="${EMO[k][1]}"><img src="a/${EMO[k][0]}.webp" alt="${EMO[k][1]}"></button>`).join('')}</div>
+  <form class="ri" id="rtF"><input id="rtI" maxlength="120" placeholder="Nhắn cả phố..." autocomplete="off"><button>Gửi</button></form>`;document.body.appendChild(p);
+ b.onclick=()=>{RT.open=!RT.open;RT.unread=0;p.classList.toggle('on',RT.open);rtUI();if(RT.open)setTimeout(()=>{const i=document.getElementById('rtI');if(i&&innerWidth>700)i.focus()},50)};
+ document.getElementById('rtX').onclick=()=>{RT.open=false;p.classList.remove('on')};
+ document.getElementById('rtF').onsubmit=e=>{e.preventDefault();const i=document.getElementById('rtI');rtChat(i.value);i.value=''};
+ p.querySelectorAll('[data-e]').forEach(x=>x.onclick=()=>rtEmo(x.dataset.e));
+ document.getElementById('rtI').addEventListener('keydown',e=>e.stopPropagation())})();
+function rtUI(){const b=document.getElementById('rtBtn');if(!b)return;const live=S.phase==='play'||S.phase==='shop';b.classList.toggle('on',!!ON.user&&live&&RT.status!=='nocfg');
+  document.getElementById('rtN').textContent=RT.status==='on'?(RT.peers.size+1):'';const u=document.getElementById('rtU');u.textContent=RT.unread||'';u.style.display=RT.unread?'block':'none';
+  if(!RT.open)return;document.getElementById('rtT').textContent='Chat phố · '+((REGIONS[S.region]||{}).name||'Sài Gòn');
+  document.getElementById('rtS').textContent=RT.status==='on'?(RT.peers.size+1)+' người đang ở phố':RT.status==='connecting'?'Đang kết nối...':'Mất kết nối, đang thử lại';
+  document.getElementById('rtPl').innerHTML=[...RT.peers.values()].map(p=>`<span class="pl ${RT.muted.has(p.u)?'mu':''}">${esc(p.n||'?')}<button onclick="rtMute('${p.u}')" title="${RT.muted.has(p.u)?'Bỏ ẩn':'Ẩn tin nhắn'}">${RT.muted.has(p.u)?'Bỏ ẩn':'Ẩn'}</button><button onclick="rtReport('${p.u}')" title="Báo cáo">Báo cáo</button></span>`).join('')||'<small>Chưa có ai khác. Gửi link mời bạn trong hồ sơ để cùng ra phố.</small>';
+  const M=document.getElementById('rtM');M.innerHTML=RT.chat.filter(c=>c.sys||!RT.muted.has(c.u)).map(c=>c.sys?`<div class="sy">${esc(c.m)}</div>`:`<div class="${c.u===RT.me?'me':''}"><b>${esc(c.n)}</b>${esc(c.m)}</div>`).join('');M.scrollTop=M.scrollHeight}
+setInterval(rtUI,1500);
+(function(){const st=document.createElement('style');st.textContent=`
+#rtBtn{position:fixed;left:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;width:56px;height:56px;border:0;background:none;padding:0;display:none;cursor:pointer;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4))}#rtBtn.on{display:block}
+#rtBtn img{width:100%;height:100%}#rtBtn b{position:absolute;left:-4px;top:-4px;min-width:20px;height:20px;border-radius:10px;background:#2aa6a0;color:#fff;font:800 11px/20px 'Baloo 2';border:2px solid #fff}#rtBtn b:empty{display:none}
+#rtBtn i{position:absolute;right:-4px;top:-4px;min-width:20px;height:20px;border-radius:10px;background:#e2471e;color:#fff;font:800 11px/20px 'Baloo 2';font-style:normal;border:2px solid #fff;display:none}
+#rtP{position:fixed;left:12px;bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:61;width:min(360px,calc(100vw - 24px));max-height:min(60vh,480px);display:none;flex-direction:column;background:rgba(18,22,44,.94);backdrop-filter:blur(12px);border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.12);color:#eef1fb;font:500 13.5px/1.4 'Be Vietnam Pro',sans-serif;overflow:hidden}
+#rtP.on{display:flex}#rtP .rh{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.1)}#rtP .rh b{font:800 16px 'Baloo 2'}#rtP .rh span{flex:1;font-size:11.5px;color:#9fb0d8}#rtP .rh button{width:30px;height:30px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+#rtP .rp{display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;max-height:72px;overflow:auto;border-bottom:1px solid rgba(255,255,255,.08)}#rtP .pl{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.1);border-radius:999px;padding:2px 4px 2px 10px;font-size:12px}#rtP .pl.mu{opacity:.5}#rtP .pl button{border:0;background:rgba(255,255,255,.14);color:#dfe6ff;border-radius:999px;font:600 10px 'Be Vietnam Pro';padding:2px 7px;cursor:pointer}
+#rtP .rm{flex:1;overflow:auto;padding:8px 12px;display:flex;flex-direction:column;gap:5px;min-height:120px}#rtP .rm div{background:rgba(255,255,255,.07);border-radius:12px;padding:5px 9px;align-self:flex-start;max-width:88%;word-break:break-word}#rtP .rm div b{display:block;font:800 11.5px 'Baloo 2';color:#7fd3c8}#rtP .rm .me{align-self:flex-end;background:rgba(255,193,92,.2)}#rtP .rm .me b{color:#ffd27a}#rtP .rm .sy{background:none;color:#9fb0d8;font-size:11.5px;align-self:center;text-align:center}
+#rtP .re{display:flex;gap:6px;padding:6px 12px;border-top:1px solid rgba(255,255,255,.08)}#rtP .re button{flex:1;border:0;background:rgba(255,255,255,.08);border-radius:10px;padding:4px;cursor:pointer}#rtP .re img{width:28px;height:28px;object-fit:contain}
+#rtP .ri{display:flex;gap:6px;padding:8px 12px 12px}#rtP .ri input{flex:1;min-width:0;border:0;border-radius:12px;padding:10px 12px;font:500 14px 'Be Vietnam Pro';background:#fff;color:#2a1a08}#rtP .ri button{border:0;border-radius:12px;padding:0 14px;font:800 14px 'Baloo 2';background:linear-gradient(#ffc15c,#f08e1c);color:#2a1a08;cursor:pointer}
+@media(max-width:640px){#rtBtn{bottom:calc(76px + env(safe-area-inset-bottom,0px));width:48px;height:48px}#rtP{bottom:calc(130px + env(safe-area-inset-bottom,0px))}}
+`;document.head.appendChild(st)})();
+// avatar ở thanh menu: mặc đồ mới thì cắt lấy mặt, không để lòi cả người ra ngoài
+(function(){const st=document.createElement('style');st.textContent=`#nav img.navav.lk{opacity:0}#nav button span:has(img.navav.lk){background:var(--navlk) 50% 3%/260% auto no-repeat,radial-gradient(#ffe9b8,#f2b968);border-radius:50%;box-shadow:0 0 0 2px #f2c46a}`;document.head.appendChild(st);
+ setInterval(()=>{const f=document.querySelector('#nav img.navav');if(!f)return;const sp=f.parentElement;if(S.look)sp.style.setProperty('--navlk',`url(a/${S.look}.webp)`)},1000)})();
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);

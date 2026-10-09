@@ -30,8 +30,8 @@ const people={tokA:{sub:'1',name:'Doris',aud:process.env.GOOGLE_CLIENT_ID,iss:'a
 global.fetch=async(url,opt)=>{
  if(String(url).startsWith('http://fake-redis')){if(opt.headers.Authorization!=='Bearer t')return{ok:false,status:401,json:async()=>({error:'no'})};try{return{ok:true,json:async()=>({result:cmd(JSON.parse(opt.body))})}}catch(e){return{ok:false,status:500,json:async()=>({error:e.message})}}}
  const t=new URL(url).searchParams.get('id_token');const p=people[t];return p?{ok:true,json:async()=>p}:{ok:false,json:async()=>({})}};
-const mods={auth:require('../api/auth'),save:require('../api/save'),score:require('../api/score'),friends:require('../api/friends'),config:require('../api/config'),ev:require('../api/ev')};
-async function call(m,method,body,cookie){return new Promise(async res=>{const r={headers:{},setHeader(k,v){this.headers[k]=v},end(s){res({status:this.statusCode,json:JSON.parse(s),headers:this.headers})}};await mods[m]({method,headers:{cookie:cookie||''},body},r)})}
+const mods={auth:require('../api/auth'),save:require('../api/save'),score:require('../api/score'),friends:require('../api/friends'),config:require('../api/config'),ev:require('../api/ev'),rt:require('../api/rt-token')};
+async function call(m,method,body,cookie,url){return new Promise(async res=>{const r={headers:{},setHeader(k,v){this.headers[k]=v},end(s){res({status:this.statusCode,json:JSON.parse(s),headers:this.headers})}};await mods[m]({method,url:url||'/',headers:{cookie:cookie||''},body},r)})}
 const cookieOf=r=>(r.headers['Set-Cookie']||'').split(';')[0];
 let fail=0;const ok=(c,n)=>{console.log((c?'PASS ':'FAIL ')+n);if(!c)fail++};
 (async()=>{
@@ -66,6 +66,10 @@ let fail=0;const ok=(c,n)=>{console.log((c?'PASS ':'FAIL ')+n);if(!c)fail++};
  const gc=await call('friends','POST',{claim:1},cb);ok(gc.json.total===20,'claim gift');
  ok((await call('friends','GET',null,cb)).json.gifts.length===0,'gifts cleared');
  await call('ev','POST',{e:['open','open','day_end','BAD NAME']});const ev=await call('ev','GET');const d0=Object.values(ev.json.days)[0];ok(d0.open===2&&d0.day_end===1&&!d0['BAD NAME'],'event counters');
+ const rt=await call('rt','GET',null,ca);ok(rt.status===200&&rt.json.token,'rt token issued');
+ const rv=await call('rt','GET',null,'','/api/rt-token?verify='+encodeURIComponent(rt.json.token));ok(rv.json.uid===a.json.user.uid&&rv.json.name==='Doris','rt token verifies');
+ ok((await call('rt','GET',null,'','/api/rt-token?verify='+encodeURIComponent(cookieOf(a).split('=')[1]))).status===401,'session cookie is not an rt token');
+ ok((await call('rt','GET',null,'')).status===401,'rt token needs login');
  ok((await call('auth','DELETE',null,ca)).status===200,'logout');
  const er=await call('auth','POST',{email:'Doris@Mail.com',password:'abc123',mode:'register',name:'Doris E'});ok(er.status===200&&er.json.user.via==='email'&&/^[A-Z0-9]{6}$/.test(er.json.user.code),'email register');
  ok((await call('auth','POST',{email:'doris@mail.com',password:'abc123',mode:'register'})).status===409,'email duplicate blocked');

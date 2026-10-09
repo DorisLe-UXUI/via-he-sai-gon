@@ -1,0 +1,16 @@
+name = "vhsg-realtime"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[vars]
+# Máy chủ game trên Vercel dùng để xác minh người chơi đã đăng nhập
+VERIFY_URL = "https://www.sidewalkgamee.fun/api/rt-token"
+ALLOWED_ORIGINS = "https://www.sidewalkgamee.fun,https://sidewalkgamee.fun"
+
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
