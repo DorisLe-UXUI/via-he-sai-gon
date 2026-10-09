@@ -505,7 +505,7 @@ section{background:var(--under,transparent)}
     <div>
       <span class="script l">không chỉ là bán hàng</span>
       <h2 class="h2 l">Sống trọn một ngày ở Sài Gòn</h2>
-      <p class="lead l">Vỉa Hè Sài Gòn đang lớn thành game sống ở phố: có điện thoại, bạn bè, nghề tay trái và một căn nhà để nâng cấp.</p>
+      <p class="lead l">Không chỉ đẩy xe bán hàng: mở quán, vay ngân hàng mua nhà, đi khám bệnh, sửa xe, dò vé số, mời bạn bè cùng chơi.</p>
     </div>
     <div class="track" data-sp="32" aria-label="Tính năng"><div class="rail" id="lifeGrid"></div></div>
   </div>
@@ -616,13 +616,17 @@ const PPL=[['Học sinh','n/npc_student','Tan trường là đông nhất, mê �
 $('people').innerHTML=PPL.map(p=>`<div class="person card"><div class="pl"><img src="a/${p[1]}.webp" alt="${p[0]}" loading="lazy"></div><span class="tm">${p[3]}</span><b>${p[0]}</b><span class="d">${p[2]}</span></div>`).join('');
 const LIFE=[
  ['li/phone','Điện thoại & Townly','Nhắn tin với khách quen, lướt mạng xã hội của phố, nhận quà và lời nhắn.',1],
- ['li/coffee','Năng lượng & tâm trạng','Mệt thì bán chậm, vui thì khách trả hậu. Uống nước mía cho tỉnh.',1],
- ['li/friends','Bạn bè & bảng xếp hạng','Đăng nhập Google, lưu game trên mây, xem phố của bạn bè.',0],
- ['li/cal','Người phố có lịch riêng','Mỗi người đi làm, đi học, đi chợ theo giờ và nhớ bạn đã làm gì.',0],
- ['li/fish','Nghề tay trái','Giao hàng, câu cá, trồng trọt, pha cà phê, mỗi nghề một mini-game.',0],
- ['li/home','Nhà sáu bậc','Từ phòng trọ lên nhà phố, thêm nội thất và đồ trang trí.',0],
- ['a/n/g_point','Chọn nhân vật','Chọn dáng, tóc, áo, màu da trước khi ra phố.',0],
- ['li/event','Sự kiện & bộ sưu tập','Lễ hội, mưa bão, gặp người lạ, gom đủ bộ huy hiệu.',0]];
+ ['li/app_biz','Mở quán, làm ông chủ','Năm loại cơ sở từ sạp tạp hoá tới khách sạn mini, thuê nhân viên, mỗi tối thu tiền.',1],
+ ['li/app_bank','Ngân hàng & mua nhà trả góp','Gửi tiết kiệm có lãi, vay vốn, giữ điểm tín dụng để mua nhà trả góp.',1],
+ ['li/app_hosp','Bệnh viện & tiệm sửa xe','Đứng bán dưới mưa dễ ốm, xe chạy nhiều sẽ hư. Lo cho cả người lẫn xe.',1],
+ ['li/app_lotto','Vé số & Vietlott','Dò vé số mỗi chiều, chọn 6 số chờ Jackpot. Chơi cho vui, đừng dồn vốn.',1],
+ ['li/app_shop','Mua sắm','Đồ ăn hồi sức, đồ dùng có ích lâu dài, quà biếu hàng xóm.',1],
+ ['li/app_me','Tủ đồ','Hơn 40 bộ đồ, mũ, giày, kính, trang sức. Đồ đẹp tăng duyên, khách mua hăng hơn.',1],
+ ['li/app_home','Nhà sáu bậc','Từ phòng trọ lên penthouse, bày nội thất vào phòng của mình.',1],
+ ['li/app_job','Nghề tay trái','Câu cá, giao hàng, trồng rau, nấu 13 món Việt theo công thức.',1],
+ ['li/app_on','Chơi cùng bạn bè','Đăng nhập Google hoặc email, mời bạn bằng link, tặng quà, đua bảng xếp hạng tuần.',1],
+ ['li/app_ach','Thành tựu & đế chế','28 thành tựu bốn độ hiếm, năm bậc đế chế từ Ông trùm tới Huyền thoại Sài Gòn.',1],
+ ['li/event','Sự kiện theo mùa','Tết, Trung thu, mưa bão, chợ đêm, đám cưới trong hẻm, mỗi ngày một khác.',1]];
 $('lifeGrid').innerHTML=LIFE.map(l=>`<article class="lc card"><span class="st ${l[3]?'ok':'wip'}">${l[3]?'Đã có':'Đang làm'}</span><div class="ic"><img src="${l[0]}.webp" alt="" loading="lazy"></div><h3>${l[1]}</h3><p>${l[2]}</p></article>`).join('');
 
 /* ---------- motion: backgrounds, 3D reveals, word headlines, auto tracks ---------- */
