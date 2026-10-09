@@ -14,6 +14,10 @@ function cmd(a){const [c,...r]=a;const C=c.toUpperCase();
  case'ZADD':{const z=kv.get('z'+r[0])||new Map();z.set(r[2],+r[1]);kv.set('z'+r[0],z);return 1}
  case'ZREVRANGE':{const z=[...(kv.get('z'+r[0])||new Map())].sort((a,b)=>b[1]-a[1]).slice(+r[1],+r[2]+1);return r[3]?z.flatMap(([k,v])=>[k,String(v)]):z.map(x=>x[0])}
  case'ZREVRANK':{const z=[...(kv.get('z'+r[0])||new Map())].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);const i=z.indexOf(r[1]);return i<0?null:i}
+ case'LPUSH':{const l=kv.get(r[0])||[];l.unshift(r[1]);kv.set(r[0],l);return l.length}
+ case'LRANGE':{const l=kv.get(r[0]);return Array.isArray(l)?l.slice(+r[1],+r[2]+1):[]}
+ case'LTRIM':{const l=kv.get(r[0]);if(Array.isArray(l))kv.set(r[0],l.slice(+r[1],+r[2]+1));return'OK'}
+ case'DEL':kv.delete(r[0]);return 1;
  case'INCR':{const v=(+kv.get(r[0])||0)+1;kv.set(r[0],String(v));return v}
  case'EXPIRE':return 1;
  case'SADD':{const s=kv.get(r[0])||new Set();s.add(r[1]);kv.set(r[0],s);return 1}
@@ -55,6 +59,11 @@ let fail=0;const ok=(c,n)=>{console.log((c?'PASS ':'FAIL ')+n);if(!c)fail++};
  ok((await call('friends','GET',null,cb)).json.friends[0].name==='Doris','friendship is mutual');
  const v1=await call('friends','POST',{visit:'g2'},ca);ok(v1.json.bonus===5,'first visit bonus');
  ok((await call('friends','POST',{visit:'g2'},ca)).json.bonus===0,'second visit same day no bonus');
+ const g1=await call('friends','POST',{gift:b.json.user.uid},ca);ok(g1.status===200,'send gift');
+ ok((await call('friends','POST',{gift:b.json.user.uid},ca)).status===429,'gift once per day');
+ const gl=await call('friends','GET',null,cb);ok(gl.json.gifts.length===1&&gl.json.gifts[0].from==='Doris','gift arrives');
+ const gc=await call('friends','POST',{claim:1},cb);ok(gc.json.total===20,'claim gift');
+ ok((await call('friends','GET',null,cb)).json.gifts.length===0,'gifts cleared');
  ok((await call('auth','DELETE',null,ca)).status===200,'logout');
  const er=await call('auth','POST',{email:'Doris@Mail.com',password:'abc123',mode:'register',name:'Doris E'});ok(er.status===200&&er.json.user.via==='email'&&/^[A-Z0-9]{6}$/.test(er.json.user.code),'email register');
  ok((await call('auth','POST',{email:'doris@mail.com',password:'abc123',mode:'register'})).status===409,'email duplicate blocked');

@@ -3,15 +3,18 @@
 const C = require('./_lib/core');
 const num = (v, a, b) => Math.max(a, Math.min(b, Math.floor(+v || 0)));
 module.exports = C.handler(['GET', 'POST'], async (req, res) => {
+  const wk = (() => { const d = new Date(); d.setUTCHours(0, 0, 0, 0); d.setUTCDate(d.getUTCDate() + 3 - ((d.getUTCDay() + 6) % 7)); const y = new Date(Date.UTC(d.getUTCFullYear(), 0, 4)); return d.getUTCFullYear() + 'w' + (1 + Math.round(((d - y) / 864e5 - 3 + ((y.getUTCDay() + 6) % 7)) / 7)); })();
   if (req.method === 'GET') {
-    const arr = await C.redis('ZREVRANGE', 'lb:wealth', 0, 49, 'WITHSCORES'); const rows = [];
+    const weekly = String(req.url || '').includes('w=1') || (req.query && req.query.w);
+    const key = weekly ? 'lb:week:' + wk : 'lb:wealth';
+    const arr = await C.redis('ZREVRANGE', key, 0, 49, 'WITHSCORES'); const rows = [];
     for (let i = 0; i < arr.length; i += 2) {
       const uid = arr[i], p = await C.redis('HMGET', 'street:' + uid, 'name', 'level', 'day', 'chain', 'cart');
       rows.push({ uid, wealth: +arr[i + 1], name: p[0] || 'Người chơi', level: +p[1] || 1, day: +p[2] || 1, chain: +p[3] || 0, cart: p[4] || 'banhmi' });
     }
     const s = C.session(req); let me = null;
-    if (s) { const r = await C.redis('ZREVRANK', 'lb:wealth', s.uid); me = r == null ? null : r + 1; }
-    return C.send(res, 200, { rows, me });
+    if (s) { const r = await C.redis('ZREVRANK', key, s.uid); me = r == null ? null : r + 1; }
+    return C.send(res, 200, { rows, me, week: weekly ? wk : null });
   }
   const s = C.needUser(req), b = await C.readBody(req);
   // Sanity limits: the client is untrusted, so cap values and rate limit.
@@ -20,7 +23,11 @@ module.exports = C.handler(['GET', 'POST'], async (req, res) => {
   await C.redis('SET', 'rl:score:' + s.uid, Date.now(), 'EX', 60);
   const cash = num(b.cash, 0, 5e9), assets = num(b.assets, 0, 5e9), wealth = cash + assets;
   const name = (await C.redis('HGET', 'user:' + s.uid, 'name')) || 'Người chơi';
-  await C.redis('HSET', 'street:' + s.uid, 'name', name, 'level', num(b.level, 1, 999), 'day', num(b.day, 1, 99999), 'chain', num(b.chain, 0, 999), 'cart', C.clean(b.cart, 20), 'rep', num((+b.rep || 0) * 10, 0, 50), 'cash', cash, 'sold', num(b.sold, 0, 1e9), 'deco', C.clean(JSON.stringify(b.deco || {}), 400), 'seen', Date.now());
+  await C.redis('HSET', 'street:' + s.uid, 'name', name, 'level', num(b.level, 1, 999), 'day', num(b.day, 1, 99999), 'chain', num(b.chain, 0, 999), 'cart', C.clean(b.cart, 20), 'rep', num((+b.rep || 0) * 10, 0, 50), 'cash', cash, 'sold', num(b.sold, 0, 1e9), 'deco', C.clean(JSON.stringify(b.deco || {}), 400), 'seen', Date.now(), 'wealth', wealth);
   await C.redis('ZADD', 'lb:wealth', wealth, s.uid);
+  await C.redis('SET', 'wk0:' + wk + ':' + s.uid, wealth, 'NX', 'EX', 1209600);
+  const w0 = +(await C.redis('GET', 'wk0:' + wk + ':' + s.uid)) || wealth;
+  await C.redis('ZADD', 'lb:week:' + wk, Math.max(0, wealth - w0), s.uid);
+  await C.redis('EXPIRE', 'lb:week:' + wk, 2419200);
   C.send(res, 200, { ok: true, wealth });
 });
