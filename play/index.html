@@ -3169,6 +3169,80 @@ function emSwap2(root){if(!root||!root.querySelectorAll)return;const R=window.EM
 #sheet img.emi,#modal img.emi,#toasts img.emi{width:1.2em;height:1.2em;vertical-align:-.22em;margin:-.15em 0}#toasts .tt>i img.emi{width:26px;height:26px;vertical-align:middle}
 #modal .mi img.emi{width:64px;height:64px}
 `;document.head.appendChild(st)})();
+// ===================== KINH DOANH NHIỀU NGÀNH + ĐẾ CHẾ (chơi tiếp sau Ông trùm) =====================
+if(!SAVE_KEYS.includes('biz'))SAVE_KEYS.push('biz');
+const BIZ=[
+ {id:'stall',n:'Sạp tạp hoá',img:'biz_stall_front',cost:1500,inc:120,staff:1,d:'Bán đồ lặt vặt đầu hẻm, thu đều mỗi ngày.'},
+ {id:'cafe',n:'Quán cà phê vỉa hè',img:'biz_cafe_front',cost:4000,inc:300,staff:2,d:'Ghế nhựa, cà phê sữa đá, khách ngồi cả buổi.'},
+ {id:'shop',n:'Cửa hàng tiện lợi',img:'biz_shop_front',cost:9000,inc:640,staff:2,d:'Mở cửa từ sáng tới khuya, khách văn phòng ghé hoài.'},
+ {id:'rest',n:'Nhà hàng cơm nhà',img:'biz_restaurant_front',cost:20000,inc:1400,staff:3,d:'Món Việt nấu kỹ, trưa tối đều đông.'},
+ {id:'hotel',n:'Khách sạn mini',img:'biz_hotel_front',cost:50000,inc:3200,staff:3,d:'Đón khách du lịch, doanh thu lớn nhưng cần quản lý giỏi.'}];
+const STAFF=[['biz_staff_1','Tèo','Phụ bán',25,.08],['biz_staff_2','Lan','Thu ngân',35,.12],['biz_staff_3','Bếp Hoà','Đầu bếp',60,.2],['biz_staff_4','Quản lý Tâm','Quản lý',90,.3],['biz_staff_5','Bảo vệ Hùng','Bảo vệ',40,.1],['biz_staff_6','Shipper Tín','Giao hàng',45,.15]];
+const SIGNS=[['biz_sign_a','Bảng gỗ',0,0],['biz_sign_b','Bảng đèn',300,.06],['biz_sign_c','Đèn lồng',600,.1],['biz_sign_d','Bảng phấn',200,.04]];
+const EMPIRE=[['Ông trùm hàng rong','3 mặt bằng + 3 triệu tiền mặt',()=>Object.values(S.premises||{}).filter(p=>p.own).length>=3&&S.cash>=GOAL_CASH],
+ ['Chủ chuỗi nhỏ','Sở hữu 2 cơ sở kinh doanh',()=>bizN()>=2],['Đại gia phố','Tài sản ròng 50 triệu',()=>netWorth()>=50000],
+ ['Tỷ phú vỉa hè','Đủ 5 ngành, tài sản 150 triệu',()=>bizN()>=5&&netWorth()>=150000],['Huyền thoại Sài Gòn','Mọi cơ sở cấp 5 và đóng dấu 13 thành phố',()=>BIZ.every(b=>bz().own[b.id]&&bz().own[b.id].lv>=5)&&Object.keys(S.travelPassport||{}).length>=REG_ORDER.length]];
+const bz=()=>{if(!S.biz)S.biz={own:{},hist:[],tot:0,emp:0,prest:0};const b=S.biz;b.own=b.own||{};b.hist=b.hist||[];return b};
+const bizN=()=>Object.keys(bz().own).length;
+const bizVal=()=>Object.keys(bz().own).reduce((a,k)=>{const B=BIZ.find(x=>x.id===k),o=bz().own[k];return a+B.cost*(1+.6*(o.lv-1))*.7},0);
+const netWorth=()=>Math.round((S.cash||0)+bizVal()+Object.values(S.premises||{}).filter(p=>p.own).length*1500+(S.house?HOUSE:0));
+const upCost=(B,o)=>Math.round(B.cost*.6*Math.pow(1.55,o.lv-1));
+function bizIncome(k,rnd){const B=BIZ.find(x=>x.id===k),o=bz().own[k];const sb=o.staff.reduce((a,s)=>a+STAFF.find(x=>x[0]===s)[4],0),sg=(SIGNS.find(x=>x[0]===o.sign)||SIGNS[0])[3];
+  const wage=o.staff.reduce((a,s)=>a+STAFF.find(x=>x[0]===s)[3],0),gross=B.inc*(1+.45*(o.lv-1))*(1+sb+sg)*(1+.05*(bz().prest||0))*(rnd==null?1:rnd);return{gross:Math.round(gross),wage,net:Math.round(gross-wage)}}
+function bizBuy(k){const B=BIZ.find(x=>x.id===k),b=bz();if(b.own[k])return;if(S.cash<B.cost){toast('💸 Cần '+fmt(B.cost)+' để mở '+B.n);return}addCash(-B.cost);b.own[k]={lv:1,staff:[],sign:'biz_sign_a',day:S.day};
+  modal({img:'u/i/biz_deed',c:'#2f7a43',tag:'Giấy chứng nhận',title:'Khai trương '+B.n,text:'Từ mai cơ sở bắt đầu có doanh thu. Thuê nhân viên và treo bảng hiệu đẹp để thu nhiều hơn.',cta:'Tuyệt'});save();ui();phRender()}
+function bizUp(k){const B=BIZ.find(x=>x.id===k),o=bz().own[k];if(!o||o.lv>=5)return;const c=upCost(B,o);if(S.cash<c){toast('💸 Cần '+fmt(c));return}addCash(-c);o.lv++;toast('🏪 '+B.n+' lên cấp '+o.lv);save();ui();phRender()}
+function bizHire(k,s){const B=BIZ.find(x=>x.id===k),o=bz().own[k];const i=o.staff.indexOf(s);if(i>=0){o.staff.splice(i,1);toast('Đã cho '+STAFF.find(x=>x[0]===s)[1]+' nghỉ')}else{if(o.staff.length>=B.staff+(o.lv>=3?1:0)){toast('Hết chỗ, nâng cấp cơ sở để thuê thêm');return}if(Object.values(bz().own).some(x=>x.staff.includes(s))){toast('Người này đang làm ở cơ sở khác');return}o.staff.push(s);toast('🤝 Đã thuê '+STAFF.find(x=>x[0]===s)[1])}save();phRender()}
+function bizSign(k,s){const o=bz().own[k],S_=SIGNS.find(x=>x[0]===s);o.own_s=o.own_s||{biz_sign_a:1};if(!o.own_s[s]){if(S.cash<S_[2]){toast('💸 Cần '+fmt(S_[2]));return}addCash(-S_[2]);o.own_s[s]=1}o.sign=s;save();phRender()}
+// cuối ngày: cộng thu nhập, báo cáo
+{const _ed=endDay;endDay=function(){_ed.apply(this,arguments);try{const b=bz();if(!bizN())return;let tot=0,lines=[];
+  Object.keys(b.own).forEach(k=>{const B=BIZ.find(x=>x.id===k),o=b.own[k];if(o.day>=S.day)return;let r=.85+Math.random()*.3;const ev=Math.random();let note='';
+   if(ev<.06){r*=.5;note=' · mất điện nửa ngày'}else if(ev<.12){r*=1.4;note=' · khách đoàn ghé'}
+   const v=bizIncome(k,r);tot+=v.net;lines.push(`<b>${B.n}</b> cấp ${o.lv}: ${v.net>=0?'+':''}${fmt(v.net)}<small>${note}</small>`)});
+  if(!lines.length)return;addCash(tot);b.tot=(b.tot||0)+tot;b.hist.push(tot);if(b.hist.length>14)b.hist.shift();
+  setTimeout(()=>modal({img:'u/i/biz_chart_frame',c:'#2f7a43',tag:'Sổ kinh doanh',title:'Thu nhập hôm nay '+(tot>=0?'+':'')+fmt(tot),text:lines.join('<br>'),cta:'Ghi sổ'}),900);empCheck()}catch(e){}}}
+function empCheck(){const b=bz();while(b.emp<EMPIRE.length&&EMPIRE[b.emp][2]()){const e=EMPIRE[b.emp];b.emp++;S.dexTitles=S.dexTitles||[];if(!S.dexTitles.includes(e[0]))S.dexTitles.push(e[0]);
+  modal({img:'u/i/title_ribbon_'+Math.min(3,1+Math.floor(b.emp/2)),c:'#c9a227',tag:'Đế chế · bậc '+b.emp+'/'+EMPIRE.length,title:e[0],text:e[1]+'. Danh hiệu mới đã vào hồ sơ.'+(b.emp>=EMPIRE.length?'<br><br>Mày có thể bắt đầu <b>Mùa mới</b> trong app Kinh doanh: chơi lại từ đầu, giữ tủ đồ, mọi doanh thu +5% vĩnh viễn.':''),cta:'Tiếp tục'});save()}}
+setInterval(()=>{try{if(S.phase==='shop'||S.phase==='play')empCheck()}catch(e){}},20000);
+function newSeason(){const b=bz();if(b.emp<EMPIRE.length)return;modal({ic:'🌅',c:'#c9a227',tag:'Mùa mới',title:'Bắt đầu lại với 100k?',text:'Tiền, xe, mặt bằng, cơ sở kinh doanh về lại từ đầu. Giữ lại: tủ đồ, danh hiệu, hộ chiếu. Doanh thu +5% vĩnh viễn cho mỗi mùa.',cta:'Bắt đầu mùa mới',cta2:'Để sau',
+  onOk:()=>{const keep={pname:S.pname,hero:S.hero,outfit:S.outfit,outfits:S.outfits,look:S.look,wd:S.wd,dexTitles:S.dexTitles,travelPassport:S.travelPassport,life:S.life,biz:{own:{},hist:[],tot:0,emp:0,prest:(b.prest||0)+1}};
+   try{localStorage.setItem(SAVE_KEY,JSON.stringify(Object.assign({v:SAVE_VERSION,day:1,cash:100},keep)))}catch(e){}location.reload()}})}
+// ---------- app Kinh doanh ----------
+function bizBody(){const b=bz();const nw=netWorth();
+  const emp=`<div class="phcard"><b>Đế chế · ${EMPIRE[Math.min(b.emp,EMPIRE.length-1)][0]}</b> <small>bậc ${b.emp}/${EMPIRE.length}${b.prest?` · mùa ${b.prest+1} (+${b.prest*5}% doanh thu)`:''}</small><div class="phbar" style="margin:6px 0"><i style="width:${b.emp/EMPIRE.length*100}%;background:#ffd27a"></i></div>${b.emp<EMPIRE.length?`<small>Tiếp theo: <b>${EMPIRE[b.emp][0]}</b> — ${EMPIRE[b.emp][1]}</small>`:`<button class="phbtn" onclick="newSeason()">Bắt đầu mùa mới</button>`}<br><small>Tài sản ròng: <b>${fmt(nw)}</b></small></div>`;
+  const H=b.hist.slice(-7),mx=Math.max(1,...H.map(Math.abs));
+  const chart=H.length?`<div class="phcard"><b>Thu nhập kinh doanh 7 ngày</b><div class="phch">${H.map(v=>`<i style="height:${Math.max(4,Math.abs(v)/mx*100)}%;${v<0?'background:#e2471e':''}" title="${fmt(v)}"></i>`).join('')}</div><small>Tổng từ trước tới nay: ${fmt(b.tot||0)}</small></div>`:'';
+  const cards=BIZ.map(B=>{const o=b.own[B.id];if(!o)return `<div class="phcard bzc lock"><img src="a/u/i/${B.img}.webp" alt=""><div style="flex:1"><b>${B.n}</b><br><small>${B.d}</small><br><small>Thu khoảng ${fmt(B.inc)}/ngày</small><br><button class="phbtn" ${S.cash<B.cost?'disabled':''} onclick="bizBuy('${B.id}')">Mở · ${fmt(B.cost)}</button></div></div>`;
+    const v=bizIncome(B.id),slots=B.staff+(o.lv>=3?1:0);
+    return `<div class="phcard"><div class="bzc"><img src="a/u/i/${B.img}.webp" alt=""><div style="flex:1"><b>${B.n}</b> <small>cấp ${o.lv}/5</small><div class="phbar" style="margin:4px 0"><i style="width:${o.lv*20}%;background:#7fd36e"></i></div><small>Dự kiến lãi <b>${fmt(v.net)}</b>/ngày (doanh thu ${fmt(v.gross)}, lương ${fmt(v.wage)})</small><br>${o.lv<5?`<button class="phbtn" onclick="bizUp('${B.id}')">Nâng cấp · ${fmt(upCost(B,o))}</button>`:'<small class="own">Cấp tối đa</small>'}</div></div>
+     <h4>Nhân viên ${o.staff.length}/${slots}</h4><div class="tiles bzs">${STAFF.map(s=>{const on=o.staff.includes(s[0]);return `<button class="tile ${on?'on':''}" onclick="bizHire('${B.id}','${s[0]}')"><img src="a/u/i/${s[0]}.webp" alt="">${s[1]}<small>${s[2]} · +${Math.round(s[4]*100)}%</small><small class="own">${on?'Đang làm':s[3]+'k/ngày'}</small></button>`}).join('')}</div>
+     <h4>Bảng hiệu</h4><div class="tiles bzs">${SIGNS.map(g=>{const own=(o.own_s||{biz_sign_a:1})[g[0]];return `<button class="tile ${o.sign===g[0]?'on':''}" onclick="bizSign('${B.id}','${g[0]}')"><img src="a/u/i/${g[0]}.webp" alt="">${g[1]}<small>${g[3]?'+'+Math.round(g[3]*100)+'% khách':'Cơ bản'}</small>${own?'':`<small>${fmt(g[2])}</small>`}</button>`}).join('')}</div></div>`}).join('');
+  return emp+chart+cards}
+APPS.splice(Math.max(0,APPS.findIndex(a=>a[0]==='job')),0,['biz','🏪','Kinh doanh','#2f7a43']);
+{const _l=l2Body;l2Body=function(a){if(a==='biz')return bizBody();return _l(a)}}
+L2APPS.push(['biz','🏪','Kinh doanh','#2f7a43']);
+(function(){const st=document.createElement('style');st.textContent=`#phone .bzc{display:flex;gap:12px;align-items:center}#phone .bzc>img{width:84px;height:84px;object-fit:contain;flex:none;filter:drop-shadow(0 6px 6px rgba(0,0,0,.4))}#phone .bzc.lock>img{filter:grayscale(.6) drop-shadow(0 6px 6px rgba(0,0,0,.4))}
+#phone h4{margin:10px 0 6px;font:800 13px 'Baloo 2';color:#ffd27a}#phone .tiles.bzs{grid-template-columns:repeat(3,1fr)}#phone .tiles.bzs img{width:52px;height:52px}`;document.head.appendChild(st)})();
+// ===================== PHÒNG CỦA MÀY: nội thất đặt vào phòng =====================
+// FURN index → vị trí trong phòng (x%, đáy y%, rộng%, lớp)
+const FPOS=[[8,80,13,4],[30,66,19,2],[89,70,11,3],[63,52,7,5],[48,86,28,6],[74,64,16,2],[90,50,13,1],[16,62,15,1],[50,94,40,0],[46,30,15,1],[33,48,9,4],[70,46,0,0]];
+const WALLS=['#d9c3a0','#e8d9b8','#cfe0d8','#e9d0c4','#d6d3ea','#f0e2c0'];
+function roomHtml(){const x=ensureL2(),t=x.home.t;const own=x.home.f;
+  const items=own.map(i=>{const p=FPOS[i]||[50,80,14,1];if(!p[2])return '';return `<img class="rf ${i===8?'rug':''}" src="a/u/i/${FURN_IMG[i]}.webp" alt="${FURN[i][0]}" title="${FURN[i][0]}" style="left:${p[0]}%;bottom:${100-p[1]}%;width:${p[2]}%;z-index:${p[3]}">`}).join('');
+  return `<div class="room" style="--wall:${WALLS[t]||WALLS[0]}"><div class="rw"><i class="win"></i></div><div class="rfl"></div>${items}${own.length?'':'<div class="rempty">Phòng còn trống. Mua nội thất bên dưới để bày vào.</div>'}</div>`}
+{const _l=l2Body;l2Body=function(a){let h=_l(a);if(a==='home'){h=h.replace('<h3>Nội thất</h3>','<h3>Phòng của mày</h3>'+roomHtml()+'<h3>Nội thất</h3>')}return h}}
+(function(){const st=document.createElement('style');st.textContent=`
+#phone .room{position:relative;aspect-ratio:16/11;border-radius:18px;overflow:hidden;margin-bottom:12px;box-shadow:0 10px 24px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.15)}
+#phone .room .rw{position:absolute;left:0;right:0;top:0;height:58%;background:linear-gradient(var(--wall),color-mix(in srgb,var(--wall) 80%,#6b4020));}
+#phone .room .rw::after{content:'';position:absolute;left:0;right:0;bottom:0;height:8%;background:#8a5a2c;box-shadow:0 2px 0 #5a3a18}
+#phone .room .win{position:absolute;left:58%;top:12%;width:22%;height:46%;border-radius:8px;background:linear-gradient(#9fd3ff,#e8f6ff);box-shadow:inset 0 0 0 5px #fff6e0,0 4px 8px rgba(0,0,0,.2)}
+#phone .room .win::after{content:'';position:absolute;left:50%;top:5px;bottom:5px;width:4px;background:#fff6e0;transform:translateX(-50%)}
+#phone .room .rfl{position:absolute;left:0;right:0;bottom:0;height:42%;background:repeating-linear-gradient(90deg,#b07a46 0 38px,#a06c3a 38px 40px),#b07a46}
+#phone .room .rf{position:absolute;transform:translateX(-50%);filter:drop-shadow(0 6px 5px rgba(40,20,5,.4));animation:rfIn .45s cubic-bezier(.2,1.4,.3,1) both}
+#phone .room .rf.rug{filter:none;transform:translateX(-50%) scaleY(.55);transform-origin:50% 100%}
+@keyframes rfIn{from{opacity:0;translate:0 -20px}}
+#phone .room .rempty{position:absolute;inset:auto 10% 10% 10%;text-align:center;font:600 12px 'Be Vietnam Pro';color:#fff;background:rgba(30,18,10,.6);border-radius:10px;padding:6px}
+`;document.head.appendChild(st)})();
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
