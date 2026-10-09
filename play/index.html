@@ -3008,6 +3008,19 @@ NEWP.forEach(p=>{PRODUCTS.push(p);PRD[p.id]=p});
 {const _pa=patchAir;patchAir=function(){_pa();const b=document.getElementById('tvPass');if(b)b.innerHTML=b.innerHTML.replace(/\/\s*8\b/,'/'+REG_ORDER.length)}}
 
 {const _sp=showPassport;showPassport=function(){_sp.apply(this,arguments);const r=sheet.querySelector('.tvpass');if(r)r.innerHTML=r.innerHTML.replace(/(\d+)\/8 điểm đến/,'$1/'+REG_ORDER.length+' điểm đến')}}
+// ---------- người địa phương: khách trên phố đúng thành phố của họ ----------
+const LOCALS={
+ vungTau:[['u/c/npc_vungtau_1','Chú ngư dân','Biển êm thì ghe về sớm, cá mực tươi rói đó con.'],['u/c/npc_vungtau_2','Chị hướng dẫn viên','Đoàn khách Sài Gòn cuối tuần đông lắm, chuẩn bị đồ uống nha.']],
+ nhaTrang:[['u/c/npc_nhatrang_1','Cô bán cá','Cá Nha Trang sáng nào cũng tươi, mua về làm bún chả cá là ngon nhất.'],['u/c/npc_nhatrang_2','Anh du khách','Tui mới xuống tàu, ở đây có gì ăn vặt không em?']],
+ quyNhon:[['u/c/npc_quynhon_1','Bà bán cá','Quy Nhơn ít khách mà khách sành, bán đồ ngon là có mối liền.'],['u/c/npc_quynhon_2','Anh phượt thủ','Đi Eo Gió về đói quá, có bánh ít lá gai không?']],
+ ninhBinh:[['u/c/npc_ninhbinh_1','Bác quang gánh','Khách đi đò Tràng An về là đói, trưa bán cơm cháy hết veo.'],['u/c/npc_ninhbinh_2','Cô lái đò','Chèo cả buổi khát nước lắm, cho cô ly gì mát mát.']],
+ sapa:[['u/c/npc_sapa_1','Chị H\'Mông hái rau','Sa Pa lạnh, ai lên đây cũng tìm đồ nóng với chén rượu ấm bụng.'],['u/c/npc_sapa_2','Anh người Dao','Chợ phiên cuối tuần đông vui, mang thổ cẩm xuống xuôi bán được giá đó.']]};
+{const _sc=spawnCustomer;spawnCustomer=function(){const n=cust.length;_sc.apply(this,arguments);const L=LOCALS[S.region];if(!L||cust.length<=n||Math.random()>.5)return;
+  const c=cust[cust.length-1],l=pick(L);c.id=l[0];c.local=1;c.name=l[1]+' '+(REGIONS[S.region]||{}).name}}
+{const _dc=drawCust;drawCust=function(c){if(c.local){drawChar(c.id,c.x,c.y,{mv:c.walking,ph:c.ph,flip:c.face<0,h:150});return}return _dc(c)}}
+{const _ar=arrive;arrive=function(dest,cls){const first=!S.travelPassport[dest];_ar(dest,cls);const L=LOCALS[dest];if(first&&L){const l=L[0];setTimeout(()=>modal({img:l[0],c:REGIONS[dest].c,tag:'Người địa phương',title:'Chào mừng tới '+REGIONS[dest].name,text:'<b>'+l[1]+':</b> “'+l[2]+'”<br><br><small>Ở đây sẽ gặp khách địa phương ghé xe. Họ thích đặc sản vùng và trả hậu nếu hàng đúng gu.</small>',cta:'Ra phố bán thôi'}),400)}}}
+// cho phone app Hàng xóm biết có người địa phương
+{const _l2b=l2Body;l2Body=function(a){let h=_l2b(a);if(a==='nb'&&LOCALS[S.region]){h=`<h3>Người ${REGIONS[S.region].name}</h3>`+LOCALS[S.region].map(l=>`<div class="phcard"><div class="phrow"><img src="a/${l[0]}.webp" alt="" style="object-fit:cover;object-position:top"><div><b>${l[1]}</b><div>${l[2]}</div></div></div></div>`).join('')+h}return h}}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
