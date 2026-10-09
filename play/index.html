@@ -1145,7 +1145,7 @@ function spawnVeh(extra){const tot=VEH.reduce((a,v)=>a+v[3],0);let r=Math.random
 const P={x:SPOTS.find(s=>s.id==='cho').x+90,dir:1,y:LANE,walk:0,mv:false,hop:0,pose:'',poseT:0,jump:0};
 let dayT=0;const hour=()=>H0+dayT/DAY_LEN*(H1-H0);
 const charm=()=>(typeof accCharm==='function'?accCharm():0)+(OUTFITS.find(o=>o.id===S.outfit)||{charm:0}).charm+S.stats.duyen+(typeof decoN==='function'?decoN()*.5:0)+(typeof cartAttr==='function'?cartAttr():0);
-const staMax=()=>100+S.stats.suc*15+(S.house?10:0);
+const staMax=()=>100+S.stats.suc*15+(S.house?10:0)-(typeof sickPen==='function'?sickPen():0);
 const xpNeed=()=>Math.round(40*Math.pow(1.35,S.level-1));
 const title=()=>TITLES.filter(t=>S.level>=t[0]).pop()[1];
 let weather={rain:false,until:0,next:0,a:0,flash:0};
@@ -1305,7 +1305,7 @@ let uiT=0,lastPeak=null;
 function tick(dt){if(typeof MO!=='undefined'&&MO)return;
   let ix=(hold.r||keys.d||keys.arrowright?1:0)-(hold.l||keys.a||keys.arrowleft?1:0);
   if(!ix&&P.target!=null){const d=P.target-P.x;if(Math.abs(d)<10)P.target=null;else ix=Math.sign(d)}else if(ix)P.target=null;
-  const spd=235*cartSpd()*(S.owned.xe?1.12:1)*(S.owned.xemay?1.1:1)*(1+S.stats.nhanh*.08)*(S.sta<20?.65:1)*(S.riding?2.1:1);
+  const spd=235*cartSpd()*(S.owned.xe?1.12:1)*(S.owned.xemay?1.1:1)*(1+S.stats.nhanh*.08)*(S.sta<20?.65:1)*(S.riding?2.1:1)*(typeof condMul==='function'?condMul():1);
   P.mv=false;
   if(ix&&sheet.hidden){if(S.open)closeStall();P.dir=ix;P.mv=true;const nx=P.x+ix*spd*dt;const mx=maxX();
     if(nx>mx){P.x=mx;P.target=null;lockedHint()}else P.x=Math.max(70,nx);
@@ -3192,7 +3192,7 @@ const EMPIRE=[['Ông trùm hàng rong','3 mặt bằng + 3 triệu tiền mặt'
 const bz=()=>{if(!S.biz)S.biz={own:{},hist:[],tot:0,emp:0,prest:0};const b=S.biz;b.own=b.own||{};b.hist=b.hist||[];return b};
 const bizN=()=>Object.keys(bz().own).length;
 const bizVal=()=>Object.keys(bz().own).reduce((a,k)=>{const B=BIZ.find(x=>x.id===k),o=bz().own[k];return a+B.cost*(1+.6*(o.lv-1))*.7},0);
-const netWorth=()=>Math.round((S.cash||0)+bizVal()+Object.values(S.premises||{}).filter(p=>p.own).length*1500+(S.house?HOUSE:0));
+let netWorth=()=>Math.round((S.cash||0)+bizVal()+Object.values(S.premises||{}).filter(p=>p.own).length*1500+(S.house?HOUSE:0));
 const upCost=(B,o)=>Math.round(B.cost*.6*Math.pow(1.55,o.lv-1));
 function bizIncome(k,rnd){const B=BIZ.find(x=>x.id===k),o=bz().own[k];const sb=o.staff.reduce((a,s)=>a+STAFF.find(x=>x[0]===s)[4],0),sg=(SIGNS.find(x=>x[0]===o.sign)||SIGNS[0])[3];
   const wage=o.staff.reduce((a,s)=>a+STAFF.find(x=>x[0]===s)[3],0),gross=B.inc*(1+.45*(o.lv-1))*(1+sb+sg)*(1+.05*(bz().prest||0))*(rnd==null?1:rnd);return{gross:Math.round(gross),wage,net:Math.round(gross-wage)}}
@@ -3453,6 +3453,181 @@ function enSwap(root){if(LANG()!=='en'||!root||!root.querySelectorAll)return;con
 {const ids=['phone','prof','modal','mg','scr','fly','toasts'];const mo=new MutationObserver(ms=>{if(LANG()!=='en')return;mo.disconnect();ms.forEach(m=>enSwap(m.target.nodeType===1?m.target:m.target.parentNode));obs()});
  const obs=()=>ids.forEach(id=>{const e=document.getElementById(id);if(e)mo.observe(e,{childList:true,subtree:true})});setTimeout(obs,500);
  const _sp=showProfile;showProfile=function(){_sp.apply(this,arguments);const p=document.getElementById('prof');if(p){enSwap(p);mo.observe(p,{childList:true,subtree:true})}}}
+// ===================== NGÂN HÀNG (tiết kiệm, vay, trả góp mua nhà, điểm tín dụng) · BỆNH VIỆN · TIỆM SỬA XE =====================
+if(!SAVE_KEYS.includes('fin'))SAVE_KEYS.push('fin','hp','cartHp','ins');
+const fin=()=>{if(!S.fin)S.fin={sav:0,credit:600,mort:null,miss:0,log:[]};return S.fin};
+if(S.hp==null)S.hp=100;if(S.cartHp==null)S.cartHp=100;
+const credLim=()=>{const c=fin().credit;return c>=760?3000:c>=700?1500:c>=640?800:c>=580?400:150};
+const mortRate=()=>{const c=fin().credit;return c>=760?.006:c>=700?.008:c>=640?.01:.013};
+const credTxt=c=>c>=760?'Rất tốt':c>=700?'Tốt':c>=640?'Khá':c>=580?'Trung bình':'Kém';
+function credAdj(d){const f=fin();f.credit=Math.max(300,Math.min(850,Math.round(f.credit+d)))}
+function finLog(t){const f=fin();f.log.unshift({d:S.day,t});f.log=f.log.slice(0,12)}
+function bankDep(n){if(n==='all')n=S.cash;n=Math.min(n,S.cash);if(n<=0){toast('Không có tiền mặt để gửi');return}addCash(-n);fin().sav+=n;finLog('Gửi tiết kiệm '+fmt(n));try{sfx.coin()}catch(e){};save();phRender()}
+function bankWd(n){const f=fin();if(n==='all')n=f.sav;n=Math.min(n,f.sav);if(n<=0)return;f.sav-=n;addCash(n);finLog('Rút '+fmt(n));try{sfx.coin()}catch(e){};save();phRender()}
+function bankLoan(n){if(S.loan+n>credLim()){toast('Hạn mức vay theo tín dụng: '+fmt(credLim()));return}S.loan+=n;addCash(n);credAdj(-6);finLog('Vay '+fmt(n));save();phRender()}
+function bankPay(n){if(n==='all')n=S.loan;n=Math.min(n,S.loan,S.cash);if(n<=0){toast('Không đủ tiền mặt để trả');return}S.loan-=n;addCash(-n);credAdj(n>=100?5:2);finLog('Trả nợ '+fmt(n));save();phRender()}
+function mortBuy(){const x=ensureL2(),n=HOMES[x.home.t+1],f=fin();if(!n||f.mort)return;const price=n[2],down=Math.round(price*.3);
+  if(f.credit<580){toast('Điểm tín dụng chưa đủ (cần từ 580)');return}if(S.cash<down){toast('Cần trả trước 30%: '+fmt(down));return}
+  const P_=price-down,r=mortRate(),N=20,pay=Math.round(P_*r/(1-Math.pow(1+r,-N)));
+  modal({img:'u/i/biz_deed',c:'#2f6fb3',tag:'Vay mua nhà',title:'Trả góp '+n[0],text:`Giá nhà <b>${fmt(price)}</b><br>Trả trước 30%: <b>${fmt(down)}</b><br>Vay: <b>${fmt(P_)}</b>, lãi ${(r*100).toFixed(1)}%/ngày<br>Trả góp <b>${fmt(pay)}/ngày</b> trong ${N} ngày (trừ tự động cuối ngày)<br><small>Thiếu tiền trả 3 lần là ngân hàng thu hồi nhà.</small>`,cta:'Ký hợp đồng',cta2:'Để sau',
+   onOk:()=>{addCash(-down);x.home.t++;S.house=true;f.mort={tier:x.home.t,left:N,pay,owe:P_,name:n[0]};finLog('Vay mua '+n[0]);credAdj(8);try{sfx.fanfare()}catch(e){};toast('🏠 Dọn vào '+n[0]+' (trả góp)');save();phRender()}})}
+function mortPayoff(){const f=fin(),m=f.mort;if(!m)return;const amt=Math.round(m.pay*m.left*.92);if(S.cash<amt){toast('Cần '+fmt(amt)+' để tất toán');return}addCash(-amt);f.mort=null;credAdj(25);finLog('Tất toán nhà, giảm 8% lãi');toast('🏠 Nhà đã là của mày hoàn toàn');save();phRender()}
+// cuối ngày: lãi tiết kiệm, trả góp, sức khoẻ, hao mòn xe
+{const _ed=endDay;endDay=function(){_ed.apply(this,arguments);try{const f=fin();
+  if(f.sav>0){const it=Math.round(f.sav*.008);if(it){f.sav+=it;finLog('Lãi tiết kiệm +'+fmt(it))}}
+  if(f.mort){const m=f.mort;if(S.cash>=m.pay){addCash(-m.pay);m.left--;f.miss=0;credAdj(4);finLog('Trả góp nhà −'+fmt(m.pay));if(m.left<=0){f.mort=null;credAdj(30);setTimeout(()=>modal({img:'u/i/biz_deed',c:'#2f7a43',tag:'Ngân hàng',title:'Trả hết nợ nhà!',text:m.name+' giờ là của mày hoàn toàn. Điểm tín dụng tăng mạnh.',cta:'Tuyệt'}),1200)}}
+   else{f.miss++;credAdj(-40);addCash(-Math.min(S.cash,20));finLog('Trễ hạn trả góp ('+f.miss+'/3)');
+    if(f.miss>=3){const x=ensureL2();x.home.t=Math.max(0,m.tier-1);f.mort=null;f.miss=0;credAdj(-60);setTimeout(()=>modal({ic:'⚠️',c:'#c4351c',tag:'Ngân hàng',title:'Bị thu hồi nhà',text:'Trễ hạn 3 lần, ngân hàng đã thu hồi '+m.name+'. Mày dọn về nhà cũ.',cta:'Buồn ghê'}),1200)}
+    else setTimeout(()=>toast('⚠️ Không đủ tiền trả góp nhà, trễ hạn '+f.miss+'/3'),1300)}}
+  if(S.loan>credLim()*1.2)credAdj(-8);else if(!S.loan&&!f.mort)credAdj(1);
+  // sức khoẻ
+  let dh=-3;if(weather.rain&&!S.owned.du)dh-=6;if(S.sta<15)dh-=6;const L=S.life;if(L&&L.en<20)dh-=4;if(S.house)dh+=4;const x=S.life&&S.life.x;if(x&&x.home)dh+=x.home.t;
+  S.hp=Math.max(0,Math.min(100,S.hp+dh));if(Math.random()<.05){S.hp=Math.max(0,S.hp-18);setTimeout(()=>toast('🤧 Hôm nay bị cảm nhẹ, sức khoẻ −18'),1600)}
+  if(S.ins){const c=S.ins==='vip'?25:12;if(S.cash>=c){addCash(-c)}else S.ins=null}
+  // xe hao mòn
+  const wear=4+(weather.rain?3:0)+(S.riding?2:0)+(S.daySold>30?2:0);S.cartHp=Math.max(0,S.cartHp-wear);
+  if(S.cartHp<35)setTimeout(()=>toast('🔧 Xe đã xuống cấp ('+Math.round(S.cartHp)+'%), ghé tiệm sửa xe'),2200);
+  if(S.hp<35)setTimeout(()=>toast('🏥 Sức khoẻ yếu ('+Math.round(S.hp)+'%), nên đi khám'),2600)}catch(e){console.warn(e)}}}
+// hiệu ứng: xe hư đi chậm, ốm giảm thể lực
+function condMul(){const c=S.cartHp==null?100:S.cartHp;let m=c<15?.7:c<35?.85:c<60?.95:1;if(S.hp<30)m*=.88;return m}
+function sickPen(){const h=S.hp==null?100:S.hp;return h<20?40:h<40?20:h<60?8:0}
+{const _sc=spawnCustomer;spawnCustomer=function(){if((S.cartHp||0)<=0&&S.open){if(Math.random()<.02)toast('🔧 Xe hư nặng, phải sửa mới bán được');return}return _sc.apply(this,arguments)}}
+// xe giữa đường bị hỏng
+setInterval(()=>{try{if(S.phase!=='play'||!S.open||MO)return;if(S.cartHp<25&&Math.random()<.04){S.cartHp=Math.max(0,S.cartHp-5);modal({img:'u/i/ev_broken_cart',c:'#c4351c',tag:'Sự cố',title:'Xe bị sút bánh!',text:'Xe đã quá cũ. Gọi thợ tới sửa tại chỗ 60k, hoặc tự chắp vá (xe tiếp tục xuống cấp).',cta:'Gọi thợ (−60k)',cta2:'Tự sửa',onOk:()=>{if(S.cash>=60){addCash(-60);S.cartHp=Math.min(100,S.cartHp+30)}},onNo:()=>{S.cartHp=Math.max(0,S.cartHp-8);energy(-10)}})}}catch(e){}},15000);
+// ---------- bệnh viện ----------
+const insCost=k=>k==='vip'?25:12;
+function hospDo(k){const costs={kham:80,thuoc:30,nam:300,khamIns:40,namIns:150};let c,heal,msg;const ins=S.ins;
+  if(k==='kham'){c=ins?(ins==='vip'?20:40):80;heal=40;msg='Bác sĩ khám và kê thuốc'}else if(k==='thuoc'){c=ins?15:30;heal=15;msg='Mua thuốc ở quầy'}else if(k==='nam'){c=ins?(ins==='vip'?60:150):300;heal=100;msg='Nằm viện theo dõi một đêm'}
+  if(S.cash<c){toast('💸 Cần '+fmt(c));return}addCash(-c);S.hp=Math.min(100,S.hp+heal);if(k==='nam'){energy(100);mood(10)}finLog(msg+' −'+fmt(c));try{sfx.ding()}catch(e){};toast('🏥 '+msg+', sức khoẻ '+Math.round(S.hp)+'%');save();phRender()}
+function insBuy(k){S.ins=S.ins===k?null:k;toast(S.ins?'🏥 Đã mua bảo hiểm '+(k==='vip'?'cao cấp':'cơ bản')+' ('+insCost(k)+'k/ngày)':'Đã huỷ bảo hiểm');save();phRender()}
+// ---------- tiệm sửa xe ----------
+const cartVal=()=>{try{return Math.max(150,curCart().cost||150)}catch(e){return 150}};
+function fixCost(full){const miss=100-S.cartHp;return Math.max(10,Math.round(cartVal()*.004*miss*(full?1:.5)+10))}
+function fixDo(k){let c,add;if(k==='full'){c=fixCost(true);add=100}else if(k==='half'){c=fixCost(false);add=Math.ceil((100-S.cartHp)/2)}else if(k==='oil'){c=25;add=12}
+  if(S.cartHp>=100){toast('Xe đang như mới');return}if(S.cash<c){toast('💸 Cần '+fmt(c));return}addCash(-c);S.cartHp=Math.min(100,S.cartHp+add);finLog('Sửa xe −'+fmt(c));try{sfx.ding()}catch(e){};toast('🔧 Xe '+Math.round(S.cartHp)+'%');save();phRender()}
+// ---------- giao diện ----------
+const bar=(v,col)=>`<div class="phbar" style="margin:5px 0"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${col}"></i></div>`;
+function bankBody(){const f=fin(),m=f.mort,x=ensureL2(),nx=HOMES[x.home.t+1],H=(S.history||[]).slice(-7),mx=Math.max(1,...H);
+  return `<div class="phcard fincard"><small>Tiền mặt</small><div class="big">${fmt(S.cash)}</div><div class="frow"><div><small>Tiết kiệm</small><b>${fmt(f.sav)}</b></div><div><small>Đang nợ</small><b class="${S.loan?'neg':''}">${fmt(S.loan||0)}</b></div><div><small>Tín dụng</small><b>${f.credit}</b></div></div></div>
+  <div class="phcard"><b>Điểm tín dụng: ${f.credit} · ${credTxt(f.credit)}</b>${bar((f.credit-300)/5.5,f.credit>=700?'#7fd36e':f.credit>=580?'#ffd27a':'#e2471e')}<small>Trả nợ đúng hạn để tăng điểm. Điểm cao: vay được nhiều hơn, lãi mua nhà thấp hơn. Hạn mức vay hiện tại ${fmt(credLim())}.</small></div>
+  <h3>Tiết kiệm · lãi 0,8%/ngày</h3><div class="phcard"><small>Tiền gửi an toàn, không bị móc túi hay bảo kê lấy mất.</small><div class="bbtn"><button class="phbtn" onclick="bankDep(100)">Gửi 100k</button><button class="phbtn" onclick="bankDep(500)">Gửi 500k</button><button class="phbtn" onclick="bankDep('all')">Gửi hết</button><button class="phbtn alt" onclick="bankWd(100)">Rút 100k</button><button class="phbtn alt" onclick="bankWd('all')">Rút hết</button></div></div>
+  <h3>Vay tiêu dùng · lãi 5%/ngày</h3><div class="phcard"><small>Vay nhanh để nhập hàng, nhớ trả sớm vì lãi cao.</small><div class="bbtn"><button class="phbtn" onclick="bankLoan(200)">Vay 200k</button><button class="phbtn" onclick="bankLoan(500)">Vay 500k</button><button class="phbtn" onclick="bankLoan(1000)">Vay 1 triệu</button><button class="phbtn alt" onclick="bankPay(200)">Trả 200k</button><button class="phbtn alt" onclick="bankPay('all')">Trả hết</button></div></div>
+  <h3>Vay mua nhà · trả góp 20 ngày</h3>${m?`<div class="phcard jobc"><img src="a/u/i/biz_deed.webp" alt="" style="width:60px;height:60px"><div style="flex:1"><b>${m.name}</b><br><small>Còn ${m.left} kỳ × ${fmt(m.pay)}/ngày${f.miss?` · <b class="neg">trễ ${f.miss}/3</b>`:''}</small>${bar((20-m.left)*5,'#6fb6ff')}<button class="phbtn" onclick="mortPayoff()">Tất toán sớm (giảm 8%)</button></div></div>`:
+   nx?`<div class="phcard jobc"><img src="a/u/s/${HOME_IMG[x.home.t+1]}.webp" alt="" style="width:96px;height:54px;object-fit:cover;border-radius:10px"><div style="flex:1"><b>${nx[0]}</b><br><small>Giá ${fmt(nx[2])} · trả trước ${fmt(Math.round(nx[2]*.3))} · lãi ${(mortRate()*100).toFixed(1)}%/ngày</small><br><button class="phbtn" onclick="mortBuy()">Mua trả góp</button></div></div>`:'<div class="phcard"><small>Mày đã ở nhà đẹp nhất.</small></div>'}
+  <div class="phcard"><b>Doanh thu 7 ngày</b><div class="phch">${H.length?H.map(v=>`<i style="height:${Math.max(4,v/mx*100)}%"></i>`).join(''):'<small>Chưa có số liệu</small>'}</div></div>
+  ${f.log.length?`<h3>Sao kê gần đây</h3><div class="phcard">${f.log.slice(0,8).map(l=>`<div style="display:flex;justify-content:space-between;gap:8px"><small>Ngày ${l.d}</small><span style="text-align:right">${esc(l.t)}</span></div>`).join('')}</div>`:''}`}
+function hospBody(){const h=Math.round(S.hp),st=h>=70?'Khoẻ mạnh':h>=40?'Hơi mệt':h>=20?'Đang ốm':'Ốm nặng';
+  return `<div class="l2hero"><img src="a/u/s/bg_street_shops.webp" alt=""><div class="cap"><b>Bệnh viện phường</b><br><small>Khám nhanh, thuốc rẻ, có bảo hiểm</small></div></div>
+  <div class="phcard"><b>Sức khoẻ: ${h}% · ${st}</b>${bar(h,h>=70?'#7fd36e':h>=40?'#ffd27a':'#e2471e')}<small>Sức khoẻ giảm khi đứng bán dưới mưa không dù, làm kiệt sức, ngủ phòng trọ. Dưới 60% thể lực tối đa giảm, dưới 30% đi chậm hơn.</small></div>
+  <h3>Dịch vụ</h3><div class="tiles hosp"><button class="tile" onclick="hospDo('thuoc')"><img src="a/l2/ing_herb.webp" alt="">Mua thuốc<small>+15% · ${fmt(S.ins?15:30)}</small></button><button class="tile" onclick="hospDo('kham')"><img src="a/l2/clip.webp" alt="">Khám bác sĩ<small>+40% · ${fmt(S.ins?(S.ins==='vip'?20:40):80)}</small></button><button class="tile" onclick="hospDo('nam')"><img src="a/u/i/furn_bed_b.webp" alt="">Nằm viện<small>Khỏi hẳn · ${fmt(S.ins?(S.ins==='vip'?60:150):300)}</small></button></div>
+  <h3>Bảo hiểm y tế</h3><div class="tiles hosp"><button class="tile ${S.ins==='basic'?'on':''}" onclick="insBuy('basic')"><img src="a/u/i/ev_card_frame.webp" alt="">Cơ bản<small>12k/ngày · giảm 50%</small>${S.ins==='basic'?'<small class="own">Đang dùng</small>':''}</button><button class="tile ${S.ins==='vip'?'on':''}" onclick="insBuy('vip')"><img src="a/u/i/rarity_frame_legendary.webp" alt="">Cao cấp<small>25k/ngày · giảm 75%</small>${S.ins==='vip'?'<small class="own">Đang dùng</small>':''}</button></div>`}
+function fixBody(){const c=Math.round(S.cartHp),cc=(()=>{try{return curCart()}catch(e){return {n:'Xe đẩy'}}})();
+  return `<div class="phcard jobc"><img src="a/${(cc.sp||'z/vietnamese_banh_mi_street_cart')}.webp" alt="" style="width:110px;height:90px"><div style="flex:1"><b>${cc.n||'Xe đẩy'}</b><br><small>Tình trạng xe</small>${bar(c,c>=60?'#7fd36e':c>=35?'#ffd27a':'#e2471e')}<b>${c}%</b> <small>${c>=60?'Chạy êm':c>=35?'Hơi lọc cọc, đi chậm':c>0?'Sắp hỏng, dễ sút bánh':'Hỏng, không bán được'}</small></div></div>
+  <div class="phcard"><small>Xe hao mòn mỗi ngày, nhanh hơn khi trời mưa, chạy xe máy hay bán đông. Xe càng xịn sửa càng đắt.</small></div>
+  <h3>Tiệm sửa xe chú Tám</h3><div class="tiles hosp"><button class="tile" onclick="fixDo('oil')"><img src="a/l2/ev_tool.webp" alt="">Tra dầu<small>+12% · 25k</small></button><button class="tile" onclick="fixDo('half')"><img src="a/u/i/ev_broken_cart.webp" alt="">Sửa nhanh<small>+${Math.ceil((100-c)/2)}% · ${fmt(fixCost(false))}</small></button><button class="tile" onclick="fixDo('full')"><img src="a/u/i/biz_stall_front.webp" alt="">Đại tu<small>100% · ${fmt(fixCost(true))}</small></button></div>`}
+APPS.splice(Math.max(0,APPS.findIndex(a=>a[0]==='bank')+1),0,['hosp','🏥','Bệnh viện','#d2432f'],['fix','🔧','Sửa xe','#59627a']);
+L2APPS.push(['bank','🏦','Ngân hàng','#2f6fb3'],['hosp','🏥','Bệnh viện','#d2432f'],['fix','🔧','Sửa xe','#59627a']);
+{const _l=l2Body;l2Body=function(a){if(a==='bank')return bankBody();if(a==='hosp')return hospBody();if(a==='fix')return fixBody();return _l(a)}}
+{const _h=homeUp;homeUp=function(){_h();if(ensureL2().home.t>0)S.house=true}}
+// trạng thái sức khoẻ + xe trên màn hình chính điện thoại
+{const _pr=phRender;phRender=function(){_pr.apply(this,arguments);if(phApp)return;const st=document.querySelector('#phone .phst');if(st&&!st.querySelector('.hpx'))st.insertAdjacentHTML('beforeend',`<div class="hpx" onclick="phAppGo('hosp')">❤️ Sức khoẻ ${Math.round(S.hp)}%<div class="phbar"><i style="width:${S.hp}%;background:${S.hp<40?'#e2471e':'#ff7a8a'}"></i></div></div><div class="hpx" onclick="phAppGo('fix')">🔧 Xe ${Math.round(S.cartHp)}%<div class="phbar"><i style="width:${S.cartHp}%;background:${S.cartHp<35?'#e2471e':'#9fd3ff'}"></i></div></div>`)}}
+if(typeof UNL!=='undefined'){UNL.hosp=[1,2];UNL.fix=[1,2];UNL_TIP.hosp='Bệnh viện: khám, mua thuốc, bảo hiểm y tế. Sức khoẻ yếu sẽ bán chậm.';UNL_TIP.fix='Tiệm sửa xe: xe hao mòn mỗi ngày, xe hư đi chậm và có thể sút bánh.';UNL.bank=[1,2];UNL_TIP.bank='Ngân hàng: gửi tiết kiệm có lãi, vay vốn, mua nhà trả góp.'}
+{const _sp=showProfile;showProfile=function(){_sp.apply(this,arguments);const g=document.querySelector('#prof .pgrid');if(g)g.insertAdjacentHTML('beforeend',`<div class="pst"><img src="a/u/i/ev_card_frame.webp" alt=""><b>${Math.round(S.hp)}%</b><small>Sức khoẻ</small></div><div class="pst"><img src="a/u/i/ev_broken_cart.webp" alt=""><b>${Math.round(S.cartHp)}%</b><small>Xe</small></div><div class="pst"><img src="a/ui/app_bank.webp" alt=""><b>${fin().credit}</b><small>Tín dụng</small></div>`)}}
+{const _nw=netWorth;netWorth=function(){return _nw()+fin().sav-(S.loan||0)-(fin().mort?fin().mort.pay*fin().mort.left:0)}}
+(function(){const st=document.createElement('style');st.textContent=`
+#phone .fincard .big{font:800 30px 'Baloo 2';margin:2px 0 8px}#phone .frow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#phone .frow div{background:rgba(255,255,255,.08);border-radius:12px;padding:6px 8px}#phone .frow b{display:block;font:800 16px 'Baloo 2'}
+#phone .bbtn{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}#phone .bbtn .phbtn{margin:0;padding:7px 11px;font-size:13px}#phone .phbtn.alt{background:#26304f;color:#dfe6ff}
+#phone b.neg,#phone .neg{color:#ff8a7a}#phone .tiles.hosp img{width:56px;height:56px}
+#phone .phst{grid-template-columns:1fr 1fr}#phone .phst .hpx{cursor:pointer}
+`;document.head.appendChild(st)})();
+// ===================== XỔ SỐ (vé số kiến thiết + Vietlott Mega 6/45) · VAY NÓNG · MUA SẮM =====================
+if(!SAVE_KEYS.includes('lot'))SAVE_KEYS.push('lot','shark','perk');
+const lot=()=>{if(!S.lot)S.lot={tix:[],mega:[],jp:12000,res:null,mres:null,spent:0,won:0};return S.lot};
+const isMegaDay=d=>[3,5,0].includes(d%7);
+const rnd6=()=>String(Math.floor(Math.random()*1e6)).padStart(6,'0');
+function buyTix(n){const L=lot(),today=L.tix.filter(t=>t.d===S.day).length;if(today+n>20){toast('Mỗi ngày mua tối đa 20 tờ');return}if(S.cash<n*10){toast('💸 Không đủ tiền');return}
+  addCash(-n*10);L.spent+=n*10;for(let i=0;i<n;i++)L.tix.push({d:S.day,n:rnd6()});try{sfx.tap()}catch(e){};save();phRender()}
+let megaPick=[];
+function megaTap(k){const i=megaPick.indexOf(k);if(i>=0)megaPick.splice(i,1);else if(megaPick.length<6)megaPick.push(k);phRender()}
+function megaQuick(){megaPick=[];while(megaPick.length<6){const k=1+Math.floor(Math.random()*45);if(!megaPick.includes(k))megaPick.push(k)}phRender()}
+function megaBuy(){const L=lot();if(megaPick.length!==6){toast('Chọn đủ 6 số');return}if(S.cash<10){toast('💸 Không đủ tiền');return}if(L.mega.filter(t=>t.d===S.day).length>=10){toast('Mỗi kỳ tối đa 10 vé');return}
+  addCash(-10);L.spent+=10;L.jp+=3;L.mega.push({d:S.day,n:megaPick.slice().sort((a,b)=>a-b)});megaPick=[];try{sfx.tap()}catch(e){};save();phRender()}
+// mở thưởng cuối ngày
+{const _ed=endDay;endDay=function(){const old=S.veso||0;if(old){S.veso=0;const L=lot();for(let i=0;i<old;i++)L.tix.push({d:S.day,n:rnd6()})}
+  const day=S.day;_ed.apply(this,arguments);try{const L=lot();let msg=[],total=0;
+  const tk=L.tix.filter(t=>t.d<=day);const res={d:day,db:rnd6()};
+  if(tk.length){tk.forEach(t=>{let p=0,lab='';const m=k=>t.n.slice(-k)===res.db.slice(-k);if(t.n===res.db){p=20000;lab='ĐẶC BIỆT'}else if(m(5)){p=3000;lab='giải nhất'}else if(m(4)){p=500;lab='giải nhì'}else if(m(3)){p=100;lab='giải ba'}else if(m(2)){p=20;lab='giải khuyến khích'}if(p){total+=p;msg.push(`Vé ${t.n}: ${lab} +${fmt(p)}`)}});
+    res.mine=tk.length;res.win=total;L.res=res;L.tix=L.tix.filter(t=>t.d>day)}
+  if(isMegaDay(day)){const draw=[];while(draw.length<6){const k=1+Math.floor(Math.random()*45);if(!draw.includes(k))draw.push(k)}draw.sort((a,b)=>a-b);let mt=0,jpWon=false;
+   L.mega.filter(t=>t.d<=day).forEach(t=>{const h=t.n.filter(k=>draw.includes(k)).length;let p=h===6?L.jp:h===5?3000:h===4?300:h===3?30:0;if(h===6)jpWon=true;if(p){mt+=p;msg.push(`Vietlott ${t.n.join(' ')}: trúng ${h} số +${fmt(p)}`)}});
+   L.mres={d:day,n:draw,jp:L.jp,won:mt,hit:jpWon};total+=mt;L.mega=L.mega.filter(t=>t.d>day);L.jp=jpWon?12000:Math.round(L.jp*1.04+200)}
+  if(total){addCash(total);L.won+=total;setTimeout(()=>{try{sfx.fanfare()}catch(e){};modal({img:'n/i_coin',c:'#c9a227',tag:'Dò vé số',title:'Trúng thưởng '+fmt(total)+'!',text:msg.join('<br>'),cta:'Quá đã'})},1400)}
+  else if(tk.length)setTimeout(()=>toast('🎫 Dò '+tk.length+' tờ vé số: trật hết. Kết quả đặc biệt '+res.db),1500)}catch(e){console.warn(e)}}}
+function lotBody(){const L=lot(),tk=L.tix.filter(t=>t.d===S.day),mg=L.mega.filter(t=>t.d>=S.day),R=L.res,M=L.mres,net=L.won-L.spent;
+  const ball=(k,on)=>`<button class="ball ${on?'on':''}" onclick="megaTap(${k})">${k}</button>`;
+  return `<div class="phcard"><b>Đã chi ${fmt(L.spent)} · đã trúng ${fmt(L.won)}</b><br><small class="${net<0?'neg':''}">${net<0?'Đang lỗ '+fmt(-net)+'. Chơi cho vui thôi, đừng dồn vốn bán hàng vào vé số.':'Đang lời '+fmt(net)+'. Hên quá!'}</small></div>
+  <h3>Vé số kiến thiết · 10k/tờ</h3><div class="phcard"><small>Mở thưởng cuối mỗi ngày. Trùng 2 số cuối +20k, 3 số +100k, 4 số +500k, 5 số +3 triệu, cả 6 số trúng đặc biệt 20 triệu.</small>
+   <div class="bbtn"><button class="phbtn" onclick="buyTix(1)">Mua 1 tờ</button><button class="phbtn" onclick="buyTix(5)">Mua 5 tờ</button></div>${tk.length?`<div class="tix">${tk.map(t=>`<span>${t.n}</span>`).join('')}</div>`:''}
+   ${R?`<small>Kỳ ngày ${R.d}: đặc biệt <b>${R.db}</b>${R.mine?` · mày ${R.mine} tờ, ${R.win?'trúng '+fmt(R.win):'trật'}`:''}</small>`:''}</div>
+  <h3>Vietlott Mega 6/45 · 10k/vé</h3><div class="phcard megac"><div class="jp"><small>Jackpot hiện tại</small><b>${fmt(L.jp)}</b><small>Quay số ${isMegaDay(S.day)?'<b>tối nay</b>':'các ngày thứ Tư, thứ Sáu, Chủ nhật'}</small></div>
+   <div class="balls">${Array.from({length:45},(_,i)=>ball(i+1,megaPick.includes(i+1))).join('')}</div>
+   <div class="bbtn"><button class="phbtn alt" onclick="megaQuick()">Chọn nhanh</button><button class="phbtn" onclick="megaBuy()" ${megaPick.length===6?'':'disabled'}>Mua vé (${megaPick.length}/6)</button></div>
+   ${mg.length?`<small>Vé đang chờ quay:</small>${mg.map(t=>`<div class="mtk">${t.n.map(k=>`<i>${k}</i>`).join('')}</div>`).join('')}`:''}
+   ${M?`<small>Kỳ ngày ${M.d}: </small><div class="mtk res">${M.n.map(k=>`<i>${k}</i>`).join('')}</div><small>${M.hit?'Có người trúng Jackpot!':'Không ai trúng Jackpot, giải tích luỹ tiếp.'}${M.won?' Mày trúng '+fmt(M.won)+'.':''}</small>`:''}</div>`}
+// ---------- vay nóng ----------
+const sh=()=>{if(!S.shark)S.shark={owe:0,due:0,late:0,tot:0};return S.shark};
+function sharkBorrow(n){const s=sh();if(s.owe+n>3000){toast('Anh Tư chỉ cho vay tối đa 3 triệu');return}
+  modal({ic:'⚠️',c:'#7a1f14',tag:'Vay nóng',title:'Vay '+fmt(n)+' của anh Tư?',text:`Lãi <b>15%/ngày</b> cộng dồn, hạn trả <b>5 ngày</b>.<br>Trễ hạn thì đàn em tới tận xe đòi nợ, lấy tiền và hàng, khách sợ không dám ghé.<br><small>Ngân hàng chỉ lãi 5%/ngày. Chỉ vay khi thật kẹt.</small>`,cta:'Vẫn vay',cta2:'Thôi',
+   onOk:()=>{s.owe+=n;s.tot+=n;if(!s.due)s.due=S.day+5;addCash(n);finLog&&finLog('Vay nóng '+fmt(n));credAdj&&credAdj(-15);save();phRender()}})}
+function sharkPay(n){const s=sh();if(n==='all')n=s.owe;n=Math.min(n,s.owe,S.cash);if(n<=0){toast('Không đủ tiền');return}s.owe-=n;addCash(-n);if(s.owe<=0){s.owe=0;s.due=0;s.late=0;toast('Đã trả xong anh Tư. Nhẹ cả người.');mood(10)}save();phRender()}
+{const _ed=endDay;endDay=function(){_ed.apply(this,arguments);try{const s=sh();if(s.owe>0){s.owe=Math.round(s.owe*1.15);if(S.day>s.due){s.late++;const take=Math.min(S.cash,Math.round(s.owe*.35));addCash(-take);s.owe-=take;mood(-15);bumpRep(-.15);
+   setTimeout(()=>modal({ic:'⚠️',c:'#7a1f14',tag:'Đòi nợ',title:'Đàn em anh Tư tới xe',text:`Trễ hạn ${s.late} ngày. Tụi nó lấy ${fmt(take)} tiền mặt, khách thấy sợ bỏ đi. Còn nợ <b>${fmt(s.owe)}</b>.`,cta:'Trả nợ ngay',cta2:'Để mai',onOk:()=>phOpen('shark')}),1800)}}}catch(e){}}}
+function sharkBody(){const s=sh(),left=s.due?s.due-S.day:0;
+  return `<div class="phcard jobc"><img src="a/327.webp" alt="" style="width:64px;height:90px;object-fit:contain;filter:grayscale(.3) brightness(.85)"><div style="flex:1"><b>Anh Tư · cho vay nhanh</b><br><small>"Cần tiền gấp? Có liền, không giấy tờ."</small></div></div>
+  <div class="phcard warn"><b>Cảnh báo</b><br><small>Lãi 15%/ngày cộng dồn: vay 1 triệu, 5 ngày sau thành khoảng 2 triệu. Trễ hạn bị đòi nợ tận xe, mất tiền, mất uy tín, tụt điểm tín dụng.</small></div>
+  ${s.owe?`<div class="phcard"><b>Đang nợ ${fmt(s.owe)}</b><br><small>${left>0?'Còn '+left+' ngày tới hạn':'<b class="neg">Đã quá hạn '+(s.late||-left)+' ngày</b>'}</small><div class="bbtn"><button class="phbtn" onclick="sharkPay(200)">Trả 200k</button><button class="phbtn" onclick="sharkPay('all')">Trả hết</button></div></div>`:''}
+  <div class="phcard"><b>Vay</b><div class="bbtn"><button class="phbtn alt" onclick="sharkBorrow(300)">300k</button><button class="phbtn alt" onclick="sharkBorrow(1000)">1 triệu</button><button class="phbtn alt" onclick="sharkBorrow(3000)">3 triệu</button></div></div>`}
+// ---------- mua sắm ----------
+const perk=()=>{if(!S.perk)S.perk={};return S.perk};
+const SHOPI=[
+ ['Đồ ăn uống',[['u/i/cook_dish_07','Bánh mì ốp la',25,'+30 sức bền',()=>{energy(30)}],['l2/ck_2','Trà sữa',35,'+15 tâm trạng',()=>{mood(15)}],['u/i/cook_dish_13','Cơm văn phòng',40,'+40 sức, +5 vui',()=>{energy(40);mood(5)}],['l2/ck_1','Cà phê sữa đá',20,'+20 sức bền',()=>{energy(20)}],['l2/crop_1','Vitamin & trái cây',60,'+15% sức khoẻ',()=>{S.hp=Math.min(100,S.hp+15)}]]],
+ ['Đồ dùng',[['u/i/acc_04','Áo mưa',90,'Mưa không hại sức khoẻ',()=>{perk().rain=1},'rain'],['u/i/furn_stove','Nồi cơm điện',220,'+5 sức mỗi sáng',()=>{perk().rice=1},'rice'],['u/i/furn_fridge','Máy lọc nước',350,'+3% sức khoẻ mỗi ngày',()=>{perk().water=1},'water'],['ui/app_phone','Điện thoại đời mới',900,'Báo trước giờ đông khách mỗi sáng',()=>{perk().phone=1},'phone']]],
+ ['Quà tặng',[['l2/ev_gift','Hộp bánh biếu hàng xóm',60,'Uy tín +, vui +',()=>{bumpRep(.06);mood(6)}],['u/i/acc_02','Quà sinh nhật bạn',150,'Uy tín ++',()=>{bumpRep(.15);mood(8)}]]]];
+function shopBuy(g,i){const it=SHOPI[g][1][i],sale=(S.evToday||[]).some(e=>e.id==='sale'),c=Math.round(it[2]*(sale?.8:1));if(it[5]&&perk()[it[5]]){toast('Đã có món này');return}if(S.cash<c){toast('💸 Cần '+fmt(c));return}
+  addCash(-c);it[4]();try{sfx.pop()}catch(e){};toast('🛍️ Đã mua '+it[1]);save();phRender()}
+function shopBody(){const sale=(S.evToday||[]).some(e=>e.id==='sale');
+  return `${sale?'<div class="phcard"><b>Ngày hội giảm giá: mọi món −20%</b></div>':''}`+SHOPI.map((g,gi)=>`<h3>${g[0]}</h3><div class="tiles">${g[1].map((it,i)=>{const own=it[5]&&perk()[it[5]];return `<button class="tile ${own?'on':''}" onclick="shopBuy(${gi},${i})"><img src="a/${it[0]}.webp" alt="">${it[1]}<small class="own">${it[3]}</small>${own?'<small class="own">Đã có</small>':`<small>${fmt(Math.round(it[2]*(sale?.8:1)))}</small>`}</button>`}).join('')}</div>`).join('')+
+   `<h3>Ở chỗ khác</h3><div class="bbtn"><button class="phbtn alt" onclick="phAppGo('me')">Thời trang → Tủ đồ</button><button class="phbtn alt" onclick="phAppGo('home')">Nội thất → Nhà</button></div>`}
+{const _sd=startDay;startDay=function(){_sd.apply(this,arguments);const p=perk();if(p.rice)energy(5);if(p.water)S.hp=Math.min(100,(S.hp||100)+3);
+  if(p.phone){try{const ev=(S.evToday||[]).filter(e=>EVDEF[e.id]).map(e=>EVDEF[e.id].name.replace('!','').toLowerCase()+' '+fmtH(e.from));if(ev.length)setTimeout(()=>toast('📱 Hôm nay: '+ev.join(', ')),2500)}catch(e){}}}}
+// áo mưa: bù lại sức khoẻ bị trừ khi mưa (city.js trừ 6)
+{const _ed=endDay;endDay=function(){const r=weather.rain&&!S.owned.du&&perk().rain;_ed.apply(this,arguments);if(r)S.hp=Math.min(100,S.hp+6)}}
+// đăng ký app
+APPS.splice(Math.max(0,APPS.findIndex(a=>a[0]==='bank')+1),0,['shop','🛍️','Mua sắm','#d65a9a'],['lotto','🎫','Xổ số','#c9a227'],['shark','💸','Vay nóng','#7a1f14']);
+L2APPS.push(['shop','🛍️','Mua sắm','#d65a9a'],['lotto','🎫','Xổ số','#c9a227'],['shark','💸','Vay nóng','#7a1f14']);
+{const _l=l2Body;l2Body=function(a){if(a==='lotto')return lotBody();if(a==='shark')return sharkBody();if(a==='shop')return shopBody();return _l(a)}}
+if(typeof UNL!=='undefined'){UNL.shop=[1,1];UNL.lotto=[1,2];UNL.shark=[2,3];UNL_TIP.shop='Mua sắm: đồ ăn hồi sức, đồ dùng có ích lâu dài, quà biếu hàng xóm.';UNL_TIP.lotto='Xổ số: vé số kiến thiết mỗi ngày và Vietlott Mega 6/45. Chơi vui thôi nhé.';UNL_TIP.shark='Vay nóng: có tiền liền nhưng lãi 15%/ngày. Trễ hạn là bị đòi nợ.'}
+(function(){const st=document.createElement('style');st.textContent=`
+#phone .tix{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#phone .tix span{font:800 15px 'Baloo 2';letter-spacing:2px;background:linear-gradient(#fff3c4,#ffd27a);color:#5a2e08;border-radius:8px;padding:3px 9px;box-shadow:inset 0 0 0 2px #e8b34a}
+#phone .megac .jp{text-align:center;margin-bottom:8px}#phone .megac .jp b{display:block;font:800 28px 'Baloo 2';color:#ffd27a;text-shadow:0 2px 0 #7a4a0a}
+#phone .balls{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}#phone .ball{aspect-ratio:1;border:0;border-radius:50%;background:#26304f;color:#dfe6ff;font:700 12px 'Be Vietnam Pro';cursor:pointer;padding:0}#phone .ball.on{background:radial-gradient(circle at 35% 30%,#ff9a8a,#e2471e);color:#fff;box-shadow:0 2px 0 #8a2010}
+#phone .mtk{display:flex;gap:4px;margin:4px 0}#phone .mtk i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:800 12px 'Baloo 2';font-style:normal;background:#ffd27a;color:#4a2606}#phone .mtk.res i{background:#e2471e;color:#fff}
+#phone .phcard.warn{background:rgba(226,71,30,.18);box-shadow:inset 0 0 0 1px rgba(255,138,122,.5)}
+`;document.head.appendChild(st)})();
+// ===================== SÂN BAY: hướng dẫn rõ + hiện tiến độ mở khoá =====================
+REGIONS.canTho.unlock={rep:1,cash:500};REGIONS.vungTau.unlock={rep:1,cash:800};
+{const _rq=regReq;regReq=function(r){const q=_rq(r);q.lines.forEach(l=>{const m=l.t.match(/^Uy tín cấp (\d)/);if(m&&!l.ok)l.t+=` · đang ${(+S.rep).toFixed(1)}`;const c=l.t.match(/^([\d.,]+ ?(k|triệu))$/);if(c&&!l.ok)l.t='Có '+l.t+' tiền mặt · đang '+fmt(S.cash)});return q}}
+{const _pa=patchAir;patchAir=function(){_pa();const r=sheet.querySelector('.airv');if(!r||r.querySelector('.airguide'))return;const open=S.unlockedRegions.filter(x=>x!=='saigon').length;
+  const hero=r.querySelector('.tvhero');if(!hero)return;
+  const nextR=REG_ORDER.filter(x=>x!==S.region&&!S.unlockedRegions.includes(x)).map(x=>({x,q:regReq(x)})).sort((a,b)=>a.q.lines.filter(l=>!l.ok).length-b.q.lines.filter(l=>!l.ok).length)[0];
+  hero.insertAdjacentHTML('afterend',`<details class="airguide" ${open?'':'open'}><summary>Buôn đặc sản bốn phương chơi thế nào?</summary><ol>
+   <li><b>Mở điểm đến:</b> mỗi thành phố cần đủ <b>uy tín</b> và <b>tiền mặt</b>. Uy tín tăng khi bán đủ 18 phần/ngày và giữ khách vui. Ghi chú bên dưới mỗi thẻ là còn thiếu gì.</li>
+   <li><b>Mua đặc sản ở nơi làm ra:</b> vào <b>Chợ vùng</b> mua hàng (xoài Cần Thơ, phở Hà Nội…), ba lô chở tối đa 40kg.</li>
+   <li><b>Chọn hạng vé:</b> vé càng xịn mang được càng nhiều ký hành lý (15, 25, 40kg).</li>
+   <li><b>Bay tới nơi đang thèm món đó:</b> nhãn <b>HOT</b> là bán được giá cao. Mỗi thành phố mới đóng dấu hộ chiếu và thưởng tiền.</li>
+   <li><b>Bán lời rồi bay tiếp</b>, gom đủ bộ đặc sản một miền để nhận danh hiệu.</li></ol>
+   ${nextR?`<div class="nx">Gần mở nhất: <b>${REGIONS[nextR.x].name}</b>, còn thiếu ${nextR.q.lines.filter(l=>!l.ok).map(l=>l.t).join(', ')||'không gì, bấm để mở'}</div>`:''}</details>`)}}
+(function(){const st=document.createElement('style');st.textContent=`.airguide{margin:10px 0;background:#fff8e4;border-radius:16px;padding:10px 14px;box-shadow:inset 0 0 0 2px #e8c98a;color:#3a2210;font:500 13.5px/1.5 var(--body)}.airguide summary{font:800 15px var(--display);cursor:pointer;color:#8e4d06}.airguide ol{margin:8px 0 6px;padding-left:20px}.airguide li{margin:3px 0}.airguide .nx{background:#2f7a43;color:#fff;border-radius:10px;padding:6px 10px;font-weight:600}`;document.head.appendChild(st)})();
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
