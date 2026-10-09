@@ -75,7 +75,7 @@ let fail=0;const ok=(c,n)=>{console.log((c?'PASS ':'FAIL ')+n);if(!c)fail++};
  ok((await call('auth','POST',{email:'doris@mail.com',password:'abc123',mode:'register'})).status===409,'email duplicate blocked');
  const el=await call('auth','POST',{email:'doris@mail.com',password:'abc123',mode:'login'});ok(el.status===200&&el.json.user.uid===er.json.user.uid,'email login (case-insensitive)');
  ok((await call('auth','POST',{email:'doris@mail.com',password:'wrong12',mode:'login'})).status===401,'email wrong password');
- ok((await call('auth','POST',{email:'bad',password:'abc123',mode:'login'})).status===400,'email format checked');
+ ok((await call('auth','POST',{email:'bad@x',password:'abc123',mode:'login'})).status===400,'email format checked');
  ok((await call('auth','GET',null,cookieOf(el))).json.user.name==='Doris E','email session works');
  const ur=await call('auth','POST',{email:'doris_09',password:'abc123',mode:'register',name:'Doris U'});ok(ur.status===200&&ur.json.user.via==='user','username register');
  ok((await call('auth','POST',{email:'doris_09',password:'abc123',mode:'login'})).status===200,'username login');
