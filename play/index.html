@@ -3326,6 +3326,133 @@ setTimeout(()=>track('open'),3000);
 {const _po=phOpen;phOpen=function(a){track('phone'+(a?'_'+a:''));return _po(a)}}
 // nút cài game trong Cài đặt của điện thoại & hồ sơ
 {const _sp=showProfile;showProfile=function(){_sp.apply(this,arguments);const pb=document.querySelector('#prof .pbtn');if(pb&&!matchMedia('(display-mode: standalone)').matches){pb.insertAdjacentHTML('beforeend','<button id="pfInst">Cài lên màn hình chính</button>');document.getElementById('pfInst').onclick=()=>{document.getElementById('prof').remove();installApp()}}}}
+// ===================== ÂM THANH CHO CÁC PHẦN MỚI =====================
+(function(){const C=()=>{try{if(!Aud.ok)Aud.init();return Aud.ok?Aud.ctx:null}catch(e){return null}};
+ const out=()=>Aud.sfx||Aud.m;
+ const tone=(f,t,d,type='triangle',g=.06,f2)=>{const c=C();if(!c)return;const o=c.createOscillator(),v=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+.01);v.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(v);v.connect(out());o.start(t);o.stop(t+d+.05)};
+ const nz=(t,d,f1,f2,g=.08,q=1)=>{const c=C();if(!c)return;const s=Aud.noise('white'),bf=c.createBiquadFilter(),v=c.createGain();bf.type='bandpass';bf.Q.value=q;bf.frequency.setValueAtTime(f1,t);bf.frequency.exponentialRampToValueAtTime(f2,t+d);v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+d*.3);v.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(bf);bf.connect(v);v.connect(out());s.start(t);s.stop(t+d+.05)};
+ const now=()=>{const c=C();return c?c.currentTime:0};
+ Object.assign(sfx,{
+  takeoff(){const t=now();nz(t,2.6,300,2400,.07,.8);tone(110,t,2.4,'sawtooth',.018,320)},
+  land(){const t=now();nz(t,.5,900,200,.09,.7);[523,659,784].forEach((f,i)=>tone(f,t+.5+i*.11,.35,'sine',.05))},
+  stamp(){const t=now();tone(120,t,.18,'sine',.16,60);nz(t,.12,2000,600,.08,2)},
+  cash(){const t=now();[1319,1568,2093].forEach((f,i)=>tone(f,t+i*.07,.18,'triangle',.05))},
+  sizzle(){const t=now();nz(t,.9,5000,3000,.05,.6)},
+  ding(){const t=now();tone(1760,t,.6,'sine',.06);tone(2637,t+.02,.5,'sine',.025)},
+  fanfare(){const t=now();[[523,0],[659,.12],[784,.24],[1047,.4]].forEach(([f,d])=>tone(f,t+d,.45,'triangle',.07));tone(1047,t+.4,.9,'sine',.04)},
+  gift(){const t=now();for(let i=0;i<6;i++)tone(1800+i*220,t+i*.05,.2,'sine',.035)},
+  unlock(){const t=now();tone(660,t,.15,'triangle',.06);tone(990,t+.12,.3,'triangle',.06)},
+  pop(){const t=now();tone(500,t,.08,'sine',.07,900)}});
+})();
+{const _pf=playFlight;playFlight=function(a,b,c){try{sfx.takeoff()}catch(e){}return _pf(a,b,function(){try{sfx.land()}catch(e){};c&&c()})}}
+{const _ar=arrive;arrive=function(d,cls){const first=!S.travelPassport[d];_ar(d,cls);if(first)setTimeout(()=>{try{sfx.stamp()}catch(e){}},300)}}
+{const _je=jobEnd;jobEnd=function(){try{sfx.ding()}catch(e){};return _je.apply(this,arguments)}}
+{const _ap=achPop;achPop=function(a){try{sfx.fanfare()}catch(e){};return _ap(a)}}
+{const _oc=onClaim;onClaim=async function(){try{sfx.gift()}catch(e){};return _oc()}}
+{const _bu=bizBuy;bizBuy=function(k){const n=bizN();_bu(k);if(bizN()>n)try{sfx.fanfare()}catch(e){}}}
+{const _wb=wdBuy;wdBuy=function(){try{sfx.pop()}catch(e){};return _wb.apply(this,arguments)}}
+{const _fb=furnBuy;furnBuy=function(i){const n=ensureL2().home.f.length;_fb(i);if(ensureL2().home.f.length>n)try{sfx.pop()}catch(e){}}}
+{const _hu=homeUp;homeUp=function(){const t=ensureL2().home.t;_hu();if(ensureL2().home.t>t)try{sfx.fanfare()}catch(e){}}}
+{const _ed=endDay;endDay=function(){_ed.apply(this,arguments);if(typeof bizN==='function'&&bizN())setTimeout(()=>{try{sfx.cash()}catch(e){}},950)}}
+{const _ck=cookGame;cookGame=function(){try{sfx.sizzle()}catch(e){};return _ck()}}
+// ===================== MỞ DẦN TÍNH NĂNG (đỡ ngợp ngày đầu) =====================
+const UNL={tw:[1,2],news:[1,2],cal:[1,2],book:[1,2],me:[2,2],ach:[2,2],bank:[2,3],job:[3,3],sk:[3,3],col:[3,3],nb:[3,4],home:[4,4],pass:[0,0,()=>S.unlockedRegions&&S.unlockedRegions.length>1||S.level>=4],on:[2,3],biz:[5,8,()=>S.cash>=1500]};
+const UNL_TIP={tw:'Mạng xã hội của phố: xem ai đang rủ nhau đi đâu để đón đầu khách.',news:'Tin tức báo trước sự kiện và giá chợ ngày mai.',cal:'Lịch cả tuần: ngày nào đông, ngày nào vắng.',book:'Sổ tay ghi lại khách quen và mối buôn.',me:'Tủ đồ: đổi bộ đồ, mũ, phụ kiện. Đồ đẹp tăng duyên, khách dễ mua hơn.',ach:'Thành tựu: hoàn thành để nhận thưởng lớn.',bank:'Ngân hàng: xem doanh thu 7 ngày và khoản vay.',job:'Nghề tay trái: câu cá, giao hàng, nấu ăn, trồng rau kiếm thêm khi không bán.',sk:'Kỹ năng: dùng điểm từ nghề tay trái để mạnh hơn.',col:'Bộ sưu tập: gom đủ cá, cây, món ăn.',nb:'Hàng xóm: biết lịch từng người để đứng đúng chỗ đúng giờ.',home:'Nhà: chuyển nhà, mua nội thất, mỗi sáng hồi thêm sức.',pass:'Hộ chiếu: đóng dấu các thành phố đã bay tới.',on:'Bạn bè: đăng nhập để lưu game, kết bạn, tặng quà, đua bảng xếp hạng.',biz:'Kinh doanh: mở quán, thuê người, mỗi tối thu tiền.'};
+const appOpen=k=>{const u=UNL[k];if(!u)return true;return S.level>=u[0]&&S.day>=u[1]||(u[2]&&u[2]())||(S.appsOn&&S.appsOn[k])};
+if(!SAVE_KEYS.includes('appsOn'))SAVE_KEYS.push('appsOn','appsNew');
+function unlCheck(){S.appsOn=S.appsOn||{};S.appsNew=S.appsNew||{};const fresh=[];
+  Object.keys(UNL).forEach(k=>{if(!S.appsOn[k]&&appOpen(k)){S.appsOn[k]=1;if(S.day>1||S.level>1){S.appsNew[k]=1;fresh.push(k)}}});
+  if(fresh.length){const a=APPS.find(x=>x[0]===fresh[0]);try{sfx.unlock()}catch(e){}
+    modal({img:'ui/app_'+fresh[0],c:'#2f7a43',tag:'Mở khoá trong điện thoại',title:(a?a[2]:'App mới')+(fresh.length>1?' và '+(fresh.length-1)+' app khác':''),text:UNL_TIP[fresh[0]]||'',cta:'Mở xem',cta2:'Để sau',onOk:()=>phOpen(fresh[0])});
+    const b=document.getElementById('phBtn');if(b)b.classList.add('dot')}}
+setInterval(()=>{try{if(S.phase==='play'||S.phase==='shop')unlCheck()}catch(e){}},3000);
+{const _ic=phIcon;phIcon=function(a,un,dock){let h=_ic(a,un,dock);if(S.appsNew&&S.appsNew[a[0]])h=h.replace('<span class="ai">','<span class="ai"><b class="nw">Mới</b>');return h}}
+{const _pr=phRender;phRender=function(){const saved=APPS.slice();try{const keep=APPS.filter(a=>appOpen(a[0]));APPS.length=0;keep.forEach(a=>APPS.push(a));_pr()}finally{APPS.length=0;saved.forEach(a=>APPS.push(a))}}}
+{const _ag=phAppGo;phAppGo=function(k){if(S.appsNew&&S.appsNew[k]){delete S.appsNew[k];save()}return _ag(k)}}
+{const _po=phOpen;phOpen=function(a){if(a&&!appOpen(a)){const u=UNL[a];toast('🔒 Mở ở cấp '+u[0]+' (ngày '+u[1]+')');return}if(a&&S.appsNew&&S.appsNew[a]){delete S.appsNew[a]}return _po(a)}}
+// ===================== MỜI BẠN + CHIA SẺ =====================
+const inviteURL=()=>location.origin+'/play/'+(ON.user?'?ban='+ON.user.code:'');
+(function(){try{const m=location.search.match(/[?&]ban=([A-Z0-9]{6})/i);if(m){localStorage.setItem('vhsg-invite',m[1].toUpperCase());history.replaceState(null,'',location.pathname)}}catch(e){}})();
+async function inviteRedeem(){let c;try{c=localStorage.getItem('vhsg-invite')}catch(e){}if(!c||!ON.user||c===ON.user.code)return;const r=await oapi('friends',{method:'POST',body:{code:c}});try{localStorage.removeItem('vhsg-invite')}catch(e){}
+  if(r.ok){try{sfx.gift()}catch(e){};modal({img:'ui/app_on',c:'#2aa6a0',tag:'Lời mời',title:'Đã kết bạn với '+r.friend.name,text:'Ghé phố nhau mỗi ngày để nhận thưởng, tặng quà và đua bảng xếp hạng tuần.',cta:'Tuyệt'})}}
+setInterval(()=>{if(ON.user)inviteRedeem()},4000);
+async function shareIt(text,url){url=url||inviteURL();try{if(navigator.share){await navigator.share({title:'Vỉa Hè Sài Gòn',text,url});track('share_native');return}}catch(e){if(e&&e.name==='AbortError')return}
+  shareSheet(text,url)}
+function shareSheet(text,url){const u=encodeURIComponent(url),t=encodeURIComponent(text);track('share_sheet');
+  modal({img:'ui/app_on',c:'#2aa6a0',tag:'Chia sẻ',title:'Rủ bạn chơi cùng',text:`<div class="shr"><a href="https://www.facebook.com/sharer/sharer.php?u=${u}&quote=${t}" target="_blank" rel="noopener">Facebook</a><a href="fb-messenger://share/?link=${u}" target="_blank" rel="noopener">Messenger</a><a href="https://zalo.me/share/?url=${u}" target="_blank" rel="noopener" onclick="navigator.clipboard&&navigator.clipboard.writeText(decodeURIComponent('${u}'))">Zalo</a><button onclick="navigator.clipboard&&navigator.clipboard.writeText(decodeURIComponent('${u}'));this.textContent='Đã chép link'">Chép link</button></div><small>${ON.user?'Bạn bấm vào link sẽ tự kết bạn với mày.':'Đăng nhập để link mời tự kết bạn.'}</small>`,cta:'Xong'})}
+function shareInvite(){shareIt('Vào phố bán hàng rong với tao nè! '+(ON.user?'Mã bạn bè: '+ON.user.code:''))}
+{const _sp=showProfile;showProfile=function(){_sp.apply(this,arguments);const pb=document.querySelector('#prof .pbtn');if(pb){pb.insertAdjacentHTML('afterbegin','<button id="pfInv" class="inv">Mời bạn chơi</button>');document.getElementById('pfInv').onclick=()=>{document.getElementById('prof').remove();shareInvite()};
+  pb.insertAdjacentHTML('beforeend','<button id="pfShare">Khoe hồ sơ</button>');document.getElementById('pfShare').onclick=()=>shareIt(`Tao là ${S.pname||'người bán'} cấp ${S.level}, ${title()}, đã bán ${(S.totalSold||0).toLocaleString('vi-VN')} phần ở Vỉa Hè Sài Gòn. Vào đua với tao!`)}}}
+{const _ob=onlineBody;onlineBody=function(){let h=_ob();if(ON.user&&ON.tab==='fr')h=h.replace('<div class="phcard"><b>Thêm bạn bằng mã</b>','<div class="phcard"><b>Mời bạn bằng link</b><br><small>Bạn bấm link là tự kết bạn, cả hai được tặng quà.</small><br><button class="phbtn" onclick="shareInvite()">Gửi link mời</button></div><div class="phcard"><b>Thêm bạn bằng mã</b>');return h}}
+{const _ap=achPop;achPop=function(a){_ap(a);const r=achRar(a);if(r[0]==='epic'||r[0]==='legendary'){const o=MQ[MQ.length-1]||MCUR;if(o&&o.title===a.name){o.cta2='Khoe bạn bè';o.onNo=()=>shareIt(`Tao vừa đạt thành tựu ${r[1]} "${a.name}" trong Vỉa Hè Sài Gòn!`)}}}}
+// ===================== SỰ KIỆN THEO MÙA + THÊM SỰ KIỆN PHỐ =====================
+Object.assign(EVDEF,{
+ tet:{name:'TẾT ĐẾN RỒI!',ic:'🧧',hrs:[[7,19.5]],spawn:.62,want:i=>['sweet','snack'].includes(icat(i))?1.7:1.2,msg:'Cả phố đi chợ Tết, đồ ngọt và đồ ăn vặt bán gấp đôi.'},
+ trungthu:{name:'TRUNG THU!',ic:'🏮',hrs:[[16,20]],spawn:.6,want:i=>icat(i)==='sweet'?2:1.2,msg:'Trẻ con rước đèn, đồ ngọt cháy hàng.'},
+ bao:{name:'MƯA BÃO!',ic:'⛈️',hrs:[[6,20]],spawn:1.35,want:i=>(HOT.includes(i.id)?1.9:.7),msg:'Bão vào, khách thưa nhưng ai ra đường cũng cần đồ nóng.'},
+ sale:{name:'NGÀY HỘI GIẢM GIÁ!',ic:'🛍️',hrs:[[9,20]],spawn:.55,want:i=>1.1,msg:'Khách đổ ra đường săn đồ rẻ, đông gấp rưỡi.'},
+ night:{name:'CHỢ ĐÊM!',ic:'🌙',hrs:[[18,20]],spawn:.6,want:i=>icat(i)==='snack'?1.8:1.2,msg:'Chợ đêm lên đèn, đồ ăn vặt hút khách.'},
+ marathon:{name:'GIẢI CHẠY BỘ!',ic:'🏃',hrs:[[6,8.5]],spawn:.6,want:i=>icat(i)==='drink'?2.2:1,msg:'Vận động viên chạy ngang, nước mát bán không kịp.'},
+ wedding:{name:'ĐÁM CƯỚI TRONG HẺM!',ic:'💒',hrs:[[10,13]],spawn:.7,want:i=>1.3,msg:'Khách đám cưới ra mua quà, trả hậu.'}});
+const SEASON=d=>{const m=d%28;return m===0||m>=26?'tet':m===13||m===14?'trungthu':m>=18&&m<=19?'bao':m===23?'sale':null};
+{const _ge=genEvents;genEvents=function(){_ge();const s=SEASON(S.day);if(s){const h=EVDEF[s].hrs[0];S.evToday.push({id:s,from:h[0],to:h[1],seen:false});if(s==='bao'){try{weather.rain=true;weather.until=99}catch(e){}}}
+  if(S.day>=3){const pool=['night','marathon','wedding'];if(Math.random()<.45){const k=pick(pool),h=EVDEF[k].hrs[0];if(!S.evToday.some(e=>e.from<h[1]&&e.to>h[0]&&e.id!=='school'))S.evToday.push({id:k,from:h[0],to:h[1],seen:false})}}}}
+{const _sd=startDay;startDay=function(){_sd.apply(this,arguments);const s=SEASON(S.day);if(s){const D=EVDEF[s],img={tet:'u/i/ev_festival',trungthu:'u/i/ev_festival',bao:'u/i/ev_rain',sale:'u/i/ev_price_up'}[s];setTimeout(()=>modal({img,c:s==='bao'?'#3d6fa8':'#d2432f',tag:'Sự kiện theo mùa',title:D.name.replace('!',''),text:D.msg+'<br><small>Giờ: '+D.hrs.map(h=>fmtH(h[0])+'–'+fmtH(h[1])).join(', ')+'</small>',cta:'Chuẩn bị hàng'}),1500)}}}
+if(typeof CEV!=='undefined')CEV.push(
+ {ic:'🎁',t:'Hàng xóm mời đám giỗ',x:'Bà Tư đầu hẻm mời qua ăn giỗ. Đi thì mất 1 tiếng bán, được bà quý.',a:['Đi (−15 sức, uy tín +)',()=>{energy(-15);bumpRep&&bumpRep(.08);mood(10)}],b:['Gửi lời xin lỗi',()=>{mood(-2)}]},
+ {ic:'💰',t:'Mối sỉ rủ hùn vốn',x:'Một mối sỉ rủ hùn 200k nhập lô hàng giá gốc. 60% lời gấp đôi, 40% mất trắng.',a:['Hùn 200k',()=>{if(S.cash<200){toast('Không đủ 200k');return}if(Math.random()<.6){addCash(200);toast('💰 Lô hàng trót lọt, lời 200k')}else{addCash(-200);toast('💸 Lô hàng bị kẹt, mất 200k')}}],b:['Thôi',()=>{}]},
+ {ic:'🌧️',t:'Trời chuyển mưa',x:'Mây đen kéo tới. Mua áo mưa trùm xe 40k thì hàng không ướt.',a:['Mua áo mưa (−40k)',()=>{addCash(-40);mood(3)}],b:['Liều',()=>{if(Math.random()<.4){addCash(-80);toast('🌧️ Hàng ướt, mất 80k')}}]},
+ {ic:'📸',t:'Đoàn khách Hàn Quốc',x:'Hướng dẫn viên hỏi mày có bán combo cho 10 khách không, trả trước 150k.',a:['Nhận (+150k, −20 sức)',()=>{addCash(150);energy(-20);bumpRep&&bumpRep(.05)}],b:['Không đủ hàng',()=>{}]},
+ {ic:'🔧',t:'Xe máy hàng xóm hư',x:'Anh xe ôm nhờ chở giùm thùng hàng ra chợ, trả 50k.',a:['Giúp (+50k, −10 sức)',()=>{addCash(50);energy(-10)}],b:['Bận rồi',()=>{}]},
+ {ic:'🎪',t:'Quay phim quảng cáo',x:'Đoàn làm phim thuê xe mày làm cảnh nền nửa ngày, trả 120k nhưng không bán được buổi sáng.',a:['Cho thuê (+120k)',()=>{addCash(120);bumpRep&&bumpRep(.06)}],b:['Từ chối',()=>{}]},
+ {ic:'👛',t:'Khách quên điện thoại',x:'Một khách để quên điện thoại trên ghế. Chờ họ quay lại thì mất 30 phút.',a:['Chờ trả (uy tín ++)',()=>{bumpRep&&bumpRep(.12);mood(8)}],b:['Gửi công an phường',()=>{bumpRep&&bumpRep(.04)}]},
+ {ic:'🎁',t:'Học sinh xin ăn chịu',x:'Bé học sinh quên tiền, xin ăn chịu 15k, mai trả.',a:['Cho chịu',()=>{mood(6);setTimeout(()=>{addCash(20);toast('🎒 Bé quay lại trả 20k, còn cảm ơn')},40000)}],b:['Không bán chịu',()=>{mood(-4)}]});
+// ===================== KHÁCH QUEN RA PHỐ THEO LỊCH =====================
+const REG_PHRASE=/ghé|ra phố|đi chợ|dạo phố|chụp phố|góc phố|hát rong|đi cà phê|nghỉ trưa|tan ca|nghỉ ăn/;
+{const _sc=spawnCustomer;spawnCustomer=function(){const n=cust.length;_sc.apply(this,arguments);if(cust.length<=n||S.region!=='saigon'||typeof NPCS==='undefined')return;const c=cust[cust.length-1];if(c.local||Math.random()>.22)return;
+  const h=hour(),here=NPCS.filter(p=>REG_PHRASE.test(npcNow(p[2],h))&&!cust.some(x=>x.regName===p[0]));if(!here.length)return;const p=pick(here);c.id=p[1].replace(/^a\//,'');c.regName=p[0];c.name=p[0]+' · khách quen';c.arch=Object.assign({},c.arch,{pay:Math.max(1.25,c.arch.pay||1),pat:(c.arch.pat||1)*1.4})}}
+{const _dc=drawCust;drawCust=function(c){_dc(c);if(c.regName&&!c.walking){ctx.save();ctx.font='700 11px "Be Vietnam Pro",sans-serif';const t='★ '+c.regName,w=ctx.measureText(t).width+12,y=c.y-(chH(c.id)||140)-14;ctx.fillStyle='rgba(47,122,67,.92)';rr(c.x-w/2,y-14,w,18,8);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(t,c.x,y-1);ctx.restore()}}}
+// ===================== DỌN TRÙNG + CHỮ TO HƠN =====================
+{const _sc=showChar;showChar=function(){_sc.apply(this,arguments);try{const tb=[...sheet.querySelectorAll('button,[data-t]')].find(b=>/Trang phục/.test(b.textContent)&&b.closest('.tabs,.ttabs,.seg,nav,div'));if(tb){tb.innerHTML=tb.innerHTML.replace('Trang phục','Tủ đồ');tb.addEventListener('click',e=>{e.stopImmediatePropagation();closeSheet();phOpen('me')},true)}}catch(e){}}}
+(function(){const st=document.createElement('style');st.textContent=`
+#phone .phapp .nw{position:absolute;top:-6px;left:-6px;z-index:2;background:#e2471e;color:#fff;font:800 10px/1 'Baloo 2';padding:3px 6px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.4)}#phone .phapp span.ai{position:relative}
+#prof .pbtn button.inv{background:linear-gradient(#7fd36e,#2f9b62)!important;color:#fff!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 3px 0 #1e6b3e!important}
+#modal .shr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 10px}#modal .shr a,#modal .shr button{display:block;padding:11px 8px;border-radius:12px;font:800 15px var(--display,'Baloo 2');text-decoration:none;text-align:center;color:#fff;border:0;cursor:pointer}
+#modal .shr a:nth-child(1){background:#1877f2}#modal .shr a:nth-child(2){background:#a033ff}#modal .shr a:nth-child(3){background:#0068ff}#modal .shr button{background:#5a3a18}
+@media(max-width:520px){#phone .tile{font-size:12.5px!important}#phone .tile small{font-size:12px!important}#phone .phcard small{font-size:12.5px}#phone .phapp em{font-size:12px}#phone .achc small{font-size:12px}}
+`;document.head.appendChild(st)})();
+// ===================== GIỮ VỊ TRÍ CUỘN KHI MÀN VẼ LẠI (chợ, túi, điện thoại…) =====================
+(function(){const SC={};const key=el=>{const t=(sheet.querySelector('h1,h2,.ttl,.title')||{}).textContent||'';return t.trim().slice(0,30)+'|'+(el.className||el.tagName)};
+ const keyP=el=>'ph|'+((document.querySelector('#phone .phtop b')||{}).textContent||'')+'|'+(el.className||'');
+ sheet.addEventListener('scroll',e=>{const el=e.target;if(el&&el.scrollHeight>el.clientHeight)SC[key(el)]=el.scrollTop},true);
+ const restore=()=>{sheet.querySelectorAll('*').forEach(el=>{if(el.scrollHeight>el.clientHeight+4){const v=SC[key(el)];if(v&&Math.abs(el.scrollTop-v)>2)el.scrollTop=v}})};
+ new MutationObserver(()=>{restore();requestAnimationFrame(restore)}).observe(sheet,{childList:true});
+ const _cs=closeSheet;closeSheet=function(){Object.keys(SC).forEach(k=>delete SC[k]);return _cs.apply(this,arguments)};
+ // điện thoại
+ const ph=document.getElementById('phone');if(ph){ph.addEventListener('scroll',e=>{const el=e.target;if(el.classList&&el.classList.contains('phbd'))SC[keyP(el)]=el.scrollTop},true);
+  const _pr=phRender;phRender=function(){const bd=ph.querySelector('.phbd');const k=bd?keyP(bd):null,v=bd?bd.scrollTop:0;_pr.apply(this,arguments);const nb=ph.querySelector('.phbd');if(nb&&k===keyP(nb)&&v)nb.scrollTop=v}}})();
+// ===================== TIẾNG ANH CHO PHẦN MỚI (thay chữ khi chọn English) =====================
+const EN=[['Bán đồ lặt vặt đầu hẻm, thu đều mỗi ngày.','Sells odds and ends at the alley corner, steady daily income.'],['Ghế nhựa, cà phê sữa đá, khách ngồi cả buổi.','Plastic stools and iced milk coffee, guests stay for hours.'],['Mở cửa từ sáng tới khuya, khách văn phòng ghé hoài.','Open early to late, office workers keep coming.'],['Món Việt nấu kỹ, trưa tối đều đông.','Carefully cooked Vietnamese food, busy at lunch and dinner.'],['Đón khách du lịch, doanh thu lớn nhưng cần quản lý giỏi.','Hosts tourists, big revenue but needs a good manager.'],
+ ['Ông trùm hàng rong','Street-vendor tycoon'],['Chủ chuỗi nhỏ','Small chain owner'],['Đại gia phố','Street mogul'],['Tỷ phú vỉa hè','Sidewalk billionaire'],['Huyền thoại Sài Gòn','Saigon legend'],['3 mặt bằng + 3 triệu tiền mặt','3 premises + 3M cash'],['Sở hữu 2 cơ sở kinh doanh','Own 2 businesses'],['Tài sản ròng 50 triệu','Net worth 50M'],['Đủ 5 ngành, tài sản 150 triệu','All 5 industries, net worth 150M'],['Mọi cơ sở cấp 5 và đóng dấu 13 thành phố','Every business at level 5 and all 13 cities stamped'],
+ [' triệu','M'],['/ngày','/day'],['k/ngày','k/day'],['bậc ','tier '],['cấp ','level '],['Phụ bán','Helper'],['Thu ngân','Cashier'],['Đầu bếp','Chef'],['Quản lý','Manager'],['Bảo vệ','Guard'],['Bảng gỗ','Wooden sign'],['Bảng đèn','Light box'],['Đèn lồng','Lanterns'],['Bảng phấn','Chalkboard'],['khách','customers'],['Điện thoại','Phone'],['Tin nhắn','Messages'],['Tin tức hôm nay','Today\'s news'],['Tin tức','News'],['Ngân hàng','Bank'],['Chợ','Market'],['Bản đồ','Map'],['Túi','Bag'],['Lịch','Calendar'],['Hộ chiếu','Passport'],['Sổ tay','Notebook'],['Nhiệm vụ','Missions'],['Bạn bè & online','Friends & online'],['Bạn bè','Friends'],['Cài đặt','Settings'],
+ ['Nghề tay trái','Side jobs'],['Kỹ năng','Skills'],['Nhà','Home'],['Tủ đồ','Wardrobe'],['Bộ sưu tập','Collection'],['Hàng xóm','Neighbors'],['Kinh doanh','Business'],['Thành tựu','Achievements'],
+ ['Sức bền','Stamina'],['Tâm trạng','Mood'],['Hôm nay','Today'],['Uống trà đá nghỉ chút','Take an iced-tea break'],
+ ['Nhân vật & bộ đồ','Characters & outfits'],['Áo dài & kiểu tóc','Ao dai & hairstyles'],['Bộ đồ đi làm','Work outfits'],['Mũ','Hats'],['Giày','Shoes'],['Kính','Glasses'],['Trang sức','Jewelry'],['Đang dùng','Wearing'],['Đã có','Owned'],['Miễn phí','Free'],['Duyên từ đồ','Charm from items'],['Duyên càng cao khách càng dễ mua, trả hậu hơn.','Higher charm means customers buy more easily and tip better.'],['Bấm lần nữa vào mũ hoặc phụ kiện đang dùng để tháo ra.','Tap a worn hat or accessory again to take it off.'],
+ ['Phòng của mày','Your room'],['Nội thất','Furniture'],['Tiếp theo','Next'],['Chuyển nhà','Move'],['Phòng còn trống. Mua nội thất bên dưới để bày vào.','Your room is empty. Buy furniture below to fill it.'],['Bậc','Tier'],
+ ['Đế chế','Empire'],['Tài sản ròng','Net worth'],['Mở ·','Open ·'],['Nâng cấp','Upgrade'],['Nhân viên','Staff'],['Bảng hiệu','Signboard'],['Dự kiến lãi','Expected profit'],['doanh thu','revenue'],['lương','wages'],['Cấp tối đa','Max level'],['Thu khoảng','Earns about'],['Thu nhập kinh doanh 7 ngày','Business income, 7 days'],['Tổng từ trước tới nay','All-time total'],['Bắt đầu mùa mới','Start a new season'],['Cơ bản','Basic'],['Đang làm','Working'],
+ ['Sạp tạp hoá','Corner shop'],['Quán cà phê vỉa hè','Sidewalk café'],['Cửa hàng tiện lợi','Convenience store'],['Nhà hàng cơm nhà','Home-style restaurant'],['Khách sạn mini','Mini hotel'],
+ ['Đã đạt','Unlocked'],['Thường','Common'],['Hiếm','Rare'],['Sử thi','Epic'],['Huyền thoại','Legendary'],
+ ['Thực đơn','Menu'],['Món đã nấu','Dishes cooked'],['Cá và hải sản','Fish & seafood'],['Cây trồng','Crops'],['Vườn nhỏ','Small garden'],['Ô đất','Plot'],['Đi làm','Go to work'],['Câu cá','Fishing'],['Giao hàng','Delivery'],['Pha chế','Barista'],['Nấu ăn xong','Cooking done'],['Nhớ thứ tự','Remember the order'],['Bấm đúng thứ tự','Tap in the right order'],['Thu hoạch','Harvest'],['Chín rồi','Ready'],['Đã biết','Known'],['Nấu','Cook'],
+ ['Hồ sơ nhân vật','Character profile'],['Mời bạn chơi','Invite friends'],['Khoe hồ sơ','Share profile'],['Chỉ số & thành tựu','Stats & achievements'],['Cài lên màn hình chính','Add to home screen'],['Đăng nhập','Sign in'],['Tài khoản','Account'],['Tiền mặt','Cash'],['Ngày chơi','Days played'],['Phần đã bán','Items sold'],['Thành phố','Cities'],['Đặc sản','Specialties'],['Nhà ở','Home'],['Danh hiệu','Titles'],['Chưa đăng nhập, tiến trình chỉ lưu trên máy này','Not signed in, progress is saved on this device only'],
+ ['Xếp hạng nhóm bạn','Friends ranking'],['Mời bạn bằng link','Invite by link'],['Gửi link mời','Send invite link'],['Thêm bạn bằng mã','Add friend by code'],['Kết bạn','Add'],['Ghé phố','Visit'],['Tặng 20k','Gift 20k'],['Nhận hết','Claim all'],['món quà đang chờ','gifts waiting'],['Mọi lúc','All time'],['Tuần này','This week'],['Xếp hạng','Ranking'],
+ ['Rủ bạn chơi cùng','Invite friends to play'],['Chép link','Copy link'],['Đã chép link','Link copied'],['Xong','Done'],['Mở khoá trong điện thoại','Unlocked on your phone'],['Mở xem','Open'],['Để sau','Later'],['Sự kiện theo mùa','Seasonal event'],['Chuẩn bị hàng','Get ready'],['Sổ kinh doanh','Business ledger'],['Thu nhập hôm nay','Today\'s income'],['Ghi sổ','Record'],['Khai trương','Grand opening'],['Giấy chứng nhận','Certificate'],['Tuyệt','Great'],['Mới','New'],['khách quen','regular'],['Người địa phương','Local'],['Ra phố bán thôi','Let\'s go sell'],['Chào mừng tới','Welcome to'],
+ ['Đang bay đến','Flying to'],['BỎ QUA','SKIP'],['Chọn nhân vật','Choose your character'],['Tên nhân vật','Character name'],['Bắt đầu hành trình','Start the journey'],['Ai cũng bắt đầu từ 100k và một chiếc xe bánh mì. Đổi bộ đồ sau trong Tủ đồ.','Everyone starts with 100k and a bánh mì cart. Change outfits later in the Wardrobe.']].sort((a,b)=>b[0].length-a[0].length);
+const ENRE=new RegExp(EN.map(p=>p[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g'),ENMAP=Object.fromEntries(EN);
+function enSwap(root){if(LANG()!=='en'||!root||!root.querySelectorAll)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const L=[];let n;while(n=w.nextNode())L.push(n);
+  L.forEach(t=>{if(t.parentNode&&t.parentNode.closest('input,textarea,.noemi'))return;const v=t.nodeValue;ENRE.lastIndex=0;if(!ENRE.test(v))return;ENRE.lastIndex=0;t.nodeValue=v.replace(ENRE,m=>ENMAP[m]||m)})}
+{const ids=['phone','prof','modal','mg','scr','fly','toasts'];const mo=new MutationObserver(ms=>{if(LANG()!=='en')return;mo.disconnect();ms.forEach(m=>enSwap(m.target.nodeType===1?m.target:m.target.parentNode));obs()});
+ const obs=()=>ids.forEach(id=>{const e=document.getElementById(id);if(e)mo.observe(e,{childList:true,subtree:true})});setTimeout(obs,500);
+ const _sp=showProfile;showProfile=function(){_sp.apply(this,arguments);const p=document.getElementById('prof');if(p){enSwap(p);mo.observe(p,{childList:true,subtree:true})}}}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
