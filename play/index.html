@@ -3149,6 +3149,26 @@ function showChars(){const pick=HEROES.find(h=>h.id===heroSel)||HEROES[0];
   const pb=document.querySelector('#prof .pbtn');if(pb)pb.insertAdjacentHTML('beforeend','<button id="pfSt">Chỉ số & thành tựu</button>');const st=document.getElementById('pfSt');if(st)st.onclick=()=>{document.getElementById('prof').remove();try{showChar()}catch(e){try{hubOpen('char')}catch(e2){}}}
   const me=document.getElementById('pfMe');if(me)me.textContent='Tủ đồ'}}
 (function(){const st=document.createElement('style');st.textContent=`#prof .pfig{position:relative}#prof .pacs{position:absolute;right:4px;top:4px;display:flex;flex-direction:column;gap:2px}#prof .pacs img{width:30px;height:30px;object-fit:contain;background:rgba(255,255,255,.75);border-radius:9px;padding:2px}`;document.head.appendChild(st)})();
+// ===================== ĐỒNG BỘ GIAO DIỆN: thanh menu, dock, emoji trong mọi màn =====================
+{const _so=setOutfit;setOutfit=function(id){S.look=null;return _so(id)}}
+(function(){const M={street:'u/i/biz_stall_front',hang:'l2/basket',inv:'u/i/bag_04',mis:'l2/clip',map:'u/i/tab_map'};Object.keys(M).forEach(k=>{const im=document.querySelector(`#nav [data-nav=${k}] img`);if(im)im.src='a/'+M[k]+'.webp'});
+ const f=document.getElementById('navFace');if(f){f.removeAttribute('id');f.classList.add('navav');const sync=()=>{f.src=S.look?'a/'+S.look+'.webp':avtSrc();f.classList.toggle('lk',!!S.look)};const _u=ui;ui=function(){_u.apply(this,arguments);try{sync()}catch(e){}};sync()}})();
+Object.assign(EMI,{'💰':'n/i_coin','🪙':'n/i_coin','⚡':'n/i_bolt','📦':'l2/crate','📅':'n/i_cal','🗓️':'n/i_cal','📍':'u/i/pin_current','🏆':'u/i/ach_badge_01','📋':'l2/clip','📖':'u/i/col_book_1','🏪':'u/i/biz_shop_front','⏱':'u/i/ic_flight_time','⏱️':'u/i/ic_flight_time','☀️':'ui/app_w_sun','⛈️':'ui/app_w_storm','🎒':'u/i/bag_04','🧺':'l2/basket','👜':'u/i/bag_02','🛍️':'u/i/bag_02','💸':'n/i_coin','🛵':'l2/job_ride','🏍️':'l2/job_ride','🏅':'u/i/ach_badge_02','🥇':'u/i/ach_badge_01','🌟':'u/i/ach_badge_02','👋':'u/i/mascot_helper','📱':'ui/app_phone','💬':'ui/app_msg','📰':'ui/app_news','🏦':'ui/app_bank','⚙️':'ui/app_set','📜':'ui/app_qst','🧭':'u/i/ic_compass','🎫':'u/i/ticket_economy'});
+{const keys=Object.keys(EMI).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).sort((a,b)=>b.length-a.length);EMRE.compile?0:0;window.EMRE2=new RegExp('('+keys.join('|')+')','gu')}
+function emSwap2(root){if(!root||!root.querySelectorAll)return;const R=window.EMRE2;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{R.lastIndex=0;return R.test(n.nodeValue)?1:2}});const list=[];let n;while(n=w.nextNode())list.push(n);
+  list.forEach(t=>{const pe=t.parentNode;if(!pe||pe.closest('textarea,input,.noemi,canvas,#clock'))return;const span=document.createElement('span');span.className='emw';span.innerHTML=t.nodeValue.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(R,m=>EMI[m]?emImg(m):m);pe.replaceChild(span,t)})}
+{let q=new Set(),tm=0;const run=()=>{tm=0;mo.disconnect();q.forEach(emSwap2);q.clear();obs()};const mo=new MutationObserver(ms=>{ms.forEach(m=>{q.add(m.target.nodeType===1?m.target:m.target.parentNode)});if(!tm)tm=requestAnimationFrame(run)});
+ const obs=()=>['sheet','modal','toasts','mission','coach','phone','mg','metaHub','ach','prof','fly'].forEach(id=>{const e=document.getElementById(id);if(e)mo.observe(e,{childList:true,subtree:true,characterData:true})});
+ setTimeout(()=>{['sheet','modal','toasts','mission','coach'].forEach(id=>emSwap2(document.getElementById(id)));obs()},400);
+ const _sp=showProfile;showProfile=function(){_sp.apply(this,arguments);const p=document.getElementById('prof');if(p){emSwap2(p);mo.observe(p,{childList:true,subtree:true})}}}
+{const _ic=phIcon;phIcon=function(a,un,dock){let h=_ic(a,un,dock);if(dock)h=h.replace('</span>',`</span><em class="dl">${a[2]}</em>`);return h}}
+(function(){const st=document.createElement('style');st.textContent=`
+#nav button span img{object-fit:contain}#nav img.navav{border-radius:50%;object-fit:cover;background:radial-gradient(#ffe9b8,#f2b968);box-shadow:0 0 0 2px #f2c46a}
+#nav img.navav.lk{object-position:50% 3%;object-fit:cover;width:100%;height:100%}
+#phone .phdock .phapp em.dl{font:600 10px 'Be Vietnam Pro';font-style:normal;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);margin-top:-2px}
+#sheet img.emi,#modal img.emi,#toasts img.emi{width:1.2em;height:1.2em;vertical-align:-.22em;margin:-.15em 0}#toasts .tt>i img.emi{width:26px;height:26px;vertical-align:middle}
+#modal .mi img.emi{width:64px;height:64px}
+`;document.head.appendChild(st)})();
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
