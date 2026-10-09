@@ -33,21 +33,23 @@ async function limit(req, key, max, sec) {
 const scrypt = (pw, salt) => new Promise((ok, no) => crypto.scrypt(pw, salt, 32, { N: 16384, r: 8, p: 1 }, (e, k) => e ? no(e) : ok(k)));
 
 async function emailAuth(b) {
-  const email = String(b.email || '').trim().toLowerCase(), pw = String(b.password || '');
-  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,}$/i.test(email)) throw new C.HttpError(400, 'Email chưa đúng.');
+  let email = String(b.email || '').trim().toLowerCase(); const pw = String(b.password || '');
+  const isUser = !email.includes('@');
+  if (isUser) { if (!/^[a-z0-9_.]{3,20}$/.test(email)) throw new C.HttpError(400, 'Tên đăng nhập 3–20 ký tự, chỉ chữ không dấu, số, dấu chấm hoặc gạch dưới.'); email = 'u:' + email; }
+  else if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,}$/i.test(email)) throw new C.HttpError(400, 'Email chưa đúng.');
   if (pw.length < 6 || pw.length > 128) throw new C.HttpError(400, 'Mật khẩu cần từ 6 ký tự.');
   const uid = 'e' + crypto.createHash('sha256').update(email).digest('hex').slice(0, 24);
   const stored = await C.redis('HGET', 'user:' + uid, 'pw');
   if (b.mode === 'register') {
-    if (stored) throw new C.HttpError(409, 'Email này đã có tài khoản. Chuyển sang Đăng nhập.');
+    if (stored) throw new C.HttpError(409, (isUser ? 'Tên đăng nhập này đã có người dùng.' : 'Email này đã có tài khoản.') + ' Chuyển sang Đăng nhập hoặc chọn tên khác.');
     const salt = crypto.randomBytes(16).toString('hex'), h = (await scrypt(pw, salt)).toString('hex');
-    const name = C.clean(String(b.name || '').trim(), 40) || email.split('@')[0].slice(0, 20);
-    return upsert(uid, name, '', 'email', ['pw', 'scrypt$' + salt + '$' + h, 'email', email]);
+    const name = C.clean(String(b.name || '').trim(), 40) || email.replace(/^u:/, '').split('@')[0].slice(0, 20);
+    return upsert(uid, name, '', isUser ? 'user' : 'email', ['pw', 'scrypt$' + salt + '$' + h, 'email', email]);
   }
-  if (!stored) throw new C.HttpError(401, 'Sai email hoặc mật khẩu.');
+  if (!stored) throw new C.HttpError(401, 'Sai tên đăng nhập/email hoặc mật khẩu.');
   const [, salt, h] = String(stored).split('$');
   const got = await scrypt(pw, salt), want = Buffer.from(h, 'hex');
-  if (got.length !== want.length || !crypto.timingSafeEqual(got, want)) throw new C.HttpError(401, 'Sai email hoặc mật khẩu.');
+  if (got.length !== want.length || !crypto.timingSafeEqual(got, want)) throw new C.HttpError(401, 'Sai tên đăng nhập/email hoặc mật khẩu.');
   await C.redis('HSET', 'user:' + uid, 'seen', Date.now());
   return userOut(uid);
 }

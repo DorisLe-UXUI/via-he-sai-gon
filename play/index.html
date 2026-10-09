@@ -545,7 +545,7 @@ body #act.open,body.dev-desktop #act.open,body.dev-tablet #act.open{width:56px;h
 .lb.lnk{background:transparent;border:0;min-height:34px;margin:4px 0 0;font:600 13px var(--body);color:#8a5a2a;text-decoration:underline}
 .lgf{display:grid;gap:9px;margin-bottom:6px}.lgf input{width:100%;box-sizing:border-box;min-height:46px;border-radius:14px;border:1.5px solid #e5c58a;background:#fff;padding:0 14px;font:500 15px var(--body);color:#3a2412}
 .lgf input:focus{outline:none;border-color:#f2a81c;box-shadow:0 0 0 3px rgba(242,168,28,.25)}
-.lgerr{margin:2px 0 8px;padding:8px 10px;border-radius:10px;background:#fde3d9;color:#9a2e14;font:600 12.5px var(--body)}
+.lgh{display:block;text-align:left;font:500 11.5px/1.4 var(--body);color:#7a5a3a;margin:-3px 2px 2px}.lgerr{margin:2px 0 8px;padding:8px 10px;border-radius:10px;background:#fde3d9;color:#9a2e14;font:600 12.5px var(--body)}
 .lb.guest{background:linear-gradient(#ffe27a,#f2a81c);border-color:#d78c10;color:#5a2e08;font-weight:700;margin:0}.lb.guest small{font:500 11px var(--body);opacity:.8}
 .or{font:500 12px var(--body);color:#8a6a4a;margin:2px 0 8px}.terms{font:500 11px var(--body);color:#fff3da;opacity:.85;margin:8px 0 0;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 /* chars */
@@ -2715,10 +2715,10 @@ function showLogin(){
     <button class="lb guest" id="lgGo">Vào game</button><button class="lb lnk" id="lgOut">Đổi tài khoản</button>`;
   }else if(LG.mode){
     const reg=LG.mode==='register';
-    body=`<h2>${reg?'Tạo tài khoản':'Đăng nhập bằng email'}</h2><p>${reg?'Dùng email và mật khẩu để lưu tiến trình trên mọi máy.':'Nhập email và mật khẩu mày đã đăng ký.'}</p>
+    body=`<h2>${reg?'Tạo tài khoản':'Đăng nhập'}</h2><p>${reg?'Dùng email hoặc tên đăng nhập tự đặt, không cần email cũng được.':'Nhập email hoặc tên đăng nhập và mật khẩu.'}</p>
     <form id="lgForm" class="lgf" novalidate>
       ${reg?'<input id="lgName" maxlength="20" placeholder="Tên hiển thị" autocomplete="nickname">':''}
-      <input id="lgMail" type="email" placeholder="Email" autocomplete="email" inputmode="email" value="${esc(LG.mail||'')}">
+      <input id="lgMail" type="text" placeholder="Email hoặc tên đăng nhập" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(LG.mail||'')}">${reg?'<small class="lgh">Không có email? Gõ tên đăng nhập (3–20 ký tự, không dấu), ví dụ <b>doris_09</b>. Nhớ kỹ mật khẩu vì không lấy lại qua email được.</small>':''}
       <input id="lgPw" type="password" placeholder="Mật khẩu (từ 6 ký tự)" autocomplete="${reg?'new-password':'current-password'}">
       ${LG.err?`<div class="lgerr">${esc(LG.err)}</div>`:''}
       <button class="lb guest" type="submit" ${LG.busy?'disabled':''}>${LG.busy?'Đang xử lý...':reg?'Tạo tài khoản':'Đăng nhập'}</button>
@@ -2730,7 +2730,7 @@ function showLogin(){
     body=`<h2>Chào mừng!</h2><p>Đăng nhập để lưu tiến trình và chơi mọi thiết bị</p>
     <div class="lb gslot" id="gSlot"><button class="lb" id="gFall" style="margin:0"><b class="gl">G</b>Đăng nhập với Google${on?'':soon(ready?'Chưa bật':'...')}</button></div>
     ${ON.fb?'<button class="lb fb" id="lgFb"><b>f</b>Đăng nhập với Facebook</button>':''}
-    <button class="lb em" id="lgEm"><b>✉</b>Đăng nhập với Email${on?'':soon(ready?'Chưa bật':'...')}</button>
+    <button class="lb em" id="lgEm"><b>✉</b>Đăng nhập / Tạo tài khoản${on?'':soon(ready?'Chưa bật':'...')}</button>
     ${LG.err?`<div class="lgerr">${esc(LG.err)}</div>`:''}
     <div class="or">Hoặc</div><button class="lb guest" id="guest">Chơi ngay <small>(Không cần đăng nhập)</small></button>`;
   }
@@ -2749,8 +2749,8 @@ function showLogin(){
 }
 async function lgPost(body){LG.busy=true;LG.err='';const a=await oapi('auth',{method:'POST',body});LG.busy=false;
   if(a.user){ON.user=a.user;sfx.sale&&sfx.sale();toast('👋 Xin chào '+a.user.name);LG.mode=null;lgDone()}else{LG.err=a.error||'Đăng nhập thất bại, thử lại nhé.';showLogin()}}
-function lgEmail(){const m=(document.getElementById('lgMail').value||'').trim();LG.mail=m;const p=document.getElementById('lgPw').value||'',n=document.getElementById('lgName');
-  if(!/^\S+@\S+\.\S+$/.test(m)){LG.err='Email chưa đúng.';showLogin();return}if(p.length<6){LG.err='Mật khẩu cần từ 6 ký tự.';showLogin();return}
+function lgEmail(){const m=(document.getElementById('lgMail').value||'').trim().toLowerCase();LG.mail=m;const p=document.getElementById('lgPw').value||'',n=document.getElementById('lgName');
+  if(m.includes('@')?!/^\S+@\S+\.\S+$/.test(m):!/^[a-zA-Z0-9_.]{3,20}$/.test(m)){LG.err=m.includes('@')?'Email chưa đúng.':'Tên đăng nhập 3–20 ký tự, chữ không dấu, số, dấu chấm hoặc gạch dưới.';showLogin();return}if(p.length<6){LG.err='Mật khẩu cần từ 6 ký tự.';showLogin();return}
   LG.busy=true;showLogin();lgPost({email:m,password:p,mode:LG.mode,name:n?n.value:''})}
 function lgFacebook(){const go=()=>FB.login(r=>{if(r.authResponse)lgPost({fbToken:r.authResponse.accessToken});else{LG.err='Mày đã huỷ đăng nhập Facebook.';showLogin()}},{scope:'public_profile'});
   if(window.FB)return go();window.fbAsyncInit=()=>{FB.init({appId:ON.fb,cookie:false,xfbml:false,version:'v19.0'});go()};
