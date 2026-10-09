@@ -3628,6 +3628,55 @@ REGIONS.canTho.unlock={rep:1,cash:500};REGIONS.vungTau.unlock={rep:1,cash:800};
    <li><b>Bán lời rồi bay tiếp</b>, gom đủ bộ đặc sản một miền để nhận danh hiệu.</li></ol>
    ${nextR?`<div class="nx">Gần mở nhất: <b>${REGIONS[nextR.x].name}</b>, còn thiếu ${nextR.q.lines.filter(l=>!l.ok).map(l=>l.t).join(', ')||'không gì, bấm để mở'}</div>`:''}</details>`)}}
 (function(){const st=document.createElement('style');st.textContent=`.airguide{margin:10px 0;background:#fff8e4;border-radius:16px;padding:10px 14px;box-shadow:inset 0 0 0 2px #e8c98a;color:#3a2210;font:500 13.5px/1.5 var(--body)}.airguide summary{font:800 15px var(--display);cursor:pointer;color:#8e4d06}.airguide ol{margin:8px 0 6px;padding-left:20px}.airguide li{margin:3px 0}.airguide .nx{background:#2f7a43;color:#fff;border-radius:10px;padding:6px 10px;font-weight:600}`;document.head.appendChild(st)})();
+// ===================== BÁN ONLINE: app giao đồ ăn "Giao Nhanh" + sàn thương mại "Sàn Phố" (tên hư cấu) =====================
+if(!SAVE_KEYS.includes('eco'))SAVE_KEYS.push('eco');
+const eco=()=>{if(!S.eco)S.eco={food:{on:false,rate:4.6,n:0,rev:0,orders:[],rv:[]},mall:{list:{},rate:4.7,fol:0,n:0,rev:0,orders:[],rv:[]}};return S.eco};
+const FOOD_CUT=.22,MALL_CUT=.12;
+const BUYERS=['Anh Long','Chị Thu','Bạn Vy','Cô Hoa','Anh Phát','Chị Ngân','Bạn Khôi','Chú Tài','Bé My','Anh Duy','Chị Trâm','Bạn Hậu'];
+const RVF=['Đồ ăn ngon, giao nhanh!','Nóng hổi, đóng gói kỹ.','Sẽ đặt lại.','Hơi lâu nhưng ngon.','Đúng vị Sài Gòn.'],RVM=['Hàng chuẩn đặc sản, shop tư vấn nhiệt tình.','Đóng gói cẩn thận, giao đúng hẹn.','Giá hợp lý, sẽ ủng hộ tiếp.','Hàng ổn, giao hơi chậm.','Quà biếu ai cũng khen.'];
+// ---- Giao Nhanh: đơn đồ ăn tới trong giờ bán, dùng hàng trên xe ----
+function foodTick(){const F=eco().food;if(!F.on||S.phase!=='play')return;const h=hour(),peak=(h>=11&&h<13)||(h>=17&&h<19.5);
+  const p=(peak?.10:.04)*(F.rate/4.6)*(1+Math.min(.5,F.n/200));if(Math.random()>p)return;
+  const avail=unlockedItems().filter(i=>(S.stock[i.id]||0)>0);if(!avail.length)return;const it=pick(avail),q=Math.min(S.stock[it.id],1+Math.floor(Math.random()*3));
+  F.orders.push({id:'f'+Date.now()+Math.random().toString(36).slice(2,5),it:it.id,q,who:pick(BUYERS),km:(.5+Math.random()*4).toFixed(1),t:performance.now()});if(F.orders.length>6)F.orders.shift();
+  try{sfx.pop()}catch(e){};toast('🛵 Đơn Giao Nhanh: '+q+' '+it.name.toLowerCase());const b=document.getElementById('phBtn');if(b)b.classList.add('dot')}
+function foodAcc(id){const F=eco().food,o=F.orders.find(x=>x.id===id);if(!o)return;const it=ITEMS.find(i=>i.id===o.it);if((S.stock[o.it]||0)<o.q){toast('Hết '+it.name.toLowerCase()+' trên xe');foodRej(id,true);return}
+  S.stock[o.it]-=o.q;const gross=Math.round(itemPrice(it)*o.q*1.1),net=Math.round(gross*(1-FOOD_CUT));addCash(net);F.n+=o.q;F.rev+=net;S.totalSold=(S.totalSold||0)+o.q;
+  F.orders=F.orders.filter(x=>x.id!==id);const late=(performance.now()-o.t)/1000>25;F.rate=Math.max(1,Math.min(5,F.rate*.94+(late?3.8:4.9)*.06));if(Math.random()<.35){F.rv.unshift({w:o.who,s:late?4:5,t:late?RVF[3]:pick(RVF)});F.rv=F.rv.slice(0,6)}
+  try{sfx.sale()}catch(e){};toast('✅ Giao xong đơn '+o.who+' +'+fmt(net)+' (đã trừ phí app '+Math.round(FOOD_CUT*100)+'%)');save();phRender();ui()}
+function foodRej(id,silent){const F=eco().food;F.orders=F.orders.filter(x=>x.id!==id);F.rate=Math.max(1,F.rate*.97+2*.03);if(!silent)toast('Đã huỷ đơn, điểm đánh giá giảm');save();phRender()}
+setInterval(()=>{try{foodTick();const F=eco().food;const now=performance.now();const exp=F.orders.filter(o=>now-o.t>60000);if(exp.length){exp.forEach(o=>foodRej(o.id,true));toast('⌛ '+exp.length+' đơn Giao Nhanh bị huỷ vì chờ lâu')}}catch(e){}},2000);
+// ---- Sàn Phố: rao bán đặc sản trong ba lô, đơn về mỗi ngày ----
+function mallList(id,on){const M=eco().mall;if(on){const p=PRD[id];M.list[id]={price:Math.round((p.base*1.25))}}else delete M.list[id];save();phRender()}
+function mallPrice(id,d){const M=eco().mall,L=M.list[id];if(!L)return;const base=PRD[id].base;L.price=Math.max(Math.round(base*.8),Math.min(Math.round(base*2.2),L.price+d));save();phRender()}
+function mallDay(){const M=eco().mall;const ids=Object.keys(M.list).filter(id=>S.cargo[id]&&S.cargo[id].kg>0);if(!ids.length)return null;let tot=0,lines=[],n=0;const sale=(S.evToday||[]).some(e=>e.id==='sale');
+  ids.forEach(id=>{const p=PRD[id],L=M.list[id],ratio=L.price/p.base,dem=Math.max(0,(2.1-ratio))*(M.rate/4.7)*(1+M.fol/150)*(sale?1.8:1);let kg=Math.min(S.cargo[id].kg,Math.round(dem*(1.5+Math.random()*3)*10)/10);if(kg<.5)return;
+   takeCargo(S.cargo,id,kg);const gross=Math.round(L.price*kg),net=Math.round(gross*(1-MALL_CUT))-8;tot+=net;n++;M.n++;lines.push(`${p.name} ${String(kg).replace('.',',')}kg · +${fmt(net)}`);
+   const good=ratio<1.6;M.rate=Math.max(1,Math.min(5,M.rate*.92+(good?4.9:4.1)*.08));M.fol+=good?Math.ceil(kg):0;if(Math.random()<.5){M.rv.unshift({w:pick(BUYERS),s:good?5:4,t:good?pick(RVM):RVM[3]});M.rv=M.rv.slice(0,6)}});
+  if(!n)return null;addCash(tot);M.rev+=tot;return{tot,lines,sale}}
+{const _ed=endDay;endDay=function(){_ed.apply(this,arguments);try{const r=mallDay();if(r)setTimeout(()=>{try{sfx.cash()}catch(e){};modal({img:'u/i/biz_shop_front',c:'#ee4d2d',tag:'Sàn Phố',title:'Bán online +'+fmt(r.tot),text:(r.sale?'<b>Ngày hội giảm giá: đơn gấp đôi!</b><br>':'')+r.lines.join('<br>')+'<br><small>Đã trừ phí sàn '+Math.round(MALL_CUT*100)+'% và 8k phí gói hàng mỗi đơn.</small>',cta:'Đóng gói tiếp'})},2100)}catch(e){}}}
+const stars=r=>'★'.repeat(Math.round(r))+'☆'.repeat(5-Math.round(r));
+function foodBody(){const F=eco().food,its=unlockedItems();
+  return `<div class="phcard ecoh fd"><div><b>Giao Nhanh · Quán ${esc(S.pname||'của mày')}</b><br><small>${stars(F.rate)} ${F.rate.toFixed(1)} · ${F.n} phần đã giao · thu ${fmt(F.rev)}</small></div><button class="tg ${F.on?'on':''}" onclick="eco().food.on=!eco().food.on;save();phRender()">${F.on?'Đang mở':'Đang đóng'}</button></div>
+  <div class="phcard"><small>Bật mở bán để nhận đơn giao tận nơi trong giờ bán. Đơn dùng hàng đang có trên xe, giá cao hơn 10% nhưng app thu ${Math.round(FOOD_CUT*100)}% phí. Giờ trưa và tối nhiều đơn nhất. Nhận đơn nhanh để giữ sao cao, sao cao thì đơn về nhiều hơn.</small></div>
+  <h3>Đơn đang chờ (${F.orders.length})</h3>${F.orders.length?F.orders.map(o=>{const it=ITEMS.find(i=>i.id===o.it)||{name:'?'};const ok=(S.stock[o.it]||0)>=o.q;return `<div class="phcard ord"><img src="a/${it.ic}.webp" alt="" onerror="this.style.display='none'"><div style="flex:1"><b>${o.q} × ${it.name}</b><br><small>${o.who} · ${o.km} km · ${fmt(Math.round(itemPrice(it)*o.q*1.1*(1-FOOD_CUT)))} sau phí</small></div><button class="phbtn" ${ok?'':'disabled'} onclick="foodAcc('${o.id}')">Nhận</button><button class="phbtn alt" onclick="foodRej('${o.id}')">Huỷ</button></div>`}).join(''):`<div class="phcard"><small>${F.on?(S.phase==='play'?'Đang chờ đơn… Nhớ có hàng trên xe.':'Ra phố bán thì đơn mới về.'):'Bật "Đang mở" để nhận đơn.'}</small></div>`}
+  <h3>Thực đơn trên app</h3><div class="tiles">${its.map(i=>`<div class="tile"><img src="a/${i.ic}.webp" alt="" onerror="this.style.display='none'">${i.name}<small>${fmt(Math.round(itemPrice(i)*1.1))}</small><small class="own">Còn ${S.stock[i.id]||0}</small></div>`).join('')}</div>
+  ${F.rv.length?`<h3>Đánh giá</h3>${F.rv.map(r=>`<div class="phcard"><b>${r.w}</b> <small style="color:#ffd27a">${stars(r.s)}</small><br><small>${r.t}</small></div>`).join('')}`:''}`}
+function mallBody(){const M=eco().mall,ids=Object.keys(S.cargo||{}).filter(id=>S.cargo[id].kg>0&&PRD[id]);
+  return `<div class="phcard ecoh ml"><div><b>Sàn Phố · Shop ${esc(S.pname||'của mày')}</b><br><small>${stars(M.rate)} ${M.rate.toFixed(1)} · ${M.fol} người theo dõi · ${M.n} đơn · thu ${fmt(M.rev)}</small></div></div>
+  <div class="phcard"><small>Rao bán đặc sản đang có trong ba lô (mua khi bay các tỉnh). Đơn về và tự giao cuối mỗi ngày. Giá càng sát giá gốc càng nhiều đơn, giá cao quá thì ế và bị đánh giá thấp. Sàn thu ${Math.round(MALL_CUT*100)}% phí và 8k phí gói mỗi đơn. Ngày hội giảm giá đơn tăng gấp đôi.</small></div>
+  <h3>Sản phẩm của shop</h3>${ids.length?ids.map(id=>{const p=PRD[id],L=M.list[id],kg=S.cargo[id].kg;return `<div class="phcard ord"><img src="a/${p.ic?(p.ic.startsWith('../')?p.ic.slice(3):'n/'+p.ic):'n/i_pack'}.webp" alt="" onerror="this.style.display='none'"><div style="flex:1"><b>${p.name}</b><br><small>Còn ${String(Math.round(kg*10)/10).replace('.',',')}kg · giá gốc ${fmt(p.base)}/kg</small>${L?`<div class="pr"><button onclick="mallPrice('${id}',-2)">−</button><b>${fmt(L.price)}/kg</b><button onclick="mallPrice('${id}',2)">+</button></div>`:''}</div><button class="phbtn ${L?'alt':''}" onclick="mallList('${id}',${L?'false':'true'})">${L?'Gỡ':'Đăng bán'}</button></div>`}).join(''):'<div class="phcard"><small>Ba lô chưa có đặc sản. Ra sân bay, bay tới tỉnh khác mua đặc sản rồi quay lại đăng bán.</small></div>'}
+  ${M.rv.length?`<h3>Đánh giá shop</h3>${M.rv.map(r=>`<div class="phcard"><b>${r.w}</b> <small style="color:#ffd27a">${stars(r.s)}</small><br><small>${r.t}</small></div>`).join('')}`:''}`}
+APPS.splice(Math.max(0,APPS.findIndex(a=>a[0]==='biz')),0,['food','🛵','Giao Nhanh','#00b14f'],['mall','🛍️','Sàn Phố','#ee4d2d']);
+L2APPS.push(['food','🛵','Giao Nhanh','#00b14f'],['mall','🛍️','Sàn Phố','#ee4d2d']);
+{const _l=l2Body;l2Body=function(a){if(a==='food')return foodBody();if(a==='mall')return mallBody();return _l(a)}}
+if(typeof UNL!=='undefined'){UNL.food=[2,2];UNL.mall=[0,0,()=>Object.keys(S.cargo||{}).length>0||S.level>=5];UNL_TIP.food='Giao Nhanh: bật bán online, nhận đơn giao tận nơi bằng hàng trên xe, app thu 22% phí.';UNL_TIP.mall='Sàn Phố: đăng bán đặc sản trong ba lô, đơn về và tự giao mỗi tối.'}
+(function(){const st=document.createElement('style');st.textContent=`
+#phone .ecoh{display:flex;align-items:center;gap:10px;justify-content:space-between}#phone .ecoh.fd{background:linear-gradient(135deg,rgba(0,177,79,.35),rgba(0,120,60,.2))}#phone .ecoh.ml{background:linear-gradient(135deg,rgba(238,77,45,.4),rgba(200,50,20,.2))}
+#phone .tg{border:0;border-radius:999px;padding:8px 14px;font:800 13px 'Baloo 2';background:#26304f;color:#cfd8f5;cursor:pointer;flex:none}#phone .tg.on{background:#00b14f;color:#fff}
+#phone .ord{display:flex;align-items:center;gap:8px}#phone .ord>img{width:48px;height:48px;object-fit:contain;flex:none}#phone .ord .phbtn{margin:0;padding:7px 10px;font-size:13px}
+#phone .pr{display:flex;align-items:center;gap:8px;margin-top:4px}#phone .pr button{width:28px;height:28px;border-radius:50%;border:0;background:#26304f;color:#fff;font:800 16px sans-serif;cursor:pointer}
+`;document.head.appendChild(st)})();
 // ===================== PHỐ ONLINE: thấy người chơi khác + chat (máy chủ Cloudflare) =====================
 const RT_DEFAULT='';// điền khi có địa chỉ worker, hoặc đặt RT_URL trên Vercel
 const RT={ws:null,url:'',room:'',shard:0,me:null,peers:new Map(),chat:[],unread:0,open:false,muted:new Set(),retry:0,last:'',lastSend:0,status:'off'};
