@@ -1,7 +1,14 @@
 // Shared helpers: Upstash Redis over REST, signed session cookie, Google ID-token check, JSON helpers.
 const crypto = require('crypto');
-const RURL = () => process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || '';
-const RTOK = () => process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || '';
+// Upstash cũng có thể được gắn dưới dạng REDIS_URL / KV_URL (rediss://default:TOKEN@host:6379) -> đổi sang REST
+function fromRedisUrl() {
+  const u = process.env.UPSTASH_REDIS_URL || process.env.REDIS_URL || process.env.KV_URL || '';
+  try { const x = new URL(u); if (/upstash\.io$/.test(x.hostname) && x.password) return { url: 'https://' + x.hostname, tok: decodeURIComponent(x.password) }; } catch { }
+  return null;
+}
+const envFind = re => { const k = Object.keys(process.env).find(n => re.test(n) && process.env[n]); return k ? process.env[k] : ''; };
+const RURL = () => process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || envFind(/(^|_)(KV|UPSTASH|REDIS)_REST_API_URL$|REDIS_REST_URL$/) || (fromRedisUrl() || {}).url || '';
+const RTOK = () => process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || envFind(/(^|_)(KV|UPSTASH|REDIS)_REST_API_TOKEN$|REDIS_REST_TOKEN$/) || (fromRedisUrl() || {}).tok || '';
 const SECRET = () => process.env.SESSION_SECRET || '';
 // Google Client ID is public by design (it is sent to every browser), so a default is safe to keep in code.
 const CLIENT_ID = () => process.env.GOOGLE_CLIENT_ID || '288520258114-mo8lr8cseq71485305qhhtjae3gbcurt.apps.googleusercontent.com';
@@ -60,4 +67,5 @@ async function googleVerify(idToken) {
   return { sub: j.sub, name: j.name || 'Người chơi', picture: j.picture || '', email: j.email || '' };
 }
 const clean = (s, n) => String(s == null ? '' : s).replace(/[<>\u0000-\u001f]/g, '').slice(0, n);
-module.exports = { redis, sign, verify, session, setCookie, readBody, send, handler, needUser, googleVerify, HttpError, clean, CLIENT_ID };
+const dbStatus = () => ({ db: !!(RURL() && RTOK()), secret: !!SECRET(), envNames: Object.keys(process.env).filter(n => /REDIS|KV_|UPSTASH|SESSION_SECRET/.test(n)) });
+module.exports = { dbStatus, redis, sign, verify, session, setCookie, readBody, send, handler, needUser, googleVerify, HttpError, clean, CLIENT_ID };
