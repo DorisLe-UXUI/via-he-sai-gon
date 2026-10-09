@@ -1,5 +1,5 @@
 // Vỉa Hè Sài Gòn service worker: ảnh/nhạc cache-first, trang game network-first, không đụng /api
-const V='vhsg-v1791537483';
+const V='vhsg-v1791538217';
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(V).then(c=>c.addAll(['./','logo.webp']).catch(()=>{})))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/'))return;
