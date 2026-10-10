@@ -3876,6 +3876,40 @@ if(typeof MALL_CUT!=='undefined'){const _md=mallDay;mallDay=function(){const r=_
 if(typeof UNL!=='undefined'){Object.assign(UNL,{bills:[1,2],family:[2,3],learn:[3,3],live:[4,4]});Object.assign(UNL_TIP,{bills:'Hoá đơn & thuế: điện, nước, internet, tiền chợ mỗi tháng, thuế khoán và giấy phép kinh doanh.',family:'Gia đình: gọi điện, gửi tiền về quê, hẹn hò, cưới, đón con.',learn:'Học thêm: nấu ăn, tiếng Anh, kế toán, marketing, mỗi khoá có hiệu quả vĩnh viễn.',live:'Townly Live: livestream bán hàng khi đang bày xe, kiếm người theo dõi.'})}
 (function(){const st=document.createElement('style');st.textContent=`#phone .bill{display:flex;align-items:center;gap:8px;margin:5px 0}#phone .bill img{width:30px;height:30px;object-fit:contain}#phone .bill span{flex:1}#phone .ok{color:#7fd36e}
 #phone .live{box-shadow:inset 0 0 0 2px #e2471e}#phone .rec{color:#ff5a4a;animation:recb 1s steps(2) infinite}@keyframes recb{50%{opacity:.3}}`;document.head.appendChild(st)})();
+// ===================== ĐIỆN THOẠI GỌN: nhóm app theo chủ đề + cảnh báo sức khoẻ, xe trên HUD =====================
+const PH_GROUPS=[['Kiếm tiền',['biz','food','mall','live','job','mkt']],['Tiền bạc',['bank','bills','shop','lotto','shark']],['Đời sống',['family','home','me','hosp','fix','learn','sk']],['Xã hội',['msg','tw','on','nb','news']],['Hành trình',['map','pass','qst','ach','col','cal','book','bag','set']]];
+{const _pr=phRender;phRender=function(){_pr.apply(this,arguments);if(phApp)return;const g=document.querySelector('#phone .phgrid');if(!g||g.dataset.grp)return;g.dataset.grp=1;
+  const btns=[...g.querySelectorAll('.phapp')],by={};btns.forEach(b=>{const m=(b.getAttribute('onclick')||'').match(/phAppGo\('(\w+)'\)/);if(m)by[m[1]]=b});
+  const used=new Set(),frag=document.createDocumentFragment();
+  PH_GROUPS.forEach(([t,ids])=>{const list=ids.filter(i=>by[i]);if(!list.length)return;const sec=document.createElement('div');sec.className='phgrp';sec.innerHTML=`<h4>${t}</h4><div class="phgrid in"></div>`;const gr=sec.lastChild;list.forEach(i=>{gr.appendChild(by[i]);used.add(i)});frag.appendChild(sec)});
+  const rest=Object.keys(by).filter(i=>!used.has(i));if(rest.length){const sec=document.createElement('div');sec.className='phgrp';sec.innerHTML='<h4>Khác</h4><div class="phgrid in"></div>';rest.forEach(i=>sec.lastChild.appendChild(by[i]));frag.appendChild(sec)}
+  g.replaceWith(frag)}}
+// cảnh báo trên HUD
+(function(){const w=document.createElement('div');w.id='hudWarn';document.body.appendChild(w);
+ setInterval(()=>{try{const live=S.phase==='play'||S.phase==='shop';const it=[];
+  if(live){if((S.hp??100)<35)it.push(['u/i/it_medicine','Sức khoẻ '+Math.round(S.hp)+'%','hosp']);if((S.cartHp??100)<35)it.push(['u/i/it_tire','Xe '+Math.round(S.cartHp)+'%','fix']);
+   try{const R=rl();const due=R.bills.filter(b=>!b.paid).length;if(due)it.push(['u/i/it_contract','Hoá đơn chưa trả','bills']);if(R.tax.owe&&S.day>=R.tax.due-1)it.push(['u/i/it_contract','Sắp hạn thuế','bills']);if(R.fam.par<25)it.push(['u/c/pl_wave','Gọi về nhà','family'])}catch(e){}
+   try{if(sh().owe&&S.day>=sh().due-1)it.push(['ui/app_shark','Nợ anh Tư sắp hạn','shark'])}catch(e){}}
+  const key=it.map(x=>x[1]).join('|');if(w.dataset.k===key)return;w.dataset.k=key;
+  w.innerHTML=it.slice(0,3).map(x=>`<button onclick="phOpen('${x[2]}')"><img src="a/${x[0]}.webp" alt=""><span>${x[1]}</span></button>`).join('')}catch(e){}},1500)})();
+// ngày mới: gom các thông báo chỉ-đọc vào một bảng "Sáng nay"
+let DIG=null;
+{const _sd=startDay;startDay=function(){DIG=[];_sd.apply(this,arguments);setTimeout(()=>{const d=DIG;DIG=null;if(!d||!d.length)return;if(d.length===1){modal(d[0]);return}
+  modal({img:'n/i_cal',c:'#8e4d06',tag:'Sáng nay · ngày '+S.day,title:'Có '+d.length+' việc cần biết',text:d.map(o=>`<div class="dig"><b>${o.title||''}</b>${o.text?'<div>'+o.text+'</div>':''}</div>`).join(''),cta:'Ra phố thôi'})},3200)}}
+{const _m=modal;modal=function(o){if(DIG&&o&&!o.cta2&&!o.onOk&&o.tag!=='Đế chế'&&!/Đế chế|Thành tựu/.test(o.tag||'')){DIG.push(o);return}return _m(o)}}
+(function(){const st=document.createElement('style');st.textContent=`
+#phone .phgrp{margin-bottom:8px}#phone .phgrp h4{margin:6px 2px 2px;font:800 12px 'Baloo 2';letter-spacing:.04em;color:#ffd27a;text-shadow:0 1px 3px rgba(0,0,0,.7);text-transform:uppercase}
+#phone .phgrid.in{padding-top:4px}
+#hudWarn{position:fixed;left:12px;top:calc(196px + env(safe-area-inset-top,0px));z-index:40;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+#hudWarn button{pointer-events:auto;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:3px 10px 3px 3px;background:rgba(160,30,15,.88);color:#fff;font:700 12px 'Be Vietnam Pro';cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.35);animation:hwP 1.6s ease-in-out infinite}
+#hudWarn img{width:26px;height:26px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}
+@keyframes hwP{50%{transform:scale(1.05)}}body.inscr #hudWarn{display:none}
+@media(max-width:640px){#hudWarn{top:calc(208px + env(safe-area-inset-top,0px))}#hudWarn span{display:none}#hudWarn button{padding:3px}}
+#modal .dig{text-align:left;background:rgba(0,0,0,.04);border-radius:10px;padding:6px 10px;margin:6px 0;font-size:13px}#modal .dig b{display:block;font-size:14px}
+`;document.head.appendChild(st)})();
+
+// Uy tín: càng cao càng khó lên (diminishing returns), mất thì vẫn mất đủ
+{const _br=bumpRep;bumpRep=function(d){if(d>0)d*=Math.max(.1,1-(S.rep||0)/5.2);return _br(d)}}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
