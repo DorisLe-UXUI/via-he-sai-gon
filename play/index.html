@@ -3910,6 +3910,15 @@ let DIG=null;
 
 // Uy tín: càng cao càng khó lên (diminishing returns), mất thì vẫn mất đủ
 {const _br=bumpRep;bumpRep=function(d){if(d>0)d*=Math.max(.1,1-(S.rep||0)/5.2);return _br(d)}}
+
+// Barie quận: chạm tới là hỏi mua giấy phép luôn (trước đây phải vào Nhân vật → Sổ tay → Quận)
+let _gateAsk=-99;
+lockedHint=function(){const d=DISTRICTS.find(d=>!S.unlocked.includes(d.id));if(!d||S.t-_gateAsk<6||!sheet.hidden)return;_gateAsk=S.t;
+  const ok=S.cash>=d.unlock,need=d.unlock-S.cash;
+  modal({ic:'🚧',c:'#c9672b',tag:'Giấy phép bán hàng',title:'Mở '+d.name,
+    text:`Qua quận mới cần giấy phép ${fmt(d.unlock)}. Giá bán ở đây ×${d.mult}, có ${d.spots.length} điểm bán mới.`+(ok?'':`<br><b>Còn thiếu ${fmt(need)}</b>, bán thêm vài ngày rồi quay lại nha.`),
+    cta:ok?'Mua giấy phép '+fmt(d.unlock):'Để sau',cta2:ok?'Để sau':null,
+    onOk:ok?()=>{addCash(-d.unlock);S.unlocked.push(d.id);try{burst(325,P.x,P.y-130,6);sfx.day()}catch(e){}save();toast('🎉 Mở '+d.name+'! Giá bán ×'+d.mult);ui()}:null})}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
