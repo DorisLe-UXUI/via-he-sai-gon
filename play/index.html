@@ -3905,7 +3905,7 @@ let DIG=null;
 #hudWarn button{pointer-events:auto;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:3px 10px 3px 3px;background:rgba(160,30,15,.88);color:#fff;font:700 12px 'Be Vietnam Pro';cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.35);animation:hwP 1.6s ease-in-out infinite}
 #hudWarn img{width:26px;height:26px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}
 @keyframes hwP{50%{transform:scale(1.05)}}body.inscr #hudWarn{display:none}
-@media(max-width:640px){#hudWarn{top:calc(208px + env(safe-area-inset-top,0px))}#hudWarn span{display:none}#hudWarn button{padding:3px}}
+@media(max-width:640px){#hudWarn{top:calc(232px + env(safe-area-inset-top,0px))}#hudWarn span{display:none}#hudWarn button{padding:3px}}
 #modal .dig{text-align:left;background:rgba(0,0,0,.04);border-radius:10px;padding:6px 10px;margin:6px 0;font-size:13px}#modal .dig b{display:block;font-size:14px}
 `;document.head.appendChild(st)})();
 
@@ -3940,7 +3940,7 @@ document.head.insertAdjacentHTML('beforeend','<style>#hudWarn{align-items:flex-s
   const s=ok[0];if(!s){g.hidden=true;return}tgt=s;const dir=s.x<P.x?-1:1;
   const html=`${dir<0?'<i>⬅</i>':''}<span>Tới ${s.emoji} ${s.name}${isPeak(s)?' <b>đang đông</b>':''}</span>${dir>0?'<i>➡</i>':''}`;
   if(g.dataset.h!==html){g.innerHTML=html;g.dataset.h=html}g.hidden=false}catch(e){}},400)})();
-document.head.insertAdjacentHTML('beforeend','<style>#guide{position:fixed;left:50%;transform:translateX(-50%);top:calc(150px + env(safe-area-inset-top,0px));z-index:41;display:flex;align-items:center;gap:8px;border:2px solid #fff3d6;border-radius:999px;padding:7px 14px;background:linear-gradient(180deg,#3d8f4f,#2a6b3a);color:#fff;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.35);cursor:pointer;white-space:nowrap}#guide b{background:#f2b632;color:#3a2306;border-radius:8px;padding:1px 6px;font-size:11px;margin-left:4px}#guide i{font-style:normal;animation:gdN 1s ease-in-out infinite}@keyframes gdN{50%{transform:translateX(3px)}}#guide[hidden]{display:none}@media (prefers-reduced-motion:reduce){#guide i{animation:none}}</style>');
+document.head.insertAdjacentHTML('beforeend','<style>#guide{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(196px + env(safe-area-inset-bottom,0px));z-index:41;display:flex;align-items:center;gap:8px;border:2px solid #fff3d6;border-radius:999px;padding:7px 14px;background:linear-gradient(180deg,#3d8f4f,#2a6b3a);color:#fff;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.35);cursor:pointer;white-space:nowrap}#guide b{background:#f2b632;color:#3a2306;border-radius:8px;padding:1px 6px;font-size:11px;margin-left:4px}#guide i{font-style:normal;animation:gdN 1s ease-in-out infinite}@keyframes gdN{50%{transform:translateX(3px)}}#guide[hidden]{display:none}@media (prefers-reduced-motion:reduce){#guide i{animation:none}}</style>');
 document.head.insertAdjacentHTML('beforeend','<style>#scr #begin{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:6;box-shadow:0 6px 18px rgba(0,0,0,.35)}</style>');
 // Bước 1 hướng dẫn chỉ xong khi đứng ở điểm bán thật (không tính chợ, quán cà phê, nhà)
 try{ONB[0].ok=()=>{const a=spotAt();return !!(a&&!a.s.market&&!a.s.cafe&&!a.s.home&&a.d<160)};ONB[0].t='Đẩy xe tới điểm bán (bấm nút xanh)';COACH[0]='Đẩy xe tới điểm bán · bấm nút xanh để đi'}catch(e){}
@@ -3951,6 +3951,21 @@ if(!SAVE_KEYS.includes('copSeen'))SAVE_KEYS.push('copSeen');
 {const _br2=bumpRep;bumpRep=function(d){if(d<0&&(S.day||1)<=3)d*=.35;return _br2(d)}}
 // Bước chỉ tiêu: hiện số cụ thể thay vì "vạch vàng"
 try{Object.defineProperty(COACH,3,{get:()=>`Đạt chỉ tiêu hôm nay: ${fmt(Math.round(S.dayRev||0))} / ${fmt(S.goal||0)}`})}catch(e){}
+
+// Dòng xe cao cấp — cho người chơi lâu có mục tiêu tiếp (trước đây xe đắt nhất chỉ 1,1 triệu)
+CARTS.push(
+ {id:'bm_vip',n:'Xe bánh mì Đèn lồng',en:'Lantern banh mi cart',e:'🏮',sp:'z/vietnamese_banh_mi_cart_render',cost:1800,rep:4,cap:12,spd:1.02,attr:.7,repB:.3,cold:false,slots:3,sig:'banhmi',compat:['banhmi','nuocngot','caphe','xoi'],vip:1,d:'Bản nâng cấp của xe khởi nghiệp: đèn lồng, tủ kính, chở nhiều hơn hẳn.',de:'Lanterns, glass case, much more space.'},
+ {id:'cf_vip',n:'Xe cà phê Hoài cổ',en:'Vintage coffee cart',e:'☕',sp:'z/vietnamese_coffee_street_cart_re',cost:2200,rep:4,cap:6,spd:1,attr:.9,repB:.35,cold:false,slots:4,sig:'caphe',compat:['caphe','banhmi','banhbao','sinhto'],vip:1,d:'Phin đồng, ghế đẩu, đèn vàng. Dân văn phòng ghé là ngồi lì.',de:'Brass filters and warm lights. Office crowd stays.'},
+ {id:'tc_vip',n:'Xe trái cây Lễ hội',en:'Festival fruit cart',e:'🍍',sp:'z/vietnamese_fruit_street_cart_render',cost:2600,rep:4,cap:18,spd:.95,attr:.7,repB:.3,cold:true,slots:3,sig:'traicay',compat:['traicay','dua','sinhto','nuocmia'],vip:1,d:'Xe to nhất dòng trái cây, có thùng đá, hàng tươi cả ngày.',de:'Biggest fruit cart, ice box, fresh all day.'},
+ {id:'as_vip',n:'Xe ăn sáng Phố cổ',en:'Old-quarter breakfast cart',e:'🥟',sp:'z/vietnamese_breakfast_street_cart_v2',cost:3200,rep:5,cap:14,spd:1,attr:.8,repB:.35,cold:false,slots:3,sig:'xoi',compat:['xoi','banhmi','banhbao','caphe','goicuon'],vip:1,d:'Năm món ăn sáng trên một xe, khách sáng sớm xếp hàng dài.',de:'Five breakfast items on one cart.'},
+ {id:'ht_vip',n:'Xe hủ tiếu Gia truyền',en:'Heritage noodle cart',e:'🍜',sp:'z/noodle_street_cart_game_asset',cost:4500,rep:5,cap:16,spd:.96,attr:1,repB:.45,cold:false,slots:4,sig:'banhbao',compat:['banhbao','xoi','hotvit','caphe','goicuon'],vip:1,d:'Nồi nước lèo ba đời, mái tôn treo đèn. Uy tín lên nhanh nhất game.',de:'Three-generation broth. Fastest reputation in the game.'},
+ {id:'che_vip',n:'Xe chè Cung đình',en:'Royal dessert cart',e:'👑',sp:'z/vietnamese_dessert_street_cart_r',cost:6000,rep:5,cap:14,spd:1,attr:1.1,repB:.5,cold:true,slots:4,sig:'che',compat:['che','kemchuoi','flan','sinhto','dua'],vip:1,d:'Xe đẹp nhất phố: mái cong, đèn lồng, tủ lạnh lớn. Khách thấy là ghé.',de:'The most beautiful cart on the street.'});
+document.head.insertAdjacentHTML('beforeend','<style>.cc.vip::after{content:"Cao cấp";position:absolute;top:6px;left:6px;background:linear-gradient(180deg,#f6c445,#d99a1c);color:#3a2306;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px}.cc{position:relative}</style>');
+{const _scart=showCart;showCart=function(){const r=_scart.apply(this,arguments);try{sheet.querySelectorAll('.cc[data-id]').forEach(el=>{const k=CARTS.find(c=>c.id===el.dataset.id);if(k&&k.vip)el.classList.add('vip')})}catch(e){}return r}}
+
+// HUD nổi (cảnh báo + chỉ đường) ẩn khi đang mở bảng/sheet
+setInterval(()=>{try{const hide=!sheet.hidden||(typeof MO!=='undefined'&&MO);document.body.classList.toggle('sheeton',hide)}catch(e){}},250);
+document.head.insertAdjacentHTML('beforeend','<style>body.sheeton #hudWarn,body.sheeton #guide{display:none!important}</style>');
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
