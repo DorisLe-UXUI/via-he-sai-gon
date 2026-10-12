@@ -1184,7 +1184,7 @@ const slotPos=i=>({x:P.x+SLOT[i][0],y:LANE+32+SLOT[i][1]});
 function spawnCustomer(){const so=spotAt();const avail=unlockedItems();const d=districtAt(P.x);
   const arch=pickWeighted(ARCH.filter(a=>!a.dist||a.dist===d.id),a=>a.w*(a.dist?3:1)*(isHoliday()&&(a.id==='tay'||a.id==='giadinh')?3:1));
   const heat=isHot()?{nuocmia:3,kemchuoi:3,dua:2,nuocngot:2,che:2,sinhto:2}:{};
-  const want=pickWeighted(avail,i=>(1+(so?(so.s.like[i.id]||0)*1.5:0)+(arch.like[i.id]||0)*1.2+(heat[i.id]||0))*evWant(i)*(S.dem[i.id]||1));
+  const want=pickWeighted(avail,i=>(1+(so?(so.s.like[i.id]||0)*1.5:0)+(arch.like[i.id]||0)*1.2+(heat[i.id]||0))*evWant(i)*(S.dem[i.id]||1)*((S.stock[i.id]||0)>0?((S.level||1)<4?6:2.5):1));
   const id=pick(arch.kinds);const name=`${arch.title} ${pick(FIRST)}${arch.label?' '+arch.label:''}`;
   const side=Math.random()<.5?-1:1;
   const base={state:'come',want,slot:-1,pat:0,arch,name,qty:arch.qty,hold:null,t:0,mood:null,sp:arch.id==='grab'?260:rnd(120,160),qt:S.t,inq:false};
@@ -3792,7 +3792,7 @@ const MONTH=7,mth=d=>Math.floor((d-1)/MONTH)+1;
 // ---------- hoá đơn mỗi "tháng" (7 ngày game) ----------
 function billCalc(){const x=(typeof ensureL2==='function')?ensureL2():{home:{t:0}},t=x.home?x.home.t:0,ap=(x.home&&x.home.f||[]).length;
   return [['Tiền điện',Math.round(60+t*45+ap*12),'it_contract'],['Tiền nước',Math.round(25+t*10),'it_oil'],['Internet & điện thoại',70,'od_map'],['Tiền chợ, ăn uống',Math.round(150+((rl().fam.kids||[]).length)*120+(rl().fam.wed?120:0)),'od_bag']]}
-function billIssue(){const R=rl();R.bills=billCalc().map(b=>({n:b[0],v:b[1],ic:b[2],due:S.day+3,paid:false}));R.lastMonth=mth(S.day);
+function billIssue(){const R=rl(),_k=Math.min(1,.5+S.day/40);R.bills=billCalc().map(b=>({n:b[0],v:Math.round(b[1]*_k/5)*5,ic:b[2],due:S.day+3,paid:false}));R.lastMonth=mth(S.day);
   setTimeout(()=>{try{sfx.pop()}catch(e){};modal({img:'u/i/it_contract',c:'#2f6fb3',tag:'Hoá đơn tháng '+mth(S.day),title:'Hoá đơn tới rồi',text:R.bills.map(b=>`${b.n}: <b>${fmt(b.v)}</b>`).join('<br>')+`<br><small>Hạn trả 3 ngày. Trễ hạn bị cắt điện nước (sáng không hồi sức) và tụt tín dụng.</small>`,cta:'Trả ngay',cta2:'Để sau',onOk:billPayAll})},1700)}
 function billPayAll(){const R=rl(),due=R.bills.filter(b=>!b.paid),tot=due.reduce((a,b)=>a+b.v,0);if(!tot){toast('Không còn hoá đơn nào');return}if(S.cash<tot){toast('💸 Cần '+fmt(tot)+' để trả hết');return}
   addCash(-tot);due.forEach(b=>b.paid=true);R.late=0;try{credAdj(3);finLog('Trả hoá đơn tháng −'+fmt(tot))}catch(e){};toast('✅ Đã trả hoá đơn '+fmt(tot));save();phRender()}
@@ -3844,7 +3844,7 @@ function liveEnd(){if(!LV)return;const V=rl().live,nf=Math.round(LV.view*.12+LV.
 setInterval(()=>{try{liveTick()}catch(e){}},1500);
 // ---------- hiệu ứng vào các hệ có sẵn ----------
 {const _sd=startDay;startDay=function(){_sd.apply(this,arguments);try{const R=rl();
-  if(!R.lastMonth||mth(S.day)>R.lastMonth&&S.day>1)billIssue();
+  if(!R.lastMonth)R.lastMonth=mth(S.day);else if(mth(S.day)>R.lastMonth)billIssue();
   const unpaid=R.bills.filter(b=>!b.paid&&S.day>b.due);if(unpaid.length){R.late++;energy(-25);try{credAdj(-10)}catch(e){};setTimeout(()=>toast('💡 Bị cắt điện nước vì nợ hoá đơn, sáng nay mệt hơn'),2000)}
   if(R.fam.wed){energy(10);mood(4)}R.fam.par=Math.max(0,R.fam.par-1);if(R.fam.par<25&&S.day%5===0)setTimeout(()=>toast('📞 Má gọi: "Lâu quá không thấy con gọi về..."'),2400);
   R.fam.kids.forEach(k=>{if(S.day-k.born>=14&&(S.day-k.born)%MONTH===0){const fee=150;if(S.cash>=fee){addCash(-fee);setTimeout(()=>toast('🎒 Đóng học phí cho bé '+k.n+' −'+fmt(fee)),2800)}}});
@@ -3927,6 +3927,30 @@ L2APPS.push(['dist','🚧','Giấy phép','#c9672b']);
   return `<div class="dlic">${DISTRICTS.map(d=>{const un=S.unlocked.includes(d.id),lack=d.unlock-S.cash;return `<div class="dl1 ${un?'on':''}"><b>${un?'✅':'🔒'} ${d.name}</b><small>Giá bán ×${d.mult} · ${d.spots.length} điểm bán</small>${un?'<em>Đã có giấy phép</em>':`<button class="pri" onclick="phClose();distAsk(DISTRICTS.find(x=>x.id==='${d.id}'))" ${lack>0?'disabled':''}>Mua giấy phép ${fmt(d.unlock)}</button>${lack>0?`<em>Còn thiếu ${fmt(lack)}</em>`:''}`}</div>`}).join('')}<p class="dnote">Có giấy phép rồi thì đẩy xe sang phải qua barie, hoặc mở Bản đồ chọn điểm bán ở quận mới.</p></div>`}}
 PH_GROUPS[0][1].push('dist');
 document.head.insertAdjacentHTML('beforeend','<style>#hudWarn{align-items:flex-start}#hudWarn button.gold{background:linear-gradient(180deg,#f6c445,#d99a1c);color:#3a2306}@media(max-width:640px){#hudWarn button.gold span{display:inline}#hudWarn button.gold{padding:3px 10px 3px 3px}}.dlic{display:flex;flex-direction:column;gap:10px}.dl1{background:#fff8ea;border-radius:14px;padding:12px;color:#3a2306;display:flex;flex-direction:column;gap:4px}.dl1 b{font-weight:800;font-size:15px}.dl1 small{color:#7a5a3a;font-size:12px}.dl1 em{font-style:normal;font-size:12px;color:#b0451f;font-weight:700}.dl1.on em{color:#2f7a43}.dl1 button{margin-top:6px;width:100%;padding:10px;font-size:14px}.dnote{color:#fff;opacity:.85;font-size:12px;margin:4px 2px}</style>');
+
+// Chỉ đường cho người mới: chưa đứng ở điểm bán thì hiện nút "Tới …", bấm là xe tự đẩy tới
+(function(){const g=document.createElement('button');g.id='guide';g.hidden=true;document.body.appendChild(g);let tgt=null;
+ g.onclick=()=>{if(!tgt)return;P.target=tgt.x;try{sfx.tap()}catch(e){}};
+ setInterval(()=>{try{
+  const newbie=(S.level||1)<3,live=S.phase==='play'&&sheet.hidden&&!MO&&!S.open&&!document.body.classList.contains('inscr');
+  const at=spotAt(),atSell=at&&!at.s.market&&!at.s.cafe&&!at.s.home&&at.d<120;
+  if(!newbie||!live||atSell){g.hidden=true;tgt=null;return}
+  const ok=SPOTS.filter(s=>S.unlocked.includes(s.d.id)&&!s.market&&!s.cafe&&!s.home);
+  ok.sort((a,b)=>(Math.abs(a.x-P.x)-(isPeak(a)?400:0))-(Math.abs(b.x-P.x)-(isPeak(b)?400:0)));
+  const s=ok[0];if(!s){g.hidden=true;return}tgt=s;const dir=s.x<P.x?-1:1;
+  const html=`${dir<0?'<i>⬅</i>':''}<span>Tới ${s.emoji} ${s.name}${isPeak(s)?' <b>đang đông</b>':''}</span>${dir>0?'<i>➡</i>':''}`;
+  if(g.dataset.h!==html){g.innerHTML=html;g.dataset.h=html}g.hidden=false}catch(e){}},400)})();
+document.head.insertAdjacentHTML('beforeend','<style>#guide{position:fixed;left:50%;transform:translateX(-50%);top:calc(150px + env(safe-area-inset-top,0px));z-index:41;display:flex;align-items:center;gap:8px;border:2px solid #fff3d6;border-radius:999px;padding:7px 14px;background:linear-gradient(180deg,#3d8f4f,#2a6b3a);color:#fff;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.35);cursor:pointer;white-space:nowrap}#guide b{background:#f2b632;color:#3a2306;border-radius:8px;padding:1px 6px;font-size:11px;margin-left:4px}#guide i{font-style:normal;animation:gdN 1s ease-in-out infinite}@keyframes gdN{50%{transform:translateX(3px)}}#guide[hidden]{display:none}@media (prefers-reduced-motion:reduce){#guide i{animation:none}}</style>');
+document.head.insertAdjacentHTML('beforeend','<style>#scr #begin{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:6;box-shadow:0 6px 18px rgba(0,0,0,.35)}</style>');
+// Bước 1 hướng dẫn chỉ xong khi đứng ở điểm bán thật (không tính chợ, quán cà phê, nhà)
+try{ONB[0].ok=()=>{const a=spotAt();return !!(a&&!a.s.market&&!a.s.cafe&&!a.s.home&&a.d<160)};ONB[0].t='Đẩy xe tới điểm bán (bấm nút xanh)';COACH[0]='Đẩy xe tới điểm bán · bấm nút xanh để đi'}catch(e){}
+// Người mới được "miễn tuần tra" 2 ngày đầu (tới khi bán được 25 phần) — trước đây có thể bị phạt sạch tiền ngay ngày 1
+{const _sc=spawnCop;spawnCop=function(){if((S.day||1)<=2&&(S.totalSold||0)<25)return;if(!S.copSeen){S.copSeen=1;setTimeout(()=>toast('🚨 Công an tuần tra tới! Bấm Dọn hàng trước khi họ tới gần để khỏi bị phạt'),300)}return _sc.apply(this,arguments)}}
+if(!SAVE_KEYS.includes('copSeen'))SAVE_KEYS.push('copSeen');
+// 3 ngày đầu: mất uy tín nhẹ tay hơn (khách bỏ đi vì chưa quen hàng không nên phạt nặng người mới)
+{const _br2=bumpRep;bumpRep=function(d){if(d<0&&(S.day||1)<=3)d*=.35;return _br2(d)}}
+// Bước chỉ tiêu: hiện số cụ thể thay vì "vạch vàng"
+try{Object.defineProperty(COACH,3,{get:()=>`Đạt chỉ tiêu hôm nay: ${fmt(Math.round(S.dayRev||0))} / ${fmt(S.goal||0)}`})}catch(e){}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
