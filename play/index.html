@@ -3966,6 +3966,20 @@ document.head.insertAdjacentHTML('beforeend','<style>.cc.vip::after{content:"Cao
 // HUD nổi (cảnh báo + chỉ đường) ẩn khi đang mở bảng/sheet
 setInterval(()=>{try{const hide=!sheet.hidden||(typeof MO!=='undefined'&&MO);document.body.classList.toggle('sheeton',hide)}catch(e){}},250);
 document.head.insertAdjacentHTML('beforeend','<style>body.sheeton #hudWarn,body.sheeton #guide{display:none!important}</style>');
+
+// Hạng XE LƯU ĐỘNG — vượt mốc 6 triệu. 3 xe dùng tranh có sẵn, 3 xe tự hiện khi có tranh mới (a/u/v/*.webp)
+CARTS.push(
+ {id:'kemdap',n:'Xe kem đạp',en:'Ice-cream bike',e:'🍦',sp:'269',face:1,noflip:1,cost:260,rep:1,cap:-10,spd:1.18,attr:.3,repB:0,cold:true,slots:1,sig:'kemchuoi',compat:['kemchuoi','nuocngot','flan'],d:'Xe đạp có dù và thùng kem. Nhẹ, đi nhanh nhất game, trẻ con mê.',de:'Fastest ride in the game, kids love it.'},
+ {id:'mokeo',n:'Xe máy kéo quầy',en:'Motorbike stall',e:'🛵',sp:'89',face:-1,noflip:1,cost:9000,rep:5,cap:28,spd:1.35,attr:1.3,repB:.55,cold:false,slots:4,sig:'banhmi',compat:['banhmi','caphe','banhbao','xoi','nuocngot','goicuon'],lv:1,d:'Xe máy kéo nguyên quầy bánh mì: chạy nhanh, chở nhiều, tới đâu bán đó.',de:'A motorbike towing a full stall.'},
+ {id:'taitc',n:'Xe tải trái cây',en:'Fruit truck',e:'🚚',sp:'262',face:1,noflip:1,cost:15000,rep:5,cap:44,spd:1.2,attr:1.6,repB:.6,cold:true,slots:5,sig:'traicay',compat:['traicay','dua','sinhto','nuocmia','nuocngot','kemchuoi'],lv:1,d:'Xe tải nhỏ chở cả vựa trái cây, thùng đá lớn. Một chuyến bằng ba ngày xe đẩy.',de:'A small truck: a whole orchard on wheels.'});
+const FUTURE_CARTS=[
+ {id:'bagac',n:'Xe ba gác ẩm thực',en:'Food cargo trike',e:'🛺',sp:'u/v/cart_bagac',face:1,cost:12000,rep:5,cap:36,spd:1.1,attr:1.5,repB:.55,cold:true,slots:5,sig:'xien',compat:['xien','hotvit','banhtrang','chuoichien','bap','nuocngot'],lv:1,d:'Ba gác máy độ thành quầy ăn vặt có mái che và đèn.',de:'A motor trike turned snack bar.'},
+ {id:'xelam',n:'Xe lam hủ tiếu',en:'Lambro noodle van',e:'🚐',sp:'u/v/cart_xelam',face:1,cost:20000,rep:5,cap:40,spd:1.15,attr:1.8,repB:.7,cold:false,slots:5,sig:'banhbao',compat:['banhbao','xoi','hotvit','caphe','goicuon','che'],lv:1,d:'Xe lam Sài Gòn xưa độ thành quán hủ tiếu: hoài cổ, khách chụp hình hoài.',de:'Old-Saigon three-wheeler turned noodle bar.'},
+ {id:'busan',n:'Xe buýt ẩm thực',en:'Food bus',e:'🚌',sp:'u/v/cart_bus',face:1,cost:35000,rep:5,cap:60,spd:1.05,attr:2.2,repB:.8,cold:true,slots:6,sig:'che',compat:['che','kemchuoi','flan','sinhto','dua','caphe','banhmi'],lv:1,d:'Xe buýt hai tầng thành nhà hàng di động. Đỉnh cao hàng rong.',de:'A double-decker restaurant. The top of the street-food ladder.'}];
+CARTS.sort((a,b)=>a.cost-b.cost);
+FUTURE_CARTS.forEach(c=>load1(c.sp).p.then(o=>{if(o.ok&&!CARTS.some(k=>k.id===c.id)){CARTS.push(c);CARTS.sort((a,b)=>a.cost-b.cost)}}));
+document.head.insertAdjacentHTML('beforeend','<style>.cc.lvd::after{content:"Lưu động";position:absolute;top:6px;left:6px;background:linear-gradient(180deg,#5aa7e0,#2f6fb3);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px}</style>');
+{const _sc2=showCart;showCart=function(){const r=_sc2.apply(this,arguments);try{sheet.querySelectorAll('.cc[data-id]').forEach(el=>{const k=CARTS.find(c=>c.id===el.dataset.id);if(k&&k.lv)el.classList.add('lvd')})}catch(e){}return r}}
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
@@ -4032,8 +4046,8 @@ function drawPlayer(){const x=P.x,y=LANE;
   drawChar(id,bx,y+4,{h:chH(id)+(id===227?6:0),mv:P.mv,ph:0,hop,flip:P.dir<0});if(typeof drawHat==='function')drawHat(id,bx,y+4-hop,chH(id),P.dir<0);
   if(S.helper)drawChar(313,x+P.dir*128,y+6,{h:138,mv:P.mv,ph:2,flip:P.dir>0});
   // xe
-  const cc=curCart(),cid=cc.sp,io=IM[cid],ch=io&&io.ok&&io.i.naturalWidth?Math.min(205,Math.round(190*io.i.naturalHeight/io.i.naturalWidth)):175;shadow(x,y+10,92);
-  const bob=P.mv?Math.sin(S.t*14)*1.6:0;spr(tinted(cid,PAINTS[S.cartColor].h),x,y+10+bob,ch);if(cc.lab&&io&&io.ok)cartPlate(cc,x,y+10+bob,ch,io);drawCartExtras(x,y,ch,bob);
+  const cc=curCart(),cid=cc.sp,io=IM[cid],ch=io&&io.ok&&io.i.naturalWidth?Math.min(205,Math.round((cc.face?280:190)*io.i.naturalHeight/io.i.naturalWidth)):175;shadow(x,y+10,92);
+  const bob=P.mv?Math.sin(S.t*14)*1.6:0;spr(tinted(cid,PAINTS[S.cartColor].h),x,y+10+bob,ch,cc.face&&!cc.noflip?{flip:(cc.face<0)===(P.dir>0)}:undefined);if(cc.lab&&io&&io.ok)cartPlate(cc,x,y+10+bob,ch,io);drawCartExtras(x,y,ch,bob);
   // hàng trên xe
   const its=unlockedItems().filter(i=>S.stock[i.id]>0).slice(0,7);its.forEach((it,i)=>{ico(it.ic,x-(its.length-1)*11+i*22,y-ch*.41+bob+Math.sin(S.t*2+i)*1,26)});
   if(S.owned.du){drawParasol(x,y-ch+8)}
