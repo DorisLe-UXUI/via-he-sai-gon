@@ -3973,9 +3973,9 @@ CARTS.push(
  {id:'mokeo',n:'Xe máy kéo quầy',en:'Motorbike stall',e:'🛵',sp:'89',face:-1,noflip:1,cost:9000,rep:5,cap:28,spd:1.35,attr:1.3,repB:.55,cold:false,slots:4,sig:'banhmi',compat:['banhmi','caphe','banhbao','xoi','nuocngot','goicuon'],lv:1,d:'Xe máy kéo nguyên quầy bánh mì: chạy nhanh, chở nhiều, tới đâu bán đó.',de:'A motorbike towing a full stall.'},
  {id:'taitc',n:'Xe tải trái cây',en:'Fruit truck',e:'🚚',sp:'262',face:1,noflip:1,cost:15000,rep:5,cap:44,spd:1.2,attr:1.6,repB:.6,cold:true,slots:5,sig:'traicay',compat:['traicay','dua','sinhto','nuocmia','nuocngot','kemchuoi'],lv:1,d:'Xe tải nhỏ chở cả vựa trái cây, thùng đá lớn. Một chuyến bằng ba ngày xe đẩy.',de:'A small truck: a whole orchard on wheels.'});
 const FUTURE_CARTS=[
- {id:'bagac',n:'Xe ba gác ẩm thực',en:'Food cargo trike',e:'🛺',sp:'u/v/cart_bagac',face:1,cost:12000,rep:5,cap:36,spd:1.1,attr:1.5,repB:.55,cold:true,slots:5,sig:'xien',compat:['xien','hotvit','banhtrang','chuoichien','bap','nuocngot'],lv:1,d:'Ba gác máy độ thành quầy ăn vặt có mái che và đèn.',de:'A motor trike turned snack bar.'},
- {id:'xelam',n:'Xe lam hủ tiếu',en:'Lambro noodle van',e:'🚐',sp:'u/v/cart_xelam',face:1,cost:20000,rep:5,cap:40,spd:1.15,attr:1.8,repB:.7,cold:false,slots:5,sig:'banhbao',compat:['banhbao','xoi','hotvit','caphe','goicuon','che'],lv:1,d:'Xe lam Sài Gòn xưa độ thành quán hủ tiếu: hoài cổ, khách chụp hình hoài.',de:'Old-Saigon three-wheeler turned noodle bar.'},
- {id:'busan',n:'Xe buýt ẩm thực',en:'Food bus',e:'🚌',sp:'u/v/cart_bus',face:1,cost:35000,rep:5,cap:60,spd:1.05,attr:2.2,repB:.8,cold:true,slots:6,sig:'che',compat:['che','kemchuoi','flan','sinhto','dua','caphe','banhmi'],lv:1,d:'Xe buýt hai tầng thành nhà hàng di động. Đỉnh cao hàng rong.',de:'A double-decker restaurant. The top of the street-food ladder.'}];
+ {id:'bagac',n:'Xe ba gác ẩm thực',en:'Food cargo trike',e:'🛺',sp:'u/v/cart_bagac',face:-1,cost:12000,rep:5,cap:36,spd:1.1,attr:1.5,repB:.55,cold:true,slots:5,sig:'xien',compat:['xien','hotvit','banhtrang','chuoichien','bap','nuocngot'],lv:1,d:'Ba gác máy độ thành quầy ăn vặt có mái che và đèn.',de:'A motor trike turned snack bar.'},
+ {id:'xelam',n:'Xe lam hủ tiếu',en:'Lambro noodle van',e:'🚐',sp:'u/v/cart_xelam',face:-1,cost:20000,rep:5,cap:40,spd:1.15,attr:1.8,repB:.7,cold:false,slots:5,sig:'banhbao',compat:['banhbao','xoi','hotvit','caphe','goicuon','che'],lv:1,d:'Xe lam Sài Gòn xưa độ thành quán hủ tiếu: hoài cổ, khách chụp hình hoài.',de:'Old-Saigon three-wheeler turned noodle bar.'},
+ {id:'busan',n:'Xe buýt ẩm thực',en:'Food bus',e:'🚌',sp:'u/v/cart_bus',face:-1,cost:35000,rep:5,cap:60,spd:1.05,attr:2.2,repB:.8,cold:true,slots:6,sig:'che',compat:['che','kemchuoi','flan','sinhto','dua','caphe','banhmi'],lv:1,d:'Xe buýt hai tầng thành nhà hàng di động. Đỉnh cao hàng rong.',de:'A double-decker restaurant. The top of the street-food ladder.'}];
 CARTS.sort((a,b)=>a.cost-b.cost);
 FUTURE_CARTS.forEach(c=>load1(c.sp).p.then(o=>{if(o.ok&&!CARTS.some(k=>k.id===c.id)){CARTS.push(c);CARTS.sort((a,b)=>a.cost-b.cost)}}));
 document.head.insertAdjacentHTML('beforeend','<style>.cc.lvd::after{content:"Lưu động";position:absolute;top:6px;left:6px;background:linear-gradient(180deg,#5aa7e0,#2f6fb3);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px}</style>');
@@ -4040,7 +4040,7 @@ function entities(){const L=[],vx0=camera.x-260,vx1=camera.x+VW+260;
   L.sort((a,b)=>a.y-b.y);L.forEach(e=>e.f())}
 function drawPlayer(){const x=P.x,y=LANE;
   if(S.riding){shadow(x,y+8,70);spr(89,x,y+10+Math.sin(S.t*30)*.8,112,{flip:P.dir>0});return}
-  const bx=x-P.dir*128;let id=S.look||+S.outfit;
+  const _cc=curCart(),_io=_cc.face&&IM[_cc.sp],_vw=_io&&_io.ok?Math.min(205,Math.round(280*_io.i.naturalHeight/_io.i.naturalWidth))*_io.i.naturalWidth/_io.i.naturalHeight:0;const bx=x-P.dir*Math.max(128,_vw/2+40);let id=S.look||+S.outfit;
   if(S.outfit==='287'){if(P.pose==='happy')id=227;else if(P.pose==='sad')id=187;else if(S.sta<20)id=291;else if(P.mv)id=228}
   const hop=(P.hopT>0?Math.sin(P.hopT/.3*Math.PI)*12:0)+(P.jump>0?Math.sin(P.jump/.5*Math.PI)*60:0);
   drawChar(id,bx,y+4,{h:chH(id)+(id===227?6:0),mv:P.mv,ph:0,hop,flip:P.dir<0});if(typeof drawHat==='function')drawHat(id,bx,y+4-hop,chH(id),P.dir<0);
