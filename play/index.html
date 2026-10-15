@@ -3863,7 +3863,7 @@ function billsBody(){const R=rl(),T=R.tax,due=R.bills.filter(b=>!b.paid);
 function famBody(){const F=rl().fam;
   return `<div class="phcard jobc"><img src="a/u/c/pl_wave.webp" alt="" style="height:90px;width:auto"><div style="flex:1"><b>Ba mẹ ở quê</b><div class="phbar" style="margin:5px 0"><i style="width:${F.par}%;background:#ff7a8a"></i></div><small>Tình cảm ${F.par}/100 · đã gửi về ${fmt(F.sent)}</small><div class="bbtn"><button class="phbtn" onclick="famCall()">Gọi điện</button><button class="phbtn" onclick="famSend(100)">Gửi 100k</button><button class="phbtn" onclick="famSend(500)">Gửi 500k</button></div></div></div>
   <h3>Tình yêu</h3>${F.rel?`<div class="phcard jobc"><img src="a/${F.rel[0]}.webp" alt="" style="height:90px;width:auto"><div style="flex:1"><b>${F.rel[1]}</b> ${F.wed?'<small class="own">Vợ/chồng</small>':''}<div class="phbar" style="margin:5px 0"><i style="width:${F.love}%;background:#e2471e"></i></div><small>Thân thiết ${F.love}/100</small><div class="bbtn">${F.wed?'':`<button class="phbtn" onclick="famDate()">Hẹn hò · 80k</button>`}${!F.wed&&F.love>=80?`<button class="phbtn" onclick="famWed()">Cưới · 3 triệu</button>`:''}</div></div></div>`:`<div class="phcard"><small>Chưa có ai. Ra quán cà phê đầu hẻm biết đâu gặp người thương.</small><br><button class="phbtn" onclick="famDate()">Đi cà phê làm quen</button></div>`}
-  ${F.wed?`<h3>Con cái</h3><div class="phcard">${F.kids.length?F.kids.map(k=>`<div>👶 Bé <b>${k.n}</b> · ${S.day-k.born} ngày tuổi${S.day-k.born>=14?' · đang đi học (150k/tháng)':''}</div>`).join(''):'<small>Chưa có bé.</small>'}${F.kids.length<2?`<br><button class="phbtn" onclick="famKid()">Đón bé · 1 triệu</button>`:''}<br><small>Có con tốn tiền chợ và học phí, nhưng mỗi tối về nhà vui hơn.</small></div>`:''}`}
+  ${F.wed?kidsHtml():''}`}
 function learnBody(){const L=rl().learn;return `<div class="phcard"><small>Mỗi khoá 5 buổi, mỗi ngày học 1 buổi (tốn 15 sức). Học xong có hiệu quả vĩnh viễn.</small></div>`+COURSES.map(c=>{const s=L[c[0]]||{p:0};return `<div class="phcard jobc"><img src="a/${c[2]}.webp" alt="" style="height:80px;width:auto"><div style="flex:1"><b>${c[1]}</b> ${s.done?'<small class="own">Đã tốt nghiệp</small>':''}<br><small>${c[4]}</small><div class="phbar" style="margin:5px 0"><i style="width:${s.p*20}%;background:#b38cf0"></i></div>${s.done?'':`<button class="phbtn" onclick="courseGo('${c[0]}')">${s.paid?'Học buổi '+(s.p+1)+'/5':'Đăng ký · '+fmt(c[3])}</button>`}</div></div>`}).join('')}
 function liveBody(){const V=rl().live;return `<div class="phcard ecoh" style="background:linear-gradient(135deg,rgba(214,90,154,.4),rgba(120,40,90,.2))"><div><b>Townly Live · ${esc(S.pname||'Mày')}</b><br><small>${V.fol} người theo dõi · ${V.n} lần live · kỷ lục ${V.best} người xem</small></div></div>
   ${LV?`<div class="phcard live"><b class="rec">● LIVE</b> <b>${LV.view} người xem</b> · ${LV.hearts} tim<br><small>Đã bán qua live ${fmt(LV.rev)} · còn ${Math.max(0,Math.round((LV.end-performance.now())/1000))} giây</small><br><button class="phbtn alt" onclick="LV.end=0;liveTick()">Kết thúc</button></div>`:`<div class="phcard"><small>Đang bày hàng ngoài phố thì livestream được 45 giây: người xem đặt mua giá +15%, ai thích thì theo dõi. Càng đông theo dõi lần sau càng nhiều người xem. Duyên cao và học Marketing thì hút khách hơn.</small><br><button class="phbtn" onclick="liveStart()">🔴 Bắt đầu live</button></div>`}`}
@@ -4028,6 +4028,49 @@ document.head.insertAdjacentHTML('beforeend','<style>.est-h{color:#ffe6a8;font-s
 document.head.insertAdjacentHTML('beforeend','<style>#pfSt .ptsb{background:#d2432f;color:#fff;border-radius:8px;padding:1px 6px;font-size:11px;margin-left:4px}</style>');
 // Khi đang mở bảng (chợ, hết ngày…), thông báo nổi dời xuống đáy để không che tiêu đề
 document.head.insertAdjacentHTML('beforeend','<style>body.sheeton #toasts{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom,0px))}</style>');
+
+// ===================== NUÔI CON: lớn dần, chăm sóc mỗi ngày, sự kiện, con phụ bán =====================
+const KID_GIRL=['Bống','Na','Mít'];
+function kidFix(k){if(k.love==null){k.love=60;k.hp=80;k.st=50;k.d={};k.g=KID_GIRL.includes(k.n)?1:0}return k}
+const kidAge=k=>S.day-k.born;
+function kidStage(k){const a=kidAge(k);return a<14?['Em bé',null]:a<35?['Mầm non',k.g?95:25]:a<70?['Tiểu học',k.g?95:24]:['Cấp 2',k.g?95:'n/npc_student']}
+const kidSchool=k=>kidAge(k)>=14,kidCanHelp=k=>kidAge(k)>=35&&k.love>=50;
+const isWknd=()=>((S.day-1)%7)>=5;
+function kidList(){return (rl().fam.kids||[]).map(kidFix)}
+function kidDo(i,act){const k=kidList()[i];if(!k)return;k.d=k.d||{};if(k.d[act]===S.day){toast('Hôm nay làm rồi, mai nha');return}
+  const sk=()=>{try{sfx.sale()}catch(e){}};
+  if(act==='play'){if((ensureLife().en||0)<10){toast('😮‍💨 Mệt quá, nghỉ chút đã');return}energy(-10);k.love=Math.min(100,k.love+12);mood(6);toast('🤗 Chơi với bé '+k.n+', bé cười tít mắt')}
+  else if(act==='feed'){if(S.cash<40){toast('💸 Cần 40k');return}addCash(-40);k.hp=Math.min(100,k.hp+14);k.love=Math.min(100,k.love+4);toast('🍜 Bé '+k.n+' ăn ngon lành')}
+  else if(act==='study'){if(!kidSchool(k))return;if((ensureLife().en||0)<15){toast('😮‍💨 Mệt quá, nghỉ chút đã');return}energy(-15);const g=(typeof learned==='function'&&learned('eng'))?15:10;k.st=Math.min(100,k.st+g);k.love=Math.min(100,k.love+3);toast('📚 Kèm bé '+k.n+' học bài · học lực +'+g)}
+  else if(act==='toy'){if(S.cash<120){toast('💸 Cần 120k');return}addCash(-120);k.love=Math.min(100,k.love+10);toast('🧸 Mua đồ chơi cho bé '+k.n)}
+  else if(act==='trip'){if(!isWknd()){toast('Cuối tuần mới đi chơi được');return}if(S.cash<200){toast('💸 Cần 200k');return}addCash(-200);k.love=Math.min(100,k.love+20);k.hp=Math.min(100,k.hp+5);mood(15);toast('🎡 Cả nhà đi Đầm Sen, bé '+k.n+' vui hết cỡ')}
+  k.d[act]=S.day;sk();save();try{phAppGo('family')}catch(e){}}
+function kidHelp(i){const ks=kidList(),k=ks[i];if(!k)return;const on=!k.help;ks.forEach(x=>x.help=false);if(on){if(!kidCanHelp(k)){toast(kidAge(k)<35?'Bé lên tiểu học mới phụ được':'Bé chưa đủ thân (cần 50)');return}k.help=true;toast('🧒 Bé '+k.n+' sẽ theo ra phố phụ bán sau giờ học')}else toast('Bé '+k.n+' ở nhà học bài');save();try{phAppGo('family')}catch(e){}}
+const kidHelper=()=>kidList().find(k=>k.help&&kidCanHelp(k));
+const kidOnDuty=()=>{const k=kidHelper();return k&&(isWknd()||hour()>=15.5)?k:null};
+function kidsHtml(){const F=rl().fam,ks=kidList();
+  const bar=(v,c)=>`<div class="phbar kb"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${c}"></i></div>`;
+  const btn=(k,i,act,l,ok=true)=>`<button class="phbtn ${k.d&&k.d[act]===S.day?'done':''}" onclick="kidDo(${i},'${act}')" ${ok?'':'disabled'}>${k.d&&k.d[act]===S.day?'✓ ':''}${l}</button>`;
+  const cards=ks.map((k,i)=>{const [st,sp]=kidStage(k),a=kidAge(k);
+    return `<div class="phcard kidc"><div class="kpic">${sp==null?'<span class="kbaby">👶</span>':`<img src="a/${sp}.webp" alt="">`}</div><div style="flex:1;min-width:0"><b>Bé ${k.n}</b> <small class="kst">${st} · ${a} ngày</small>
+      <div class="krow"><span>Thân thiết</span>${bar(k.love,'#ff7a8a')}</div><div class="krow"><span>Sức khoẻ</span>${bar(k.hp,'#3fae6a')}</div>${kidSchool(k)?`<div class="krow"><span>Học lực</span>${bar(k.st,'#6a7ac9')}</div>`:''}
+      <div class="bbtn">${btn(k,i,'play','Chơi với bé')}${btn(k,i,'feed','Cho ăn · 40k')}${kidSchool(k)?btn(k,i,'study','Kèm học'):''}${btn(k,i,'toy','Đồ chơi · 120k')}${btn(k,i,'trip','Đi chơi · 200k',isWknd())}</div>
+      ${a>=35?`<button class="phbtn khelp ${k.help?'on':''}" onclick="kidHelp(${i})">${k.help?'🧒 Đang phụ bán · bấm để cho ở nhà':'🧒 Dắt bé ra phố phụ bán'}</button>`:`<small class="knote">Lên tiểu học (35 ngày) bé phụ bán được.</small>`}</div></div>`}).join('');
+  return `<h3>Con cái</h3>${cards||'<div class="phcard"><small>Chưa có bé.</small></div>'}${ks.length<2?`<div class="phcard"><button class="phbtn" onclick="famKid()">Đón bé · 1 triệu</button><br><small>Con lớn dần: mầm non → tiểu học → cấp 2. Chăm bé thường xuyên, bé giỏi được học bổng, lớn lên ra phố phụ bán.</small></div>`:''}`}
+// vẽ bé đứng cạnh xe khi đang phụ bán
+function kidDraw(bx,y){const k=kidOnDuty();if(!k||S.riding)return;const sp=kidStage(k)[1];if(sp==null)return;drawChar(sp,bx+P.dir*52,y+18,{h:100,mv:P.mv,ph:1,flip:P.dir<0})}
+// bé tự bán giúp: ~ mỗi 5 giây 1 khách đang chờ
+setInterval(()=>{try{if(S.phase!=='play'||!S.open||MO)return;const k=kidOnDuty();if(!k)return;const c=cust.find(c=>c.state==='wait');if(c){serve(c);if(Math.random()<.25)fly(P.x-P.dir*62,P.y-150,'🧒 Bé '+k.n+' bán giùm!','good')}}catch(e){}},5000);
+// mỗi tối: chỉ số giảm dần, học bổng
+{const _ed3=endDay;endDay=function(){const r=_ed3.apply(this,arguments);try{kidList().forEach(k=>{k.love=Math.max(0,k.love-4);k.hp=Math.max(0,k.hp-3);if(kidSchool(k))k.st=Math.max(0,k.st-2);
+   if(kidSchool(k)&&kidAge(k)%30===0&&k.st>=80){addCash(300);mood(15);setTimeout(()=>modal({ic:'🏅',c:'#c9a227',tag:'Học sinh giỏi',title:'Bé '+k.n+' được học bổng!',text:'Học lực '+k.st+'/100, nhà trường thưởng 300k. Ba mẹ tự hào quá trời.',cta:'Giỏi quá!'}),3000)}
+   if(k.help&&k.love<50){k.help=false;setTimeout(()=>toast('🥺 Bé '+k.n+' buồn, không muốn ra phố nữa. Chơi với bé nhiều hơn nha'),3400)}})}catch(e){}return r}}
+// sáng ra: sự kiện về con
+{const _sd2=startDay;startDay=function(){const r=_sd2.apply(this,arguments);try{const ks=kidList();if(!ks.length)return r;const k=ks[Math.floor(Math.random()*ks.length)];
+  if(kidAge(k)>0&&kidAge(k)%30===0)setTimeout(()=>modal({ic:'🎂',c:'#d65a9a',tag:'Sinh nhật',title:'Hôm nay sinh nhật bé '+k.n+'!',text:'Tổ chức tiệc nhỏ với bánh kem, bạn bè trong hẻm?',cta:'Làm tiệc · 300k',cta2:'Chúc mừng thôi',onOk:()=>{if(S.cash>=300){addCash(-300);k.love=Math.min(100,k.love+25);mood(12);toast('🎂 Bé '+k.n+' thổi nến, cả hẻm hát mừng')}else toast('💸 Không đủ tiền làm tiệc')},onNo:()=>{k.love=Math.min(100,k.love+5)}}),4200);
+  else if(k.hp<40&&Math.random()<.5)setTimeout(()=>modal({ic:'🤒',c:'#d2432f',tag:'Bé ốm',title:'Bé '+k.n+' bị sốt',text:'Bé ăn uống thất thường nên đổ bệnh. Đưa đi khám thì bé mau khoẻ.',cta:'Đi khám · 150k',cta2:'Để bé nghỉ ở nhà',onOk:()=>{if(S.cash>=150){addCash(-150);k.hp=Math.min(100,k.hp+35);k.love=Math.min(100,k.love+5)}else{k.hp=Math.min(100,k.hp+10)}},onNo:()=>{k.hp=Math.min(100,k.hp+8);k.love=Math.max(0,k.love-8);mood(-8)}}),4200);
+  else if(Math.random()<.12)setTimeout(()=>modal({ic:'🧸',c:'#e0912c',tag:'Bé xin',title:'Bé '+k.n+' xin tiền mua đồ',text:'"Ba mẹ ơi, bạn con có hộp bút mới đẹp lắm…"',cta:'Cho bé · 60k',cta2:'Để dịp khác',onOk:()=>{if(S.cash>=60){addCash(-60);k.love=Math.min(100,k.love+8)}},onNo:()=>{k.love=Math.max(0,k.love-3)}}),4200)}catch(e){}return r}}
+document.head.insertAdjacentHTML('beforeend','<style>.kidc{display:flex;gap:10px;align-items:flex-start}.kpic{width:74px;height:110px;flex:none;display:flex;align-items:flex-end;justify-content:center;background:rgba(255,255,255,.08);border-radius:12px}.kpic img{max-height:106px;max-width:72px;object-fit:contain}.kbaby{font-size:46px;align-self:center}.kst{opacity:.8}.krow{display:flex;align-items:center;gap:6px;font-size:11px;margin-top:4px}.krow span{width:62px;flex:none;opacity:.85}.krow .kb{flex:1;margin:0}.kidc .bbtn{flex-wrap:wrap;gap:5px;margin-top:7px}.kidc .phbtn{font-size:11px;padding:5px 8px}.kidc .phbtn.done{opacity:.55}.khelp{width:100%;margin-top:6px}.khelp.on{background:#2f7a43!important;color:#fff}.knote{display:block;margin-top:6px;opacity:.75;font-size:11px}</style>');
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
@@ -4093,6 +4136,7 @@ function drawPlayer(){const x=P.x,y=LANE;
   const hop=(P.hopT>0?Math.sin(P.hopT/.3*Math.PI)*12:0)+(P.jump>0?Math.sin(P.jump/.5*Math.PI)*60:0);
   drawChar(id,bx,y+4,{h:chH(id)+(id===227?6:0),mv:P.mv,ph:0,hop,flip:P.dir<0});if(typeof drawHat==='function')drawHat(id,bx,y+4-hop,chH(id),P.dir<0);
   if(S.helper)drawChar(313,x+P.dir*128,y+6,{h:138,mv:P.mv,ph:2,flip:P.dir>0});
+  try{kidDraw(bx,y)}catch(e){}
   // xe
   const cc=curCart(),cid=cc.sp,io=IM[cid],ch=io&&io.ok&&io.i.naturalWidth?Math.min(205,Math.round((cc.face?280:190)*io.i.naturalHeight/io.i.naturalWidth)):175;shadow(x,y+10,92);
   const bob=P.mv?Math.sin(S.t*14)*1.6:0;spr(tinted(cid,PAINTS[S.cartColor].h),x,y+10+bob,ch,cc.face&&!cc.noflip?{flip:(cc.face<0)===(P.dir>0)}:undefined);if(cc.lab&&io&&io.ok)cartPlate(cc,x,y+10+bob,ch,io);drawCartExtras(x,y,ch,bob);
