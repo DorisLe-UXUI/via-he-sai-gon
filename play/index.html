@@ -3889,6 +3889,7 @@ const PH_GROUPS=[['Kiếm tiền',['biz','food','mall','live','job','mkt']],['Ti
  setInterval(()=>{try{const live=S.phase==='play'||S.phase==='shop';const it=[];
   if(live){try{const d=DISTRICTS.find(d=>!S.unlocked.includes(d.id));if(d&&S.cash>=d.unlock)it.push(['u/i/it_contract','Mở '+d.name.split(' · ')[0]+' · '+fmt(d.unlock),"js:distAsk()",'gold'])}catch(e){}
    try{const cheap=SPOTS.filter(s=>s.premise&&S.unlocked.includes(s.d.id)&&!(S.premises[s.id]&&S.premises[s.id].own)).sort((a,b)=>a.premise-b.premise)[0];if(cheap&&premOwn()<3&&S.cash>=cheap.premise&&(S.level||1)>=2)it.push(['u/i/it_contract','Mua mặt bằng · '+premOwn()+'/3','prem','gold'])}catch(e){}
+   try{if(premOwn()>=3){const nx=ESTATE.find(x=>!(S.estate||{})[x.id]&&S.unlocked.includes(x.d));if(nx&&S.cash>=nx.cost)it.push(['u/i/it_contract','Mua '+nx.n.split(' ').slice(0,2).join(' ')+' · '+fmt(nx.cost),'prem','gold'])}}catch(e){}
    if((S.hp??100)<35)it.push(['u/i/it_medicine','Sức khoẻ '+Math.round(S.hp)+'%','hosp']);if((S.cartHp??100)<35)it.push(['u/i/it_tire','Xe '+Math.round(S.cartHp)+'%','fix']);
    try{const R=rl();const due=R.bills.filter(b=>!b.paid).length;if(due)it.push(['u/i/it_contract','Hoá đơn chưa trả','bills']);if(R.tax.owe&&S.day>=R.tax.due-1)it.push(['u/i/it_contract','Sắp hạn thuế','bills']);if(R.fam.par<25)it.push(['u/c/pl_wave','Gọi về nhà','family'])}catch(e){}
    try{if(sh().owe&&S.day>=sh().due-1)it.push(['ui/app_shark','Nợ anh Tư sắp hạn','shark'])}catch(e){}}
@@ -4002,6 +4003,27 @@ L2APPS.push(['prem','🏪','Mặt bằng','#a0522d']);
   return `<div class="pmw">${head}<p class="pm-note">Mặt bằng là quầy cố định có người đứng bán giùm. Mỗi tối tự thu tiền về, mày rảnh tay đi bán chỗ khác.</p>${rows}</div>`}}
 PH_GROUPS[0][1].splice(1,0,'prem');
 document.head.insertAdjacentHTML('beforeend','<style>.pmw{display:flex;flex-direction:column;gap:10px}.pm-goal{background:linear-gradient(180deg,#fff3d0,#ffe6a8);border-radius:14px;padding:12px;color:#3a2306}.pm-goal b{font-size:15px}.pm-row{display:flex;justify-content:space-between;font-size:13px;margin-top:6px}.pm-row em{font-style:normal;font-weight:800;color:#b0451f}.pm-row em.ok{color:#2f7a43}.pm-note{color:#fff;opacity:.85;font-size:12px;margin:0 2px}.pm1{background:#fff8ea;border-radius:14px;padding:12px;color:#3a2306;display:flex;flex-direction:column;gap:4px}.pm1.own{background:#eaf6e4}.pm1 b{font-weight:800;font-size:15px}.pm1 small{color:#7a5a3a;font-size:12px}.pm1 .okt{font-style:normal;color:#2f7a43;font-weight:700;font-size:13px}.pm-b{display:flex;gap:8px;margin-top:6px}.pm-b button,.pm1>button{flex:1;padding:9px;font-size:13px}.pm1 button.sec{background:#fff;border:2px solid #d9b98a;color:#6b4a26;border-radius:12px;font-weight:700}</style>');
+
+// ===== Bất động sản cao cấp: chỗ tiêu tiền cho người chơi giàu (mỗi tối tự thu tiền thuê) =====
+const ESTATE=[
+ {id:'kiot',img:'biz_stall_front',e:'🏬',n:'Ki-ốt chợ Bến Thành',d:'q1',cost:12000,inc:520,t:'Ki-ốt mặt chợ, khách du lịch đông nườm nượp.'},
+ {id:'nhapho',img:'biz_shop_front',e:'🏠',n:'Nhà phố mặt tiền Quận 1',d:'q1',cost:20000,inc:900,t:'Cho thuê mặt bằng tầng trệt, chủ shop trả tiền đều.'},
+ {id:'shophouse',img:'biz_cafe_front',e:'🏢',n:'Shophouse Quận 3',d:'q3',cost:30000,inc:1400,t:'Ba tầng, tầng dưới mở quán cà phê cho thuê.'},
+ {id:'nhahang',img:'biz_restaurant_front',e:'🏮',n:'Nhà hàng Chợ Lớn',d:'q5',cost:45000,inc:2200,t:'Nhà hàng Hoa có tiếng, mỗi tối kín bàn.'},
+ {id:'toanha',img:'biz_hotel_front',e:'🌆',n:'Tòa nhà mini Quận 1',d:'q1',cost:80000,inc:4200,t:'Tòa 7 tầng cho thuê văn phòng. Đỉnh của đỉnh.'}];
+if(!SAVE_KEYS.includes('estate'))SAVE_KEYS.push('estate');
+const estOwn=()=>ESTATE.filter(x=>(S.estate||{})[x.id]);
+function estBuy(id){const x=ESTATE.find(e=>e.id===id);S.estate=S.estate||{};if(!x||S.estate[id])return;if(!S.unlocked.includes(x.d)){toast('🔒 Cần giấy phép quận trước');return}if(S.cash<x.cost){toast('💸 Còn thiếu '+fmt(x.cost-S.cash));return}
+  addCash(-x.cost);S.estate[id]=S.day;try{sfx.day()}catch(e){}save();toast(x.e+' Đã mua '+x.n+'! Mỗi tối thu '+fmt(x.inc));try{ui()}catch(e){}try{phAppGo('prem')}catch(e){}
+  if(estOwn().length===ESTATE.length)modal({ic:'👑',c:'#c9a227',tag:'Đại gia bất động sản',title:'Cả phố là của mày!',text:'Đủ 5 bất động sản, mỗi tối thu '+fmt(ESTATE.reduce((a,x)=>a+x.inc,0))+'. Từ xe bánh mì lên trùm Sài Gòn.',cta:'Quá đỉnh!'})}
+{const _ed2=endDay;endDay=function(){const r=_ed2.apply(this,arguments);try{const o=estOwn();if(o.length){const inc=o.reduce((a,x)=>a+x.inc,0);addCash(inc);S.estInc=(S.estInc||0)+inc;setTimeout(()=>toast('🏢 Tiền thuê bất động sản: +'+fmt(inc)),2200)}}catch(e){}return r}}
+{const _b3=l2Body;l2Body=function(a){const h=_b3.apply(this,arguments);if(a!=='prem')return h;
+  const own=estOwn(),tot=own.reduce((s,x)=>s+x.inc,0);
+  const rows=ESTATE.map(x=>{const have=(S.estate||{})[x.id],lic=S.unlocked.includes(x.d),dn=DISTRICTS.find(d=>d.id===x.d).name.split(' · ')[0];
+    const act=have?`<em class="okt">✅ Của mày · mỗi tối +${fmt(x.inc)}</em>`:!lic?`<button class="sec" onclick="phClose();distAsk(DISTRICTS.find(d=>d.id==='${x.d}'))">🔒 Cần giấy phép ${dn}</button>`:`<button class="pri" onclick="estBuy('${x.id}')" ${S.cash<x.cost?'disabled':''}>Mua ${fmt(x.cost)}</button>${S.cash<x.cost?`<em class="lack">Còn thiếu ${fmt(x.cost-S.cash)}</em>`:''}`;
+    return `<div class="pm1 est ${have?'own':''}"><b class="esb"><img class="esti" src="a/u/i/${x.img}.webp" alt="">${x.n}</b><small>${x.t}<br>Thu ${fmt(x.inc)}/ngày · hoàn vốn ~${Math.ceil(x.cost/x.inc)} ngày</small>${act}</div>`}).join('');
+  return h.replace(/<\/div>$/,`<h4 class="est-h">🏙️ Bất động sản cao cấp${own.length?` · đang thu ${fmt(tot)}/ngày`:''}</h4>${rows}</div>`)}}
+document.head.insertAdjacentHTML('beforeend','<style>.est-h{color:#ffe6a8;font-size:14px;margin:10px 2px 0}.pm1.est{background:linear-gradient(180deg,#fffaf0,#fdeccb);border:2px solid #e8c27a}.pm1.est.own{background:#eaf6e4;border-color:#9cc98a}.pm1 em.lack{font-style:normal;font-size:12px;color:#b0451f;font-weight:700}.pm1.est>button{margin-top:6px}.esb{display:flex;align-items:center;gap:8px}.esti{width:44px;height:44px;object-fit:contain}</style>');
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
