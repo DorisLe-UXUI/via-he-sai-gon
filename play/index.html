@@ -1400,7 +1400,7 @@ function showSummary(waste,l){sheet.hidden=false;const best=ITEMS.slice().sort((
   <div class="goalrow ${S.stars?'ok':''}"><span class="stars">${[1,2,3].map(i=>i<=S.stars?'⭐':'☆').join('')}</span><div><b>${S.stars?(S.stars===3?'Tuyệt vời!':S.stars===2?'Giỏi lắm!':'Đạt chỉ tiêu!'):'Chưa đạt chỉ tiêu'}</b><small>${S.dayRev}k / ${S.goal}k${S.bestCombo>=2?' · combo cao nhất ×'+S.bestCombo:''}</small></div></div>
   <div class="stats"><div class="stat"><small>Hài lòng TB</small><b>${S.starN?(S.starSum/S.starN).toFixed(1)+' ★':'—'}</b></div><div class="stat"><small>Khách quen</small><b>${S.regulars}</b></div></div>
   <div class="stats"><div class="stat"><small>Bán hàng</small><b class="good">+${S.dayRev}k</b></div><div class="stat"><small>Đã bán</small><b>${S.daySold} phần</b></div><div class="stat"><small>Khách bỏ đi</small><b class="${S.dayLost?'bad':''}">${S.dayLost}</b></div><div class="stat"><small>Phạt + bảo kê</small><b class="${S.fines+S.bribes?'bad':''}">−${S.fines+S.bribes}k</b></div></div>
-  <div class="ledger">${l.premInc?`<span>🏪 Mặt bằng thu về</span><b class="pos">+${l.premInc}k</b>`:''}${l.premCost?`<span>Tiền thuê mặt bằng</span><b class="neg">−${l.premCost}k</b>`:''}<span>${S.house?'🏠 Nhà mình, miễn thuê':'🏠 Tiền trọ'}</span><b class="${S.house?'':'neg'}">${S.house?'0k':'−'+l.rent+'k'}</b><span>Dừa rớt nhặt được</span><b class="pos">+${S.tips}k</b></div>
+  <div class="ledger">${l.premInc?`<span>🏪 Mặt bằng thu về</span><b class="pos">+${l.premInc}k</b>`:''}${l.premCost?`<span>Tiền thuê mặt bằng</span><b class="neg">−${l.premCost}k</b>`:''}<span>${S.house?'🏠 Nhà mình, miễn thuê':'🏠 Tiền trọ'}</span><b class="${S.house?'':'neg'}">${S.house?'0k':'−'+l.rent+'k'}</b>${S.tips?`<span>Dừa rớt nhặt được</span><b class="pos">+${S.tips}k</b>`:''}</div>
   <h2>Doanh thu theo ngày</h2><div class="bars">${bars}</div><div style="height:16px"></div>
   ${S.daySold?`<div class="tip">🏆 Bán chạy nhất: ${best.emoji} ${best.name} (${S.sold[best.id]} phần).</div>`:'<div class="tip">Chưa bán được món nào. Tới điểm 🔥 rồi bày hàng nhé.</div>'}
   ${wtxt?`<div class="tip">🗑️ Hỏng qua đêm: ${wtxt}. Nhập vừa đủ, hoặc mua thùng giữ lạnh.</div>`:''}
@@ -3153,7 +3153,7 @@ function showChars(){const pick=HEROES.find(h=>h.id===heroSel)||HEROES[0];
 `;document.head.appendChild(st)})();
 {const _sp=showProfile;showProfile=function(){_sp();const f=document.querySelector('#prof .pfig img');if(f)f.src=lookImg();const w=wdS(),bits=[];if(w.hat){const h=HATS.find(x=>x[0]===w.hat);if(h)bits.push(['u/i/'+h[0],h[1]])}Object.keys(w.acc).forEach(k=>{const it=w.acc[k]&&ACCS[k][1].find(x=>x[0]===w.acc[k]);if(it)bits.push(['u/i/'+it[0],it[1]])});
   if(bits.length){const fg=document.querySelector('#prof .pfig');fg.insertAdjacentHTML('beforeend',`<div class="pacs">${bits.map(b=>`<img src="a/${b[0]}.webp" title="${b[1]}" alt="${b[1]}">`).join('')}</div>`)}
-  const pb=document.querySelector('#prof .pbtn');if(pb)pb.insertAdjacentHTML('beforeend','<button id="pfSt">Chỉ số & thành tựu</button>');const st=document.getElementById('pfSt');if(st)st.onclick=()=>{document.getElementById('prof').remove();try{showChar()}catch(e){try{hubOpen('char')}catch(e2){}}}
+  const pb=document.querySelector('#prof .pbtn');if(pb)pb.insertAdjacentHTML('beforeend','<button id="pfSt">Chỉ số & thành tựu'+(S.statPts?' <b class="ptsb">+'+S.statPts+' điểm</b>':'')+'</button>');const st=document.getElementById('pfSt');if(st)st.onclick=()=>{document.getElementById('prof').remove();try{ctab=S.statPts?'stat':'ach';showChar()}catch(e){try{hubOpen('char')}catch(e2){}}}
   const me=document.getElementById('pfMe');if(me)me.textContent='Tủ đồ'}}
 (function(){const st=document.createElement('style');st.textContent=`#prof .pfig{position:relative}#prof .pacs{position:absolute;right:4px;top:4px;display:flex;flex-direction:column;gap:2px}#prof .pacs img{width:30px;height:30px;object-fit:contain;background:rgba(255,255,255,.75);border-radius:9px;padding:2px}`;document.head.appendChild(st)})();
 // ===================== ĐỒNG BỘ GIAO DIỆN: thanh menu, dock, emoji trong mọi màn =====================
@@ -3890,10 +3890,11 @@ const PH_GROUPS=[['Kiếm tiền',['biz','food','mall','live','job','mkt']],['Ti
   if(live){try{const d=DISTRICTS.find(d=>!S.unlocked.includes(d.id));if(d&&S.cash>=d.unlock)it.push(['u/i/it_contract','Mở '+d.name.split(' · ')[0]+' · '+fmt(d.unlock),"js:distAsk()",'gold'])}catch(e){}
    try{const cheap=SPOTS.filter(s=>s.premise&&S.unlocked.includes(s.d.id)&&!(S.premises[s.id]&&S.premises[s.id].own)).sort((a,b)=>a.premise-b.premise)[0];if(cheap&&premOwn()<3&&S.cash>=cheap.premise&&(S.level||1)>=2)it.push(['u/i/it_contract','Mua mặt bằng · '+premOwn()+'/3','prem','gold'])}catch(e){}
    try{if(premOwn()>=3){const nx=ESTATE.find(x=>!(S.estate||{})[x.id]&&S.unlocked.includes(x.d));if(nx&&S.cash>=nx.cost)it.push(['u/i/it_contract','Mua '+nx.n.split(' ').slice(0,2).join(' ')+' · '+fmt(nx.cost),'prem','gold'])}}catch(e){}
+   if(S.statPts>0&&(S.level||1)>=2)it.push(['u/i/it_contract','Cộng điểm kỹ năng · +'+S.statPts,"js:ctab='stat';showChar()",'gold']);
    if((S.hp??100)<35)it.push(['u/i/it_medicine','Sức khoẻ '+Math.round(S.hp)+'%','hosp']);if((S.cartHp??100)<35)it.push(['u/i/it_tire','Xe '+Math.round(S.cartHp)+'%','fix']);
    try{const R=rl();const due=R.bills.filter(b=>!b.paid).length;if(due)it.push(['u/i/it_contract','Hoá đơn chưa trả','bills']);if(R.tax.owe&&S.day>=R.tax.due-1)it.push(['u/i/it_contract','Sắp hạn thuế','bills']);if(R.fam.par<25)it.push(['u/c/pl_wave','Gọi về nhà','family'])}catch(e){}
    try{if(sh().owe&&S.day>=sh().due-1)it.push(['ui/app_shark','Nợ anh Tư sắp hạn','shark'])}catch(e){}}
-  const key=it.map(x=>x[1]).join('|');if(w.dataset.k===key)return;w.dataset.k=key;
+  {const red=it.filter(x=>x[3]!=='gold'),gold=it.filter(x=>x[3]==='gold');it.length=0;it.push(...red.slice(0,2),...gold.slice(0,1))}const key=it.map(x=>x[1]).join('|');if(w.dataset.k===key)return;w.dataset.k=key;
   w.innerHTML=it.slice(0,3).map(x=>`<button class="${x[3]||''}" onclick="${x[2].startsWith('js:')?x[2].slice(3):`phOpen('${x[2]}')`}"><img src="a/${x[0]}.webp" alt=""><span>${x[1]}</span></button>`).join('')}catch(e){}},1500)})();
 // ngày mới: gom các thông báo chỉ-đọc vào một bảng "Sáng nay"
 let DIG=null;
@@ -3907,7 +3908,7 @@ let DIG=null;
 #hudWarn button{pointer-events:auto;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:3px 10px 3px 3px;background:rgba(160,30,15,.88);color:#fff;font:700 12px 'Be Vietnam Pro';cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.35);animation:hwP 1.6s ease-in-out infinite}
 #hudWarn img{width:26px;height:26px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}
 @keyframes hwP{50%{transform:scale(1.05)}}body.inscr #hudWarn{display:none}
-@media(max-width:640px){#hudWarn{top:calc(232px + env(safe-area-inset-top,0px))}#hudWarn span{display:none}#hudWarn button{padding:3px}}
+@media(max-width:640px){#hudWarn{top:calc(232px + env(safe-area-inset-top,0px))}#hudWarn button{font-size:11px;padding:2px 9px 2px 2px}#hudWarn img{width:24px;height:24px}}
 #modal .dig{text-align:left;background:rgba(0,0,0,.04);border-radius:10px;padding:6px 10px;margin:6px 0;font-size:13px}#modal .dig b{display:block;font-size:14px}
 `;document.head.appendChild(st)})();
 
@@ -4024,6 +4025,9 @@ function estBuy(id){const x=ESTATE.find(e=>e.id===id);S.estate=S.estate||{};if(!
     return `<div class="pm1 est ${have?'own':''}"><b class="esb"><img class="esti" src="a/u/i/${x.img}.webp" alt="">${x.n}</b><small>${x.t}<br>Thu ${fmt(x.inc)}/ngày · hoàn vốn ~${Math.ceil(x.cost/x.inc)} ngày</small>${act}</div>`}).join('');
   return h.replace(/<\/div>$/,`<h4 class="est-h">🏙️ Bất động sản cao cấp${own.length?` · đang thu ${fmt(tot)}/ngày`:''}</h4>${rows}</div>`)}}
 document.head.insertAdjacentHTML('beforeend','<style>.est-h{color:#ffe6a8;font-size:14px;margin:10px 2px 0}.pm1.est{background:linear-gradient(180deg,#fffaf0,#fdeccb);border:2px solid #e8c27a}.pm1.est.own{background:#eaf6e4;border-color:#9cc98a}.pm1 em.lack{font-style:normal;font-size:12px;color:#b0451f;font-weight:700}.pm1.est>button{margin-top:6px}.esb{display:flex;align-items:center;gap:8px}.esti{width:44px;height:44px;object-fit:contain}</style>');
+document.head.insertAdjacentHTML('beforeend','<style>#pfSt .ptsb{background:#d2432f;color:#fff;border-radius:8px;padding:1px 6px;font-size:11px;margin-left:4px}</style>');
+// Khi đang mở bảng (chợ, hết ngày…), thông báo nổi dời xuống đáy để không che tiêu đề
+document.head.insertAdjacentHTML('beforeend','<style>body.sheeton #toasts{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom,0px))}</style>');
 // ================= DRAW =================
 const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const timeK=()=>S.phase==='play'?dayT/DAY_LEN:(S.phase==='shop'?1:0);
